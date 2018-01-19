@@ -1,6 +1,6 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose:  WinPlusÖ÷Í·ÎÄ¼ş
-// desc:     °üº¬ËùÓĞ¹¦ÄÜµÄÍ·ÎÄ¼ş
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose:  WinPlusä¸»å¤´æ–‡ä»¶
+// desc:     åŒ…å«æ‰€æœ‰åŠŸèƒ½çš„å¤´æ–‡ä»¶
 // author:   WT
 //////////////////////////////////////////////////////////////////////////
 #if !defined(__WINPLUS_HPP__)
@@ -16,9 +16,9 @@
 #include "md5.hpp"
 #include "system.hpp"
 #include "time.hpp"
+#include "picture.hpp"
 #include "winctrl.hpp"
 #include "compoundfile.hpp"
-#include "picture.hpp"
 #include "shell.hpp"
 #include "graphics.hpp"
 #include "console.hpp"

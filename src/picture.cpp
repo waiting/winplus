@@ -1,4 +1,4 @@
-#include <windows.h>
+ï»¿#include <windows.h>
 #include <comdef.h>
 #include "../include/definitions.hpp"
 #include "../include/picture.hpp"
@@ -10,296 +10,296 @@
 namespace winplus
 {
 
-bool Bitmap_SaveFile( HBITMAP bitmap, String const & filename )
+WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename )
 {
-	HDC hDC; //Éè±¸ÃèÊö±í
-	INT nBits;  //µ±Ç°ÏÔÊ¾·Ö±æÂÊÏÂÃ¿¸öÏñËØËùÕ¼Î»Êý
-	WORD wBitCount = 0;    //Î»Í¼ÖÐÃ¿¸öÏñËØËùÕ¼Î»Êý
-	//µ÷É«°å´óÐ¡£¬Î»Í¼ÖÐÏñËØ×Ö½Ú´óÐ¡£¬Î»Í¼ÎÄ¼þ´óÐ¡£¬Ð´ÈëÎÄ¼þ×Ö½ÚÊý
-	DWORD dwPaletteSize = 0, dwBmBitsSize, dwDIBSize, dwWritten;
-	BITMAP bmpObj; //Î»Í¼ÊôÐÔ
-	BITMAPFILEHEADER bmfHdr; //Î»Í¼ÎÄ¼þÍ·
-	BITMAPINFOHEADER bi;//Î»Í¼ÐÅÏ¢Í·
-	LPBITMAPINFOHEADER lpbi; //Ö¸ÏòÎ»Í¼ÐÅÏ¢Í·
-	//ÎÄ¼þ¾ä±ú£¬·ÖÅäÄÚ´æ¾ä±ú£¬µ÷É«°å¾ä±ú
-	HANDLE hFile, hDibData;
-	HPALETTE hPal, hOldPal = NULL;
-	//¼ÆËãÎ»Í¼ÎÄ¼þÃ¿¸öÏñËØËùÕ¼Î»Êý
-	hDC = CreateDC( TEXT("DISPLAY"), NULL, NULL, NULL );
-	nBits = GetDeviceCaps( hDC, BITSPIXEL ) * GetDeviceCaps( hDC, PLANES );
-	DeleteDC(hDC);
-	if ( nBits <= 1 )
-		wBitCount = 1;
-	else if ( nBits <= 4 )
-		wBitCount = 4;
-	else if ( nBits <= 8 )
-		wBitCount = 8;
-	else if ( nBits <= 24 )
-		wBitCount = 24;
-	else
-		wBitCount = 32;
-	//¼ÆËãµ÷É«°å´óÐ¡£¬4,8Î»Î»Í¼£¬Ðè½¨Á¢µ÷É«°å
-	if ( wBitCount <= 8 )
-		dwPaletteSize = ( 1 << wBitCount ) * sizeof(RGBQUAD);
+    HDC hDC; //è®¾å¤‡æè¿°è¡¨
+    INT nBits;  //å½“å‰æ˜¾ç¤ºåˆ†è¾¨çŽ‡ä¸‹æ¯ä¸ªåƒç´ æ‰€å ä½æ•°
+    WORD wBitCount = 0;    //ä½å›¾ä¸­æ¯ä¸ªåƒç´ æ‰€å ä½æ•°
+    //è°ƒè‰²æ¿å¤§å°ï¼Œä½å›¾ä¸­åƒç´ å­—èŠ‚å¤§å°ï¼Œä½å›¾æ–‡ä»¶å¤§å°ï¼Œå†™å…¥æ–‡ä»¶å­—èŠ‚æ•°
+    DWORD dwPaletteSize = 0, dwBmBitsSize, dwDIBSize, dwWritten;
+    BITMAP bmpObj; //ä½å›¾å±žæ€§
+    BITMAPFILEHEADER bmfHdr; //ä½å›¾æ–‡ä»¶å¤´
+    BITMAPINFOHEADER bi;//ä½å›¾ä¿¡æ¯å¤´
+    LPBITMAPINFOHEADER lpbi; //æŒ‡å‘ä½å›¾ä¿¡æ¯å¤´
+    //æ–‡ä»¶å¥æŸ„ï¼Œåˆ†é…å†…å­˜å¥æŸ„ï¼Œè°ƒè‰²æ¿å¥æŸ„
+    HANDLE hFile, hDibData;
+    HPALETTE hPal, hOldPal = NULL;
+    //è®¡ç®—ä½å›¾æ–‡ä»¶æ¯ä¸ªåƒç´ æ‰€å ä½æ•°
+    hDC = CreateDC( TEXT("DISPLAY"), NULL, NULL, NULL );
+    nBits = GetDeviceCaps( hDC, BITSPIXEL ) * GetDeviceCaps( hDC, PLANES );
+    DeleteDC(hDC);
+    if ( nBits <= 1 )
+        wBitCount = 1;
+    else if ( nBits <= 4 )
+        wBitCount = 4;
+    else if ( nBits <= 8 )
+        wBitCount = 8;
+    else if ( nBits <= 24 )
+        wBitCount = 24;
+    else
+        wBitCount = 32;
+    //è®¡ç®—è°ƒè‰²æ¿å¤§å°ï¼Œ4,8ä½ä½å›¾ï¼Œéœ€å»ºç«‹è°ƒè‰²æ¿
+    if ( wBitCount <= 8 )
+        dwPaletteSize = ( 1 << wBitCount ) * sizeof(RGBQUAD);
 
-	//ÉèÖÃÎ»Í¼ÐÅÏ¢Í·
-	GetObject( bitmap, sizeof(BITMAP), &bmpObj );
-	bi.biSize = sizeof(BITMAPINFOHEADER);
-	bi.biWidth = bmpObj.bmWidth;
-	bi.biHeight = bmpObj.bmHeight;
-	bi.biPlanes = 1;
-	bi.biBitCount = wBitCount;
-	bi.biCompression = BI_RGB;
-	bi.biSizeImage = 0;
-	bi.biXPelsPerMeter = 0;
-	bi.biYPelsPerMeter = 0;
-	bi.biClrUsed = 0;
-	bi.biClrImportant = 0;
-	//¼ÆËãÏñËØÊý¾Ý×Ö½ÚÊý
-	dwBmBitsSize = ( ( bmpObj.bmWidth * wBitCount + 31 ) / 32 ) * 4 * bmpObj.bmHeight;
-	//ÎªÎ»Í¼ÄÚÈÝ·ÖÅäÄÚ´æ
-	hDibData = GlobalAlloc( GHND, dwBmBitsSize + dwPaletteSize + sizeof( BITMAPINFOHEADER ) );
-	lpbi = ( LPBITMAPINFOHEADER )GlobalLock( hDibData );
-	*lpbi = bi;
-	//´¦Àíµ÷É«°å      
-	hPal = ( HPALETTE )GetStockObject(DEFAULT_PALETTE);
-	if ( hPal )
-	{
-		hDC = GetDC(NULL);
-		hOldPal = SelectPalette( hDC, hPal, FALSE );
-		RealizePalette(hDC);
-	}
-	//»ñÈ¡¸Ãµ÷É«°åÏÂÐÂµÄÏñËØÖµ
-	GetDIBits( hDC, bitmap, 0, (UINT)bmpObj.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) + dwPaletteSize, (LPBITMAPINFO)lpbi, DIB_RGB_COLORS );
-	//»Ö¸´µ÷É«°å
-	if (hOldPal)
-	{
-		SelectPalette(hDC, hOldPal, TRUE);
-		RealizePalette(hDC);
-		ReleaseDC(NULL, hDC);
-	}
-	//´´½¨Î»Í¼ÎÄ¼þ
-	hFile = CreateFile( filename.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL );
-	if ( hFile == INVALID_HANDLE_VALUE )
-		return false;
-	//ÉèÖÃÎ»Í¼ÎÄ¼þÍ·
-	bmfHdr.bfType = 0x4D42; //"BM"
-	dwDIBSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwBmBitsSize;
-	bmfHdr.bfSize = dwDIBSize;
-	bmfHdr.bfReserved1 = 0;
-	bmfHdr.bfReserved2 = 0;
-	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize;
-	//Ð´ÈëÎ»Í¼ÎÄ¼þÍ·
-	WriteFile(hFile, &bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL);
-	//Ð´ÈëÎ»Í¼ÎÄ¼þÆäÓàÄÚÈÝ
-	WriteFile(hFile, lpbi, dwDIBSize, &dwWritten, NULL);
-	//Çå³ý
-	GlobalUnlock(hDibData);
-	GlobalFree(hDibData);
-	CloseHandle(hFile);
-	return true;
+    //è®¾ç½®ä½å›¾ä¿¡æ¯å¤´
+    GetObject( bitmap, sizeof(BITMAP), &bmpObj );
+    bi.biSize = sizeof(BITMAPINFOHEADER);
+    bi.biWidth = bmpObj.bmWidth;
+    bi.biHeight = bmpObj.bmHeight;
+    bi.biPlanes = 1;
+    bi.biBitCount = wBitCount;
+    bi.biCompression = BI_RGB;
+    bi.biSizeImage = 0;
+    bi.biXPelsPerMeter = 0;
+    bi.biYPelsPerMeter = 0;
+    bi.biClrUsed = 0;
+    bi.biClrImportant = 0;
+    //è®¡ç®—åƒç´ æ•°æ®å­—èŠ‚æ•°
+    dwBmBitsSize = ( ( bmpObj.bmWidth * wBitCount + 31 ) / 32 ) * 4 * bmpObj.bmHeight;
+    //ä¸ºä½å›¾å†…å®¹åˆ†é…å†…å­˜
+    hDibData = GlobalAlloc( GHND, dwBmBitsSize + dwPaletteSize + sizeof( BITMAPINFOHEADER ) );
+    lpbi = ( LPBITMAPINFOHEADER )GlobalLock( hDibData );
+    *lpbi = bi;
+    //å¤„ç†è°ƒè‰²æ¿      
+    hPal = ( HPALETTE )GetStockObject(DEFAULT_PALETTE);
+    if ( hPal )
+    {
+        hDC = GetDC(NULL);
+        hOldPal = SelectPalette( hDC, hPal, FALSE );
+        RealizePalette(hDC);
+    }
+    //èŽ·å–è¯¥è°ƒè‰²æ¿ä¸‹æ–°çš„åƒç´ å€¼
+    GetDIBits( hDC, bitmap, 0, (UINT)bmpObj.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) + dwPaletteSize, (LPBITMAPINFO)lpbi, DIB_RGB_COLORS );
+    //æ¢å¤è°ƒè‰²æ¿
+    if (hOldPal)
+    {
+        SelectPalette(hDC, hOldPal, TRUE);
+        RealizePalette(hDC);
+        ReleaseDC(NULL, hDC);
+    }
+    //åˆ›å»ºä½å›¾æ–‡ä»¶
+    hFile = CreateFile( filename.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL );
+    if ( hFile == INVALID_HANDLE_VALUE )
+        return false;
+    //è®¾ç½®ä½å›¾æ–‡ä»¶å¤´
+    bmfHdr.bfType = 0x4D42; //"BM"
+    dwDIBSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwBmBitsSize;
+    bmfHdr.bfSize = dwDIBSize;
+    bmfHdr.bfReserved1 = 0;
+    bmfHdr.bfReserved2 = 0;
+    bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize;
+    //å†™å…¥ä½å›¾æ–‡ä»¶å¤´
+    WriteFile(hFile, &bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL);
+    //å†™å…¥ä½å›¾æ–‡ä»¶å…¶ä½™å†…å®¹
+    WriteFile(hFile, lpbi, dwDIBSize, &dwWritten, NULL);
+    //æ¸…é™¤
+    GlobalUnlock(hDibData);
+    GlobalFree(hDibData);
+    CloseHandle(hFile);
+    return true;
 }
 
-IPicturePtr Picture_Load( String const & pic_file )
+WINPLUS_FUNC_IMPL(IPicturePtr) Picture_Load( String const & pic_file )
 {
-	HRESULT hr;
-	IPicturePtr pic;
-	IStreamPtr stream = CreateStreamExistingFile(pic_file);
-	if ( !(bool)stream )
-	{
-		return NULL;
-	}
-	hr = OleLoadPicture( stream, 0, FALSE, IID_IPicture, (LPVOID *)&pic );
+    HRESULT hr;
+    IPicturePtr pic;
+    IStreamPtr stream = CreateStreamExistingFile(pic_file);
+    if ( !(bool)stream )
+    {
+        return NULL;
+    }
+    hr = OleLoadPicture( stream, 0, FALSE, IID_IPicture, (LPVOID *)&pic );
 
-	if ( FAILED(hr) ) // ´´½¨IPicture½Ó¿ÚÊ§°Ü,·µ»Ønull
-	{
-		return NULL;
-	}
+    if ( FAILED(hr) ) // åˆ›å»ºIPictureæŽ¥å£å¤±è´¥,è¿”å›žnull
+    {
+        return NULL;
+    }
 
-	return pic;
+    return pic;
 }
 
-SIZE Picture_GetDimensions( IPicturePtr pic )
+WINPLUS_FUNC_IMPL(SIZE) Picture_GetDimensions( IPicturePtr pic )
 {
-	SIZE dimensions;
-	HRESULT hr;
-	LONG x, y;
-	HDC dc;
-	hr = pic->get_Width(&x);
-	hr = pic->get_Height(&y);
+    SIZE dimensions;
+    HRESULT hr;
+    LONG x, y;
+    HDC dc;
+    hr = pic->get_Width(&x);
+    hr = pic->get_Height(&y);
 
-	dc = GetDC(HWND_DESKTOP);
-	HIMETRIC_to_DP( dc, &x, &y );
-	ReleaseDC( HWND_DESKTOP, dc );
+    dc = GetDC(HWND_DESKTOP);
+    HIMETRIC_to_DP( dc, &x, &y );
+    ReleaseDC( HWND_DESKTOP, dc );
 
-	dimensions.cx = x;
-	dimensions.cy = y;
+    dimensions.cx = x;
+    dimensions.cy = y;
 
-	return dimensions;
+    return dimensions;
 }
 
-bool Picture_Load( String const & pic_file, MemImage * mem_img )
+WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & pic_file, MemImage * mem_img )
 {
-	Gdiplus::Bitmap bmp( StringToUnicode(pic_file).c_str() );
-	mem_img->create( bmp.GetWidth(), bmp.GetHeight() );
-	mem_img->copy(&bmp);
-	return true;
+    Gdiplus::Bitmap bmp( StringToUnicode(pic_file).c_str() );
+    mem_img->create( bmp.GetWidth(), bmp.GetHeight() );
+    mem_img->copy(&bmp);
+    return true;
 }
 
-bool Picture_Load( String const & pic_file, MemDC * memdc )
+WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & pic_file, MemDC * memdc )
 {
-	IPicturePtr pic;
-	if ( pic = Picture_Load(pic_file) )
-	{
-		HDC hDC = GetDC(HWND_DESKTOP);
-		MemDC temp_dc;
-		HBITMAP hBitmap = Picture_GetBitmap(pic);
-		temp_dc.create(hDC);
-		temp_dc.attachBitmap(hBitmap);
-		memdc->copy(temp_dc);
-		temp_dc.detachBitmap();
-		ReleaseDC( HWND_DESKTOP, hDC );
-		
-		return true;
-	}
-	return false;
+    IPicturePtr pic;
+    if ( pic = Picture_Load(pic_file) )
+    {
+        HDC hDC = GetDC(HWND_DESKTOP);
+        MemDC temp_dc;
+        HBITMAP hBitmap = Picture_GetBitmap(pic);
+        temp_dc.create(hDC);
+        temp_dc.attachBitmap(hBitmap);
+        memdc->copy(temp_dc);
+        temp_dc.detachBitmap();
+        ReleaseDC( HWND_DESKTOP, hDC );
+        
+        return true;
+    }
+    return false;
 }
 //
-void HIMETRIC_to_DP( HDC dc, LPPOINT point )
+WINPLUS_FUNC_IMPL(void) HIMETRIC_to_DP( HDC dc, LPPOINT point )
 {
-	INT mapMode;
-	if ( ( mapMode = GetMapMode(dc) ) < MM_ISOTROPIC && mapMode != MM_TEXT )
-	{
-		// when using a constrained map mode, map against physical inch
-		SetMapMode( dc, MM_HIMETRIC );
-		LPtoDP( dc, point, 1 );
-		SetMapMode( dc, mapMode );
-	}
-	else
-	{
-		// map against logical inch for non-constrained mapping modes
-		INT cxPerInch, cyPerInch;
-		cxPerInch = GetDeviceCaps( dc, LOGPIXELSX );
-		cyPerInch = GetDeviceCaps( dc, LOGPIXELSY );
-		point->x = MulDiv( point->x, cxPerInch, HIMETRIC_INCH );
-		point->y = MulDiv( point->y, cyPerInch, HIMETRIC_INCH );
-	}
+    INT mapMode;
+    if ( ( mapMode = GetMapMode(dc) ) < MM_ISOTROPIC && mapMode != MM_TEXT )
+    {
+        // when using a constrained map mode, map against physical inch
+        SetMapMode( dc, MM_HIMETRIC );
+        LPtoDP( dc, point, 1 );
+        SetMapMode( dc, mapMode );
+    }
+    else
+    {
+        // map against logical inch for non-constrained mapping modes
+        INT cxPerInch, cyPerInch;
+        cxPerInch = GetDeviceCaps( dc, LOGPIXELSX );
+        cyPerInch = GetDeviceCaps( dc, LOGPIXELSY );
+        point->x = MulDiv( point->x, cxPerInch, HIMETRIC_INCH );
+        point->y = MulDiv( point->y, cyPerInch, HIMETRIC_INCH );
+    }
 }
 
-void HIMETRIC_to_DP( HDC dc, LONG * x, LONG * y )
+WINPLUS_FUNC_IMPL(void) HIMETRIC_to_DP( HDC dc, LONG * x, LONG * y )
 {
-	POINT pt = { *x, *y };
-	HIMETRIC_to_DP( dc, &pt );
-	*x = pt.x;
-	*y = pt.y;
+    POINT pt = { *x, *y };
+    HIMETRIC_to_DP( dc, &pt );
+    *x = pt.x;
+    *y = pt.y;
 }
 
-void DP_to_HIMETRIC( HDC dc, LPPOINT point )
+WINPLUS_FUNC_IMPL(void) DP_to_HIMETRIC( HDC dc, LPPOINT point )
 {
-	INT mapMode;
-	if ( ( mapMode = GetMapMode(dc) ) < MM_ISOTROPIC && mapMode != MM_TEXT )
-	{
-		// when using a constrained map mode, map against physical inch
-		SetMapMode( dc, MM_HIMETRIC );
-		DPtoLP( dc, point, 1 );
-		SetMapMode( dc, mapMode );
-	}
-	else
-	{
-		// map against logical inch for non-constrained mapping modes
-		INT cxPerInch, cyPerInch;
-		cxPerInch = GetDeviceCaps( dc, LOGPIXELSX );
-		cyPerInch = GetDeviceCaps( dc, LOGPIXELSY );
-		point->x = MulDiv( point->x, HIMETRIC_INCH, cxPerInch );
-		point->y = MulDiv( point->y, HIMETRIC_INCH, cyPerInch );
-	}
+    INT mapMode;
+    if ( ( mapMode = GetMapMode(dc) ) < MM_ISOTROPIC && mapMode != MM_TEXT )
+    {
+        // when using a constrained map mode, map against physical inch
+        SetMapMode( dc, MM_HIMETRIC );
+        DPtoLP( dc, point, 1 );
+        SetMapMode( dc, mapMode );
+    }
+    else
+    {
+        // map against logical inch for non-constrained mapping modes
+        INT cxPerInch, cyPerInch;
+        cxPerInch = GetDeviceCaps( dc, LOGPIXELSX );
+        cyPerInch = GetDeviceCaps( dc, LOGPIXELSY );
+        point->x = MulDiv( point->x, HIMETRIC_INCH, cxPerInch );
+        point->y = MulDiv( point->y, HIMETRIC_INCH, cyPerInch );
+    }
 }
 
-void DP_to_HIMETRIC( HDC dc, LONG * x, LONG * y )
+WINPLUS_FUNC_IMPL(void) DP_to_HIMETRIC( HDC dc, LONG * x, LONG * y )
 {
-	POINT pt = { *x, *y };
-	DP_to_HIMETRIC( dc, &pt );
-	*x = pt.x;
-	*y = pt.y;
+    POINT pt = { *x, *y };
+    DP_to_HIMETRIC( dc, &pt );
+    *x = pt.x;
+    *y = pt.y;
 }
 
-// gdi+ Ïà¹Ø --------------------------------------------------------------
+// gdi+ ç›¸å…³ --------------------------------------------------------------
 #if defined(_GDIPLUS_H)
 
 #pragma comment ( lib, "gdiplus" )
 
-INT ImageEncoderFromMIME( String const & mime_type, CLSID * encoder_clsid )
+WINPLUS_FUNC_IMPL(INT) ImageEncoderFromMIME( String const & mime_type, CLSID * encoder_clsid )
 {
-	using namespace Gdiplus;
-	UINT num = 0;          // number of image encoders
-	UINT size = 0;         // size of the image encoder array in bytes
-	ImageCodecInfo * pImageCodecInfo = NULL;
-	GetImageEncodersSize( &num, &size );
-	if ( size == 0 ) return -1;  // Failure
-	pImageCodecInfo = (ImageCodecInfo *)malloc(size);
-	if ( pImageCodecInfo == NULL ) return -1;  // Failure
-	GetImageEncoders( num, size, pImageCodecInfo );
-	UINT i;
-	for( i = 0; i < num; ++i )
-	{
-		ImageCodecInfo & info = pImageCodecInfo[i];
-		String strMimeType = UnicodeToString( info.MimeType ? info.MimeType : L"" );
-		if ( strMimeType == mime_type )
-		{
-			*encoder_clsid = info.Clsid;
-			break;
-		}
-	}
-	free(pImageCodecInfo);
-	if ( i < num )
-	{
-		return i; // Success
-	}
-	return -1;  // Failure
+    using namespace Gdiplus;
+    UINT num = 0;          // number of image encoders
+    UINT size = 0;         // size of the image encoder array in bytes
+    ImageCodecInfo * pImageCodecInfo = NULL;
+    GetImageEncodersSize( &num, &size );
+    if ( size == 0 ) return -1;  // Failure
+    pImageCodecInfo = (ImageCodecInfo *)malloc(size);
+    if ( pImageCodecInfo == NULL ) return -1;  // Failure
+    GetImageEncoders( num, size, pImageCodecInfo );
+    UINT i;
+    for( i = 0; i < num; ++i )
+    {
+        ImageCodecInfo & info = pImageCodecInfo[i];
+        String strMimeType = UnicodeToString( info.MimeType ? info.MimeType : L"" );
+        if ( strMimeType == mime_type )
+        {
+            *encoder_clsid = info.Clsid;
+            break;
+        }
+    }
+    free(pImageCodecInfo);
+    if ( i < num )
+    {
+        return i; // Success
+    }
+    return -1;  // Failure
 }
 
-INT ImageEncoderFromExtName( String const & extname, CLSID * encoder_clsid )
+WINPLUS_FUNC_IMPL(INT) ImageEncoderFromExtName( String const & extname, CLSID * encoder_clsid )
 {
-	using namespace Gdiplus;
-	UINT num = 0;          // number of image encoders
-	UINT size = 0;         // size of the image encoder array in bytes
-	ImageCodecInfo * pImageCodecInfo = NULL;
-	GetImageEncodersSize( &num, &size );
-	if ( size == 0 ) return -1;  // Failure
-	pImageCodecInfo = (ImageCodecInfo *)malloc(size);
-	if ( pImageCodecInfo == NULL ) return -1;  // Failure
-	GetImageEncoders( num, size, pImageCodecInfo );
-	UINT i;
-	String strExtName = extname;
-	for( i = 0; i < num; ++i )
-	{
-		ImageCodecInfo & info = pImageCodecInfo[i];
-		String strFilenameExtension = UnicodeToString( info.FilenameExtension ? info.FilenameExtension : L"" );
-		StringArray arrExtName;
-		INT nExtNameCount = StrSplit( strFilenameExtension.c_str(), TEXT(";"), &arrExtName );
-		INT j;
-		for ( j = 0; j < nExtNameCount; ++j )
-		{
-			//arrExtName[j] = arrExtName[j].substr(2); // *.xxx skip 2 chars
-			_tcslwr(&arrExtName[j][0]);
-			_tcslwr(&strExtName[0]);
-			if ( arrExtName[j].find(strExtName) != String::npos )
-			{
-				break;
-			}
-		}
-		if ( j < nExtNameCount )
-		{
-			*encoder_clsid = info.Clsid;
-			break;
-		}
-	}
-	free(pImageCodecInfo);
-	if ( i < num )
-	{
-		return i; // Success
-	}
-	return -1;  // Failure
+    using namespace Gdiplus;
+    UINT num = 0;          // number of image encoders
+    UINT size = 0;         // size of the image encoder array in bytes
+    ImageCodecInfo * pImageCodecInfo = NULL;
+    GetImageEncodersSize( &num, &size );
+    if ( size == 0 ) return -1;  // Failure
+    pImageCodecInfo = (ImageCodecInfo *)malloc(size);
+    if ( pImageCodecInfo == NULL ) return -1;  // Failure
+    GetImageEncoders( num, size, pImageCodecInfo );
+    UINT i;
+    String strExtName = extname;
+    for( i = 0; i < num; ++i )
+    {
+        ImageCodecInfo & info = pImageCodecInfo[i];
+        String strFilenameExtension = UnicodeToString( info.FilenameExtension ? info.FilenameExtension : L"" );
+        StringArray arrExtName;
+        INT nExtNameCount = StrSplit( strFilenameExtension.c_str(), TEXT(";"), &arrExtName );
+        INT j;
+        for ( j = 0; j < nExtNameCount; ++j )
+        {
+            //arrExtName[j] = arrExtName[j].substr(2); // *.xxx skip 2 chars
+            _tcslwr(&arrExtName[j][0]);
+            _tcslwr(&strExtName[0]);
+            if ( arrExtName[j].find(strExtName) != String::npos )
+            {
+                break;
+            }
+        }
+        if ( j < nExtNameCount )
+        {
+            *encoder_clsid = info.Clsid;
+            break;
+        }
+    }
+    free(pImageCodecInfo);
+    if ( i < num )
+    {
+        return i; // Success
+    }
+    return -1;  // Failure
 }
 
 #endif

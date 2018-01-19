@@ -1,4 +1,4 @@
-/* MD5
+﻿/* MD5
  converted to C++ class by Frank Thilo (thilo@unix-ag.org)
  for bzflag (http://www.bzflag.org)
 
@@ -46,7 +46,7 @@ documentation and/or software.
 namespace winplus
 {
 
-class MD5
+class WINPLUS_DLL MD5
 {
 public:
   typedef unsigned int size_type; // must be 32bit

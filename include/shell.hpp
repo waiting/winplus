@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose: ShellÏà¹Ø
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose: Shellç›¸å…³
 // author:  WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,17 +13,17 @@
 namespace winplus
 {
 
-// Íâ¿Ç(Shell)Ïà¹Ø --------------------------------------------------------
+// å¤–å£³(Shell)ç›¸å…³ --------------------------------------------------------
 
-/* ´ÓÒ»¸öÂ·¾¶»ñµÃItemIDList,Â·¾¶±ØĞë´æÔÚ
-   µ÷ÓÃÕß¸ºÔğÓÃSHGetMalloc(),IMalloc::Free()ÊÍ·Å·µ»ØµÄItemIDList */
-LPITEMIDLIST ItemIdListFromPath( String const & filePath );
-/* ´ÓÒ»¸öÂ·¾¶»ñµÃItemIDList,²»±ØĞë´æÔÚ
-   µ÷ÓÃÕß¸ºÔğÓÃSHGetMalloc(),IMalloc::Free()ÊÍ·Å·µ»ØµÄItemIDList */
-LPITEMIDLIST ItemIdListFromPathSimple( String const & filePath );
-/* ´ÓÒ»¸öÂ·¾¶»ñµÃItemIDList,¿É¶¨ÖÆ
-   µ÷ÓÃÕß¸ºÔğÓÃSHGetMalloc(),IMalloc::Free()ÊÍ·Å·µ»ØµÄItemIDList */
-HRESULT ItemIdListFromPathCustom( LPWSTR path, WIN32_FIND_DATAW * pfd, LPITEMIDLIST * ppidl );
+/* ä»ä¸€ä¸ªè·¯å¾„è·å¾—ItemIDList,è·¯å¾„å¿…é¡»å­˜åœ¨
+   è°ƒç”¨è€…è´Ÿè´£ç”¨SHGetMalloc(),IMalloc::Free()é‡Šæ”¾è¿”å›çš„ItemIDList */
+WINPLUS_FUNC_DECL(LPITEMIDLIST) ItemIdListFromPath( String const & filePath );
+/* ä»ä¸€ä¸ªè·¯å¾„è·å¾—ItemIDList,ä¸å¿…é¡»å­˜åœ¨
+   è°ƒç”¨è€…è´Ÿè´£ç”¨SHGetMalloc(),IMalloc::Free()é‡Šæ”¾è¿”å›çš„ItemIDList */
+WINPLUS_FUNC_DECL(LPITEMIDLIST) ItemIdListFromPathSimple( String const & filePath );
+/* ä»ä¸€ä¸ªè·¯å¾„è·å¾—ItemIDList,å¯å®šåˆ¶
+   è°ƒç”¨è€…è´Ÿè´£ç”¨SHGetMalloc(),IMalloc::Free()é‡Šæ”¾è¿”å›çš„ItemIDList */
+WINPLUS_FUNC_DECL(HRESULT) ItemIdListFromPathCustom( LPWSTR path, WIN32_FIND_DATAW * pfd, LPITEMIDLIST * ppidl );
 
 } // namespace winplus
 

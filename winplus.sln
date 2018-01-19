@@ -8,6 +8,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "examples", "examples\exampl
 		{87C0A8EB-AFF9-D9FF-2D85-9B0CFAEFADB3} = {87C0A8EB-AFF9-D9FF-2D85-9B0CFAEFADB3}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DynamicLib", "build\DynamicLib.vcxproj", "{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -42,6 +44,18 @@ Global
 		{6AA12AD6-DC21-4AEF-1878-4868C1B8A3EC}.MT-Release|Win32.Build.0 = Release|Win32
 		{6AA12AD6-DC21-4AEF-1878-4868C1B8A3EC}.Release|Win32.ActiveCfg = Release|Win32
 		{6AA12AD6-DC21-4AEF-1878-4868C1B8A3EC}.Release|Win32.Build.0 = Release|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.Debug|Win32.ActiveCfg = MD-Debug|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.Debug|Win32.Build.0 = MD-Debug|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.MD-Debug|Win32.ActiveCfg = MD-Debug|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.MD-Debug|Win32.Build.0 = MD-Debug|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.MD-Release|Win32.ActiveCfg = MD-Release|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.MD-Release|Win32.Build.0 = MD-Release|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.MT-Debug|Win32.ActiveCfg = MD-Debug|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.MT-Debug|Win32.Build.0 = MD-Debug|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.MT-Release|Win32.ActiveCfg = MD-Release|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.MT-Release|Win32.Build.0 = MD-Release|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.Release|Win32.ActiveCfg = MD-Release|Win32
+		{D8FDA00E-CF77-D0A3-C4C4-592D178BC85E}.Release|Win32.Build.0 = MD-Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

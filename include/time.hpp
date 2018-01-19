@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose: Ê±¼äÏà¹Ø
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose: æ—¶é—´ç›¸å…³
 // author:  WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,16 +13,16 @@
 namespace winplus
 {
 
-/* »ñµÃ[1970-01-01 0:0:0]µ½µ±Ç°µÄUTCÊ±¼ä,¾«È·µ½ºÁÃë */
-ULONGLONG GetUtcTimeMs( void );
-/* »ñµÃ[1970-01-01 0:0:0]µ½µ±Ç°µÄUTCÊ±¼ä,¾«È·µ½Ãë */
-UINT GetUtcTime( void );
-/* Í¨¹ýÒ»¸ö[1970-1-1 0:0:0]ÖÁ½ñµÄUTCºÁÃëÊý»ñÈ¡Ò»¸öUTC SYSTEMTIME */
-SYSTEMTIME GetUtcSysTime( ULONGLONG utcTimeMs );
-/* Í¨¹ýÒ»¸ö[1970-1-1 0:0:0]ÖÁ½ñµÄUTCºÁÃëÊý»ñÈ¡Ò»¸öLocal SYSTEMTIME */
-SYSTEMTIME GetLocalSysTime( ULONGLONG utcTimeMs );
-/* ¸ñÊ½»¯Ê±¼ä,<yr><mo><dy><h><m><s><ms> */
-String FormatTime( String const & fmt, SYSTEMTIME const & time );
+/* èŽ·å¾—[1970-01-01 0:0:0]åˆ°å½“å‰çš„UTCæ—¶é—´,ç²¾ç¡®åˆ°æ¯«ç§’ */
+WINPLUS_FUNC_DECL(ULONGLONG) GetUtcTimeMs( void );
+/* èŽ·å¾—[1970-01-01 0:0:0]åˆ°å½“å‰çš„UTCæ—¶é—´,ç²¾ç¡®åˆ°ç§’ */
+WINPLUS_FUNC_DECL(UINT) GetUtcTime( void );
+/* é€šè¿‡ä¸€ä¸ª[1970-1-1 0:0:0]è‡³ä»Šçš„UTCæ¯«ç§’æ•°èŽ·å–ä¸€ä¸ªUTC SYSTEMTIME */
+WINPLUS_FUNC_DECL(SYSTEMTIME) GetUtcSysTime( ULONGLONG utcTimeMs );
+/* é€šè¿‡ä¸€ä¸ª[1970-1-1 0:0:0]è‡³ä»Šçš„UTCæ¯«ç§’æ•°èŽ·å–ä¸€ä¸ªLocal SYSTEMTIME */
+WINPLUS_FUNC_DECL(SYSTEMTIME) GetLocalSysTime( ULONGLONG utcTimeMs );
+/* æ ¼å¼åŒ–æ—¶é—´,<yr><mo><dy><h><m><s><ms> */
+WINPLUS_FUNC_DECL(String) FormatTime( String const & fmt, SYSTEMTIME const & time );
 
 } // namespace winplus
 

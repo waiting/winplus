@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose: Í¼Æ¬Ïà¹Ø
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose: å›¾ç‰‡ç›¸å…³
 // author:  WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,104 +13,113 @@
 namespace winplus
 {
 
-// Í¼Æ¬Ïà¹Ø -----------------------------------------------------------
+// å›¾ç‰‡ç›¸å…³ -----------------------------------------------------------
 
-/* ±£´æÎ»Í¼µ½Ö¸¶¨ÎÄ¼ş */
-bool Bitmap_SaveFile( HBITMAP bitmap, String const & filename );
+/* ä¿å­˜ä½å›¾åˆ°æŒ‡å®šæ–‡ä»¶ */
+WINPLUS_FUNC_DECL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename );
 
 // IPicturePtr
 
-/* ´ÓÎÄ¼ş¼ÓÔØÍ¼Æ¬(bmp,gif,jpg,png),»ñµÃIPicture½Ó¿Ú */
-IPicturePtr Picture_Load( String const & pic_file );
+/* ä»æ–‡ä»¶åŠ è½½å›¾ç‰‡(bmp,gif,jpg,png),è·å¾—IPictureæ¥å£ */
+WINPLUS_FUNC_DECL(IPicturePtr) Picture_Load( String const & pic_file );
 /* IPicturePtr to HBITMAP */
 inline HBITMAP Picture_GetBitmap( IPicturePtr pic )
 {
-	HBITMAP bitmap;
-	pic->get_Handle( (OLE_HANDLE *)&bitmap );
-	return bitmap;
+    HBITMAP bitmap;
+    pic->get_Handle( (OLE_HANDLE *)&bitmap );
+    return bitmap;
 }
-/* »ñµÃIPictureÍ¼Æ¬³ß´ç(pixels) */
-SIZE Picture_GetDimensions( IPicturePtr pic );
+/* è·å¾—IPictureå›¾ç‰‡å°ºå¯¸(pixels) */
+WINPLUS_FUNC_DECL(SIZE) Picture_GetDimensions( IPicturePtr pic );
 
-// Óëmem_dcÏà¹Ø
+// ä¸mem_dcç›¸å…³
 class MemDC;
-/* ´ÓÎÄ¼ş¼ÓÔØÍ¼Æ¬(bmp,gif,jpg,png),²¢»ñµÃmem_dc¶ÔÏó */
-bool Picture_Load( String const & pic_file, MemDC * memdc );
+/* ä»æ–‡ä»¶åŠ è½½å›¾ç‰‡(bmp,gif,jpg,png),å¹¶è·å¾—mem_dcå¯¹è±¡ */
+WINPLUS_FUNC_DECL(bool) Picture_Load( String const & pic_file, MemDC * memdc );
 
-// Óëmem_imageÏà¹Ø
+// ä¸mem_imageç›¸å…³
 class MemImage;
-/* ´ÓÎÄ¼ş¼ÓÔØÍ¼Æ¬(bmp,gif,jpg,png),²¢»ñµÃMemImage¶ÔÏó */
-bool Picture_Load( String const & pic_file, MemImage * mem_img );
+/* ä»æ–‡ä»¶åŠ è½½å›¾ç‰‡(bmp,gif,jpg,png),å¹¶è·å¾—MemImageå¯¹è±¡ */
+WINPLUS_FUNC_DECL(bool) Picture_Load( String const & pic_file, MemImage * mem_img );
 
 
 #define HIMETRIC_INCH   2540    // HIMETRIC units per inch
 
-/* HIMETRIC×ª»»ÎªÉè±¸×ø±ê(¼´ÏñËØ) */
-void HIMETRIC_to_DP( HDC dc, LPPOINT point );
-void HIMETRIC_to_DP( HDC dc, LONG * x, LONG * y );
-/* Éè±¸×ø±ê(¼´ÏñËØ)×ª»»ÎªHIMETRIC */
-void DP_to_HIMETRIC( HDC dc, LPPOINT point );
-void DP_to_HIMETRIC( HDC dc, LONG * x, LONG * y );
+/* HIMETRICè½¬æ¢ä¸ºè®¾å¤‡åæ ‡(å³åƒç´ ) */
+WINPLUS_FUNC_DECL(void) HIMETRIC_to_DP( HDC dc, LPPOINT point );
+WINPLUS_FUNC_DECL(void) HIMETRIC_to_DP( HDC dc, LONG * x, LONG * y );
+/* è®¾å¤‡åæ ‡(å³åƒç´ )è½¬æ¢ä¸ºHIMETRIC */
+WINPLUS_FUNC_DECL(void) DP_to_HIMETRIC( HDC dc, LPPOINT point );
+WINPLUS_FUNC_DECL(void) DP_to_HIMETRIC( HDC dc, LONG * x, LONG * y );
 
-/* Í¼±êÀà */
+/* å›¾æ ‡ç±» */
 class Icon
 {
 public:
-	Icon( String const & icoPath, uint cx = 0, uint cy = 0 )
-	{
-		new(this) Icon( icoPath.c_str(), LR_LOADFROMFILE | LR_SHARED, cx, cy );
-	}
-	Icon( uint icoResource, uint cx = 0, uint cy = 0 )
-	{
-		new(this) Icon( MAKEINTRESOURCE(icoResource), LR_SHARED, cx, cy );
-	}
-	Icon( LPCTSTR name, ulong flag, uint cx = 0, uint cy = 0 )
-	{
-		new(this) Icon( GetModuleHandle(NULL), name, flag, cx, cy );
-	}
-	Icon( HMODULE module, LPCTSTR name, ulong flag, uint cx = 0, uint cy = 0 ) : _ico(NULL)
-	{
-		attach( (HICON)LoadImage( module, name, IMAGE_ICON, cx, cy, flag ) );
-	}
-	~Icon()
-	{
-		_free();
-	}
-	void attach( HICON ico )
-	{
-		_free();
-		_ico = ico;
-	}
-	HICON detach()
-	{
-		HICON ico = _ico;
-		_ico = NULL;
-		return ico;
-	}
-	operator HICON() const { return _ico; }
+    Icon( String const & icoPath, uint cx = 0, uint cy = 0 )
+    {
+        _construct( icoPath.c_str(), LR_LOADFROMFILE | LR_SHARED, cx, cy );
+    }
+    Icon( uint icoResource, uint cx = 0, uint cy = 0 )
+    {
+        _construct( MAKEINTRESOURCE(icoResource), LR_SHARED, cx, cy );
+    }
+    Icon( LPCTSTR name, ulong flag, uint cx = 0, uint cy = 0 )
+    {
+        _construct( name, flag, cx, cy );
+    }
+    Icon( HMODULE module, LPCTSTR name, ulong flag, uint cx = 0, uint cy = 0 )
+    {
+        _construct( module, name, flag, cx, cy );
+    }
+    ~Icon()
+    {
+        _free();
+    }
+    void attach( HICON ico )
+    {
+        _free();
+        _ico = ico;
+    }
+    HICON detach()
+    {
+        HICON ico = _ico;
+        _ico = NULL;
+        return ico;
+    }
+    operator HICON() const { return _ico; }
 protected:
-	void _free()
-	{
-		if ( _ico )
-		{
-			DestroyIcon(_ico);
-			_ico = NULL;
-		}
-	}
+    void _free()
+    {
+        if ( _ico )
+        {
+            DestroyIcon(_ico);
+            _ico = NULL;
+        }
+    }
+    void _construct( HMODULE module, LPCTSTR name, ulong flag, uint cx = 0, uint cy = 0 )
+    {
+         _ico = NULL;
+         this->attach( (HICON)LoadImage( module, name, IMAGE_ICON, cx, cy, flag ) );
+    }
+    void _construct( LPCTSTR name, ulong flag, uint cx = 0, uint cy = 0 )
+    {
+        _construct( GetModuleHandle(NULL), name, flag, cx, cy );
+    }
 
 private:
-	HICON _ico;
-	Icon( Icon const & other );
-	Icon & operator = ( Icon const & other );
+    HICON _ico;
+    Icon( Icon const & other );
+    Icon & operator = ( Icon const & other );
 };
 
-// gdi+ Í¼Æ¬Ïà¹Ø
+// gdi+ å›¾ç‰‡ç›¸å…³
 #if defined(_GDIPLUS_H)
 
-/* ¸ù¾İMIME»ñÈ¡EncoderClsid */
-INT ImageEncoderFromMIME( String const & mime_type, CLSID * encoder_clsid );
-/* ¸ù¾İÀ©Õ¹Ãû»ñÈ¡EncoderClsid */
-INT ImageEncoderFromExtName( String const & extname, CLSID * encoder_clsid );
+/* æ ¹æ®MIMEè·å–EncoderClsid */
+WINPLUS_FUNC_DECL(INT) ImageEncoderFromMIME( String const & mime_type, CLSID * encoder_clsid );
+/* æ ¹æ®æ‰©å±•åè·å–EncoderClsid */
+WINPLUS_FUNC_DECL(INT) ImageEncoderFromExtName( String const & extname, CLSID * encoder_clsid );
 
 #endif
 

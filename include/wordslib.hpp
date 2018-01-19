@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose: ½¨Á¢´Ê¿âºÍ·Ö´Ê¹¦ÄÜ
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose: å»ºç«‹è¯åº“å’Œåˆ†è¯åŠŸèƒ½
 // author:  WT
 // date:    2013-05-31
 //////////////////////////////////////////////////////////////////////////
@@ -14,95 +14,95 @@
 namespace winplus
 {
 
-// ¶¨Òå´Ê¿âÎÄ¼ş ----------------------------------------------------------
+// å®šä¹‰è¯åº“æ–‡ä»¶ ----------------------------------------------------------
 /*
-    ´Ê¿âÎÄ¼şÓÉÁ½²¿·Ö×é³É£ºÎÄ¼şÍ·¡¢´Ê»ãÊı¾İ¡£
-	ÎÄ¼şÍ·²ÉÓÃ´¿ÎÄ±¾ĞÎÊ½ÃèÊö´Ê¿âµÄÖØÒªÊôĞÔ£º´Ê¿âÃû³Æ£¬±¸×¢ĞÅÏ¢£¬´Ê¿âÀàĞÍ£¬Ñ¹Ëõ·½Ê½£¬±àÂë£¬´Ê»ãÁ¿£¬µ¥Ïî´óĞ¡
-    ´Ê»ãÊı¾İ¿ÉÒÔÊÇÑ¹ËõµÄ£¬Ò²¿ÉÒÔÊÇ·ÇÑ¹ËõµÄ£¬¿ÉÒÔÊÇµÈ³¤Ïî£¬Ò²¿ÉÒÔÊÇ²»µÈ³¤µÄ£¬ÕâĞ©ÓÉÎÄ¼şÍ·Ö¸³ö
+    è¯åº“æ–‡ä»¶ç”±ä¸¤éƒ¨åˆ†ç»„æˆï¼šæ–‡ä»¶å¤´ã€è¯æ±‡æ•°æ®ã€‚
+    æ–‡ä»¶å¤´é‡‡ç”¨çº¯æ–‡æœ¬å½¢å¼æè¿°è¯åº“çš„é‡è¦å±æ€§ï¼šè¯åº“åç§°ï¼Œå¤‡æ³¨ä¿¡æ¯ï¼Œè¯åº“ç±»å‹ï¼Œå‹ç¼©æ–¹å¼ï¼Œç¼–ç ï¼Œè¯æ±‡é‡ï¼Œå•é¡¹å¤§å°
+    è¯æ±‡æ•°æ®å¯ä»¥æ˜¯å‹ç¼©çš„ï¼Œä¹Ÿå¯ä»¥æ˜¯éå‹ç¼©çš„ï¼Œå¯ä»¥æ˜¯ç­‰é•¿é¡¹ï¼Œä¹Ÿå¯ä»¥æ˜¯ä¸ç­‰é•¿çš„ï¼Œè¿™äº›ç”±æ–‡ä»¶å¤´æŒ‡å‡º
 
-    ÒÔÏÂ¶¨Òå´Ê¿âÎÄ¼ş¸ñÊ½
+    ä»¥ä¸‹å®šä¹‰è¯åº“æ–‡ä»¶æ ¼å¼
 
-        {}     ±íÊ¾Õû¸öÎÄ¼ş
-        ()     ±íÊ¾Ò»¸öÕûÌå
-        CRLF   ´ú±íÒ»¸ö»Ø³µ»»ĞĞ·û
-        SPACE  ´ú±í·ÇCRLFµÄ¿Õ°××Ö·û
-        +      ´ú±í1¸ö»ò¶à¸ö
-        *      ´ú±í0¸ö»ò¶à¸ö
-        ?      ´ú±í0¸ö»ò1¸ö
-        |      ´ú±íÑ¡Ïî£¬Õâ¸ö»òÄÇ¸ö
-        //     ´ú±í×¢ÊÍËµÃ÷
+        {}     è¡¨ç¤ºæ•´ä¸ªæ–‡ä»¶
+        ()     è¡¨ç¤ºä¸€ä¸ªæ•´ä½“
+        CRLF   ä»£è¡¨ä¸€ä¸ªå›è½¦æ¢è¡Œç¬¦
+        SPACE  ä»£è¡¨éCRLFçš„ç©ºç™½å­—ç¬¦
+        +      ä»£è¡¨1ä¸ªæˆ–å¤šä¸ª
+        *      ä»£è¡¨0ä¸ªæˆ–å¤šä¸ª
+        ?      ä»£è¡¨0ä¸ªæˆ–1ä¸ª
+        |      ä»£è¡¨é€‰é¡¹ï¼Œè¿™ä¸ªæˆ–é‚£ä¸ª
+        //     ä»£è¡¨æ³¨é‡Šè¯´æ˜
     
-    ÎÄ¼şÍ·µÄÊôĞÔÃû´óĞ¡Ğ´²»Ãô¸Ğ
-    £¨×¢Òâ£¬ÏÂÃæ¶¨ÒåÎÄ±¾ÖĞ¿Õ°××Ö·û¶¼ÊÇ±ãÓÚÔÄ¶ÁµÄ£¬Êµ¼Ê²»´æÔÚ£©
+    æ–‡ä»¶å¤´çš„å±æ€§åå¤§å°å†™ä¸æ•æ„Ÿ
+    ï¼ˆæ³¨æ„ï¼Œä¸‹é¢å®šä¹‰æ–‡æœ¬ä¸­ç©ºç™½å­—ç¬¦éƒ½æ˜¯ä¾¿äºé˜…è¯»çš„ï¼Œå®é™…ä¸å­˜åœ¨ï¼‰
     {
-        (name: (SPACE*) ×Ö·ûÊı¾İ CRLF)?
-        (desc: (SPACE*) ×Ö·ûÊı¾İ CRLF)?
-        type: (SPACE*) (equal | unequal) CRLF // ÃèÊö´ÊÏîÊÇµÈ³¤»ò²»µÈ³¤£¬Ä¬ÈÏequal
-                                              // µÈ³¤´ÊÏîµÄÇé¿öÏÂ£¬±ãÓÚÀûÓÃseek()»òÕßÎÄ¼şÄÚ´æÓ³Éä¶¨Î»£¬µ«ÊÇ´æ´¢»á±È½ÏÕ¼¿Õ¼ä
-                                              // ²»µÈ³¤µÄÇé¿öÏÂ£¬ĞèÒªÔÚÄÚ´æÖĞ¹¹½¨Ò»¸öÏßĞÔ½á¹¹´æ´¢ËùÓĞ´Ê»ã£¬±ãÓÚËÑË÷£¬µ«´æ´¢»á½ÚÊ¡¿Õ¼ä
-        itemsize: (SPACE*) Êı×Ö CRLF          // ´ÊÏî´óĞ¡(bytes)£¬µ±typeÊÇµÈ³¤Çé¿öÏÂ±ØĞëÖ¸¶¨£¬²»µÈ³¤Çé¿öÏÂºöÂÔ¡£
-        compress: (SPACE*) (none | gzip) CRLF // ´Ê»ãÊı¾İÑ¹Ëõ·½Ê½£¬²»Ñ¹Ëõ»òÊÇgzipÑ¹Ëõ£¬Ä¬ÈÏnone
-                                              // ÔÚÑ¹ËõµÄÇé¿öÏÂ£¬»á´´½¨Ò»¸öĞÂµÄ²»Ñ¹ËõµÄ´Ê¿âÎÄ¼ş£¬±ãÓÚ²Ù×÷
-        encoding: (SPACE*) ±àÂëÊ¶±ğ´® CRLF    // Ä¬ÈÏ±¾µØ±àÂë
-        wordscount: (SPACE*) Êı×Ö CRLF        // Ö¸Ê¾´Ê¿âËùº¬´Ê»ã
+        (name: (SPACE*) å­—ç¬¦æ•°æ® CRLF)?
+        (desc: (SPACE*) å­—ç¬¦æ•°æ® CRLF)?
+        type: (SPACE*) (equal | unequal) CRLF // æè¿°è¯é¡¹æ˜¯ç­‰é•¿æˆ–ä¸ç­‰é•¿ï¼Œé»˜è®¤equal
+                                              // ç­‰é•¿è¯é¡¹çš„æƒ…å†µä¸‹ï¼Œä¾¿äºåˆ©ç”¨seek()æˆ–è€…æ–‡ä»¶å†…å­˜æ˜ å°„å®šä½ï¼Œä½†æ˜¯å­˜å‚¨ä¼šæ¯”è¾ƒå ç©ºé—´
+                                              // ä¸ç­‰é•¿çš„æƒ…å†µä¸‹ï¼Œéœ€è¦åœ¨å†…å­˜ä¸­æ„å»ºä¸€ä¸ªçº¿æ€§ç»“æ„å­˜å‚¨æ‰€æœ‰è¯æ±‡ï¼Œä¾¿äºæœç´¢ï¼Œä½†å­˜å‚¨ä¼šèŠ‚çœç©ºé—´
+        itemsize: (SPACE*) æ•°å­— CRLF          // è¯é¡¹å¤§å°(bytes)ï¼Œå½“typeæ˜¯ç­‰é•¿æƒ…å†µä¸‹å¿…é¡»æŒ‡å®šï¼Œä¸ç­‰é•¿æƒ…å†µä¸‹å¿½ç•¥ã€‚
+        compress: (SPACE*) (none | gzip) CRLF // è¯æ±‡æ•°æ®å‹ç¼©æ–¹å¼ï¼Œä¸å‹ç¼©æˆ–æ˜¯gzipå‹ç¼©ï¼Œé»˜è®¤none
+                                              // åœ¨å‹ç¼©çš„æƒ…å†µä¸‹ï¼Œä¼šåˆ›å»ºä¸€ä¸ªæ–°çš„ä¸å‹ç¼©çš„è¯åº“æ–‡ä»¶ï¼Œä¾¿äºæ“ä½œ
+        encoding: (SPACE*) ç¼–ç è¯†åˆ«ä¸² CRLF    // é»˜è®¤æœ¬åœ°ç¼–ç 
+        wordscount: (SPACE*) æ•°å­— CRLF        // æŒ‡ç¤ºè¯åº“æ‰€å«è¯æ±‡
         CRLF
-        ´Ê»ãÊı¾İ
+        è¯æ±‡æ•°æ®
     }
  */
 
 /* WordsLibException */
-class WordsLibException : public std::exception
+class WINPLUS_DLL WordsLibException : public std::exception
 {
 public:
-	WordsLibException( LPCSTR what ) : std::exception(what) {}
+    WordsLibException( LPCSTR what ) : std::exception(what) {}
 };
 
-class WordsLib
+class WINPLUS_DLL WordsLib
 {
 
 public:
-	WordsLib( String const & filename ) throw(WordsLibException);
-	~WordsLib();
+    WordsLib( String const & filename ) throw(WordsLibException);
+    ~WordsLib();
 
-	// µ±str1µÈÓÚsubstr(str2, 0, strlen(str1))Ê±·µ»Ø0£¬´óÓÚ·µ»Ø1£¬Ğ¡ÓÚ·µ»Ø-1
-	static int StrMatch( String const & str1, String const & str2 );
-	// ËÑË÷Ò»¸ö´Ê(¾«È·Æ¥Åä), ·µ»ØÆäÔÚ´Ê¿âÖĞµÄË÷Òı, ·ñÔò·µ»Ø-1
-	int find( String const & word, int first, int last ) const;
-	int find( String const & word ) const
-	{
-		return this->find( word, 0, wordscount - 1 );
-	}
-	// ËÑË÷Ò»¸ö´®(Ä£ºıÆ¥Åä), ·µ»ØÆäÆ¥Åä´Ê¿âÖĞµÚÒ»¸ö´ÊµÄË÷ÒıÒÔ¼°Æ¥Åäµ½µÄ´ÊÊı, ·ñÔò·µ»Ø-1
-	int findEx( String const & word, int first, int last, int * count ) const;
-	int findEx( String const & word, int * count ) const
-	{
-		return this->findEx( word, 0, wordscount - 1, count );
-	}
-	// ·Ö´Ê
-	int splitWords( String const & text, StringArray * arrWords ) const;
+    // å½“str1ç­‰äºsubstr(str2, 0, strlen(str1))æ—¶è¿”å›0ï¼Œå¤§äºè¿”å›1ï¼Œå°äºè¿”å›-1
+    static int StrMatch( String const & str1, String const & str2 );
+    // æœç´¢ä¸€ä¸ªè¯(ç²¾ç¡®åŒ¹é…), è¿”å›å…¶åœ¨è¯åº“ä¸­çš„ç´¢å¼•, å¦åˆ™è¿”å›-1
+    int find( String const & word, int first, int last ) const;
+    int find( String const & word ) const
+    {
+        return this->find( word, 0, wordscount - 1 );
+    }
+    // æœç´¢ä¸€ä¸ªä¸²(æ¨¡ç³ŠåŒ¹é…), è¿”å›å…¶åŒ¹é…è¯åº“ä¸­ç¬¬ä¸€ä¸ªè¯çš„ç´¢å¼•ä»¥åŠåŒ¹é…åˆ°çš„è¯æ•°, å¦åˆ™è¿”å›-1
+    int findEx( String const & word, int first, int last, int * count ) const;
+    int findEx( String const & word, int * count ) const
+    {
+        return this->findEx( word, 0, wordscount - 1, count );
+    }
+    // åˆ†è¯
+    int splitWords( String const & text, StringArray * arrWords ) const;
 
-	String prev() const;
-	String next() const;
-	String at( int i ) const;
-	String seek( int index ) const;
+    String prev() const;
+    String next() const;
+    String at( int i ) const;
+    String seek( int index ) const;
 
-	StringMap header;
-	String name, desc, type, compress, encoding;
-	int itemsize, wordscount;
-	uint filesize;
+    StringMap header;
+    String name, desc, type, compress, encoding;
+    int itemsize, wordscount;
+    uint filesize;
 protected:
-	String getHeader( String const & key, String const & defval );
+    String getHeader( String const & key, String const & defval );
 private:
-	// ¶ÁÈ¡Í·²¿ĞÅÏ¢²¢½âÎö¡¢´æ´¢
-	void readHeaders();
-	
-	HANDLE _file, _fileMapping;
-	int _dataOffset; // ´Ê»ãÊı¾İÆ«ÒÆ
-	LPBYTE _p, _data;
-	uint _dataSize; // Êµ¼Ê´Ê»ãÊı¾İ´óĞ¡
-	mutable int _curIndex;
-	WordsLib( WordsLib const & );
-	WordsLib & operator = ( WordsLib const & );
+    // è¯»å–å¤´éƒ¨ä¿¡æ¯å¹¶è§£æã€å­˜å‚¨
+    void readHeaders();
+    
+    HANDLE _file, _fileMapping;
+    int _dataOffset; // è¯æ±‡æ•°æ®åç§»
+    LPBYTE _p, _data;
+    uint _dataSize; // å®é™…è¯æ±‡æ•°æ®å¤§å°
+    mutable int _curIndex;
+    WordsLib( WordsLib const & );
+    WordsLib & operator = ( WordsLib const & );
 };
 
 } // namespace winplus

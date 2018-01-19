@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose:  ´°¿Ú¿Ø¼şÏà¹Ø
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose:  çª—å£æ§ä»¶ç›¸å…³
 // author:   WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -12,124 +12,149 @@
 
 namespace winplus
 {
-// UIÏà¹Ø ----------------------------------------------------------------
+// UIç›¸å…³ ----------------------------------------------------------------
 
-/* ´°¿Ú¶¨Ê±Æ÷ */
-class WindowTimer
+/* çª—å£å®šæ—¶å™¨ */
+class WINPLUS_DLL WindowTimer
 {
 public:
-	WindowTimer( void );
-	void create( HWND window, UINT elapse, UINT_PTR id = -1 );
-	void destroy( void );
-	UINT getId( void ) const { return _id; }
-	~WindowTimer( void );
+    WindowTimer( void );
+    void create( HWND window, UINT elapse, UINT_PTR id = -1 );
+    void destroy( void );
+    UINT getId( void ) const { return _id; }
+    ~WindowTimer( void );
 private:
-	HWND _window;
-	UINT_PTR _id;
-	static UINT_PTR _idAutoIncrement;
+    HWND _window;
+    UINT_PTR _id;
+    static UINT_PTR _idAutoIncrement;
 
-	WindowTimer( WindowTimer const & );
-	WindowTimer & operator = ( WindowTimer const & );
+    WindowTimer( WindowTimer const & );
+    WindowTimer & operator = ( WindowTimer const & );
 };
 
-// ´°¿ÚÏà¹Ø --------------------------------------------------------------
+// çª—å£ç›¸å…³ --------------------------------------------------------------
 
-/* µ¯³öÒ»¸öÏûÏ¢¿ò */
-int MsgBox( String const & msg, String const & title = TEXT("WinPlus") );
-/* µ¯³öÒ»¸ö´íÎó¿ò */
-int ErrBox( String const & msg, String const & title = TEXT("WinPlus Error") );
-/* µ¯³öÒ»¸ö¾¯¸æ¿ò */
-int WarnBox( String const & msg, String const & title = TEXT("WinPlus Warning") );
+/* å¼¹å‡ºä¸€ä¸ªæ¶ˆæ¯æ¡† */
+WINPLUS_FUNC_DECL(int) MsgBox( String const & msg, String const & title = TEXT("WinPlus") );
+/* å¼¹å‡ºä¸€ä¸ªé”™è¯¯æ¡† */
+WINPLUS_FUNC_DECL(int) ErrBox( String const & msg, String const & title = TEXT("WinPlus Error") );
+/* å¼¹å‡ºä¸€ä¸ªè­¦å‘Šæ¡† */
+WINPLUS_FUNC_DECL(int) WarnBox( String const & msg, String const & title = TEXT("WinPlus Warning") );
 
-/* »ñÈ¡¿Í»§Çø¾ØĞÎ */
-RECT Window_GetClient( HWND window );
-/* »ñÈ¡´°¿Ú¾ØĞÎ,Ïà¶ÔÓÚ¸¸´°¿Ú */
-RECT Window_GetRect( HWND window );
-/* ÉèÖÃ´°¿Ú¾ØĞÎ,Ïà¶ÔÓÚ¸¸´°¿Ú */
-void Window_SetRect( HWND window, LPCRECT rect, bool is_redraw = true );
-/* ÅòÕÍ´°¿Ú */
-void Window_Inflate( HWND window, INT dx, INT dy );
-/* ÒÔÏà¶Ô´°¿ÚÎª×¼¾ÓÖĞ´°¿Ú */
-void Window_Center( HWND window, HWND relative_wnd, bool is_in_relative = false, bool is_redraw = true );
-/* ´°¿ÚÎÄ±¾ */
-String Window_GetText( HWND window );
-void Window_SetText( HWND window, String const & text );
-/* »ñµÃ´°¿ÚÊÇ·ñÏÔÊ¾ */
-bool Window_IsShow( HWND window );
-/* ÈÃ´°¿Ú¿É¼û */
-void Window_Show( HWND window, bool show = true );
+/* è·å–å®¢æˆ·åŒºçŸ©å½¢ */
+WINPLUS_FUNC_DECL(RECT) Window_GetClient( HWND window );
+/* è·å–çª—å£çŸ©å½¢,ç›¸å¯¹äºçˆ¶çª—å£ */
+WINPLUS_FUNC_DECL(RECT) Window_GetRect( HWND window );
+/* è®¾ç½®çª—å£çŸ©å½¢,ç›¸å¯¹äºçˆ¶çª—å£ */
+WINPLUS_FUNC_DECL(void) Window_SetRect( HWND window, LPCRECT rect, bool is_redraw = true );
+/* è†¨èƒ€çª—å£ */
+WINPLUS_FUNC_DECL(void) Window_Inflate( HWND window, INT dx, INT dy );
+/* ä»¥ç›¸å¯¹çª—å£ä¸ºå‡†å±…ä¸­çª—å£ */
+WINPLUS_FUNC_DECL(void) Window_Center( HWND window, HWND relative_wnd, bool is_in_relative = false, bool is_redraw = true );
+/* çª—å£æ–‡æœ¬ */
+WINPLUS_FUNC_DECL(String) Window_GetText( HWND window );
+WINPLUS_FUNC_DECL(void) Window_SetText( HWND window, String const & text );
+/* è·å¾—çª—å£æ˜¯å¦æ˜¾ç¤º */
+WINPLUS_FUNC_DECL(bool) Window_IsShow( HWND window );
+/* è®©çª—å£å¯è§ */
+WINPLUS_FUNC_DECL(void) Window_Show( HWND window, bool show = true );
 
-// ListCtrl - Report²Ù×÷ -------------------------------------------------
-INT Report_AddStrings( HWND report, StringArray const & cols );
-INT Report_InsertStrings( HWND report, INT item_index, StringArray const & cols );
-void Report_SetStrings( HWND report, INT item_index, StringArray const & cols );
-INT Report_GetStrings( HWND report, INT item_index, StringArray * cols );
+// ListCtrl - Reportæ“ä½œ -------------------------------------------------
+WINPLUS_FUNC_DECL(INT) Report_AddStrings( HWND report, StringArray const & cols );
+WINPLUS_FUNC_DECL(INT) Report_InsertStrings( HWND report, INT item_index, StringArray const & cols );
+WINPLUS_FUNC_DECL(void) Report_SetStrings( HWND report, INT item_index, StringArray const & cols );
+WINPLUS_FUNC_DECL(INT) Report_GetStrings( HWND report, INT item_index, StringArray * cols );
 
-// ImageList controlÏà¹Ø -------------------------------------------------
+// ImageList controlç›¸å…³ -------------------------------------------------
 #ifdef _GDIPLUS_H
-/* Ìí¼ÓÒ»ÕÅº¬AlphaÍ¨µÀµÄÍ¼Æ¬½øImageList via Gdiplus::Bitmap,ImageList±ØĞë´´½¨ÎªILC_COLOR32 */
-int ImageList_AddAlphaImage( HIMAGELIST hImageList, Gdiplus::Bitmap const & image );
-int ImageList_AddAlphaImage( HIMAGELIST hImageList, UINT nId, LPCTSTR lpType );
-int ImageList_AddAlphaImage( HIMAGELIST hImageList, String const & imagePath );
+/* æ·»åŠ ä¸€å¼ å«Alphaé€šé“çš„å›¾ç‰‡è¿›ImageList via Gdiplus::Bitmap,ImageListå¿…é¡»åˆ›å»ºä¸ºILC_COLOR32 */
+WINPLUS_FUNC_DECL(int) ImageList_AddAlphaImage( HIMAGELIST hImageList, Gdiplus::Bitmap const & image );
+WINPLUS_FUNC_DECL(int) ImageList_AddAlphaImage( HIMAGELIST hImageList, UINT nId, LPCTSTR lpType );
+WINPLUS_FUNC_DECL(int) ImageList_AddAlphaImage( HIMAGELIST hImageList, String const & imagePath );
 #endif
-/* Ìí¼ÓÒ»ÕÅº¬AlphaÍ¨µÀµÄ32Î»DIB½øImageList via LoadImage(),ImageList±ØĞë´´½¨ÎªILC_COLOR32 */
-int ImageList_Add32bpp( HIMAGELIST hImageList, UINT nId, UINT uType );
-int ImageList_Add32bpp( HIMAGELIST hImageList, String const & imagePath, UINT uType );
+/* æ·»åŠ ä¸€å¼ å«Alphaé€šé“çš„32ä½DIBè¿›ImageList via LoadImage(),ImageListå¿…é¡»åˆ›å»ºä¸ºILC_COLOR32 */
+WINPLUS_FUNC_DECL(int) ImageList_Add32bpp( HIMAGELIST hImageList, UINT nId, UINT uType );
+WINPLUS_FUNC_DECL(int) ImageList_Add32bpp( HIMAGELIST hImageList, String const & imagePath, UINT uType );
 
-// HotkeyCtrlÏà¹Ø --------------------------------------------------------
+// HotkeyCtrlç›¸å…³ --------------------------------------------------------
 
-/* HOTKEYF±êÊ¶×ªÎªMOD±êÊ¶
-   ±ãÓÚ´ÓHotkey¿Ø¼şÊäÈëµÄ°´¼üĞÅÏ¢ÓÃRegisterHotkey()×¢²á */
-UINT HOTKEYF_to_MOD( UINT hkf );
+/* HOTKEYFæ ‡è¯†è½¬ä¸ºMODæ ‡è¯†
+   ä¾¿äºä»Hotkeyæ§ä»¶è¾“å…¥çš„æŒ‰é”®ä¿¡æ¯ç”¨RegisterHotkey()æ³¨å†Œ */
+WINPLUS_FUNC_DECL(UINT) HOTKEYF_to_MOD( UINT hkf );
 
-/* MOD±êÊ¶×ªÎªHOTKEYF±êÊ¶
-   ÓëHOTKEYF_to_MOD()Ïà·´ */
-UINT MOD_to_HOTKEYF( UINT mod );
+/* MODæ ‡è¯†è½¬ä¸ºHOTKEYFæ ‡è¯†
+   ä¸HOTKEYF_to_MOD()ç›¸å */
+WINPLUS_FUNC_DECL(UINT) MOD_to_HOTKEYF( UINT mod );
 
 
-// Í¨ÓÃ¶Ô»°¿òÏà¹Ø --------------------------------------------------------
-
-/* ÎÄ¼ş¼ĞÑ¡Ôñ¶Ô»°¿ò
-   »ùÓÚSHBrowseForFolder() */
-class FolderDialog
+// é€šç”¨å¯¹è¯æ¡†ç›¸å…³ --------------------------------------------------------
+/* æ–‡ä»¶å¤¹é€‰æ‹©å¯¹è¯æ¡†
+   åŸºäºSHBrowseForFolder() */
+class WINPLUS_DLL FolderDialog
 {
 private:
-	FolderDialog( FolderDialog const & );
-	FolderDialog & operator = ( FolderDialog const & );
+    FolderDialog( FolderDialog const & );
+    FolderDialog & operator = ( FolderDialog const & );
 
-	BROWSEINFO _bi;
-	String _strPath;
-	String _strDisplay;
-	LPCTSTR _lpszWindowTitle;
-	LPCTSTR _lpszSelectionDir;
-	// »Øµ÷º¯Êı
-	static int CALLBACK BrowseCallback( HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData );
+    BROWSEINFO _bi;
+    String _strPath;
+    String _strDisplay;
+    LPCTSTR _lpszWindowTitle;
+    LPCTSTR _lpszSelectionDir;
+    // å›è°ƒå‡½æ•°
+    static int CALLBACK BrowseCallback( HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData );
 public:
-	FolderDialog( HWND hWndOwner, LPCTSTR lpszWindowTitle = NULL, LPCTSTR lpszPromptText = NULL, BOOL bIncludedFiles = FALSE );
-	// ³É¹¦»ñÈ¡Â·¾¶·µ»ØTRUE,·ñÔò·µ»ØFALSE
-	BOOL doModal( LPCTSTR lpszRootDir = NULL, LPCTSTR lpszSelectionDir = NULL );	// ÏÔÊ¾¶Ô»°¿ò
-	String getDisplayName() const; // Ñ¡ÔñµÄÎÄ¼ş¼ĞÏÔÊ¾Ãû(ÏÔÊ¾Ãû²¢²»Ò»¶¨¾ÍÊÇÎÄ¼ş¼ĞÃû:ÀıÈç"ÎÒµÄÎÄµµ" and "My Documents")
-	String getPath() const; // Ñ¡ÔñµÄÂ·¾¶
+    FolderDialog( HWND hWndOwner, LPCTSTR lpszWindowTitle = NULL, LPCTSTR lpszPromptText = NULL, BOOL bIncludedFiles = FALSE );
+    // æˆåŠŸè·å–è·¯å¾„è¿”å›TRUE,å¦åˆ™è¿”å›FALSE
+    BOOL doModal( LPCTSTR lpszRootDir = NULL, LPCTSTR lpszSelectionDir = NULL );    // æ˜¾ç¤ºå¯¹è¯æ¡†
+    String getDisplayName() const; // é€‰æ‹©çš„æ–‡ä»¶å¤¹æ˜¾ç¤ºå(æ˜¾ç¤ºåå¹¶ä¸ä¸€å®šå°±æ˜¯æ–‡ä»¶å¤¹å:ä¾‹å¦‚"æˆ‘çš„æ–‡æ¡£" and "My Documents")
+    String getPath() const; // é€‰æ‹©çš„è·¯å¾„
 };
 
-/* ÎÄ¼şÑ¡Ôñ¶Ô»°¿ò */
-class FileDialog
+/* æ–‡ä»¶é€‰æ‹©å¯¹è¯æ¡† */
+class WINPLUS_DLL FileDialog
 {
 private:
-	FileDialog( FileDialog const & );
-	FileDialog & operator = ( FileDialog const & );
+    FileDialog( FileDialog const & );
+    FileDialog & operator = ( FileDialog const & );
 
-	String _buffer;
-	OPENFILENAME _ofn;
-	BOOL _isOpen;
+    String _buffer;
+    OPENFILENAME _ofn;
+    BOOL _isOpen;
 public:
-	FileDialog( HWND hwndOwner, BOOL bOpenDialog = TRUE, LPCTSTR lpszWindowTitle = NULL, LPCTSTR lpszDefExt = NULL, BOOL bMultiSelected = FALSE, DWORD dwAdditionalFlags = 0, DWORD dwRemoveFlags = 0 );
-	BOOL doModal( LPCTSTR lpszInitialDir = NULL, LPCTSTR lpFilter = NULL );
-	String getFilePath() const; // Ñ¡ÔñµÄÎÄ¼şÂ·¾¶
-	String getDirPath() const; // »ñÈ¡Ä¿Â¼Â·¾¶
-	int getFilePaths( StringArray * pArr ) const; // µ±¶àÑ¡Ê±Í¨¹ı´Ë»ñµÃÑ¡ÔñµÄÎÄ¼ş
+    FileDialog( HWND hwndOwner, BOOL bOpenDialog = TRUE, LPCTSTR lpszWindowTitle = NULL, LPCTSTR lpszDefExt = NULL, BOOL bMultiSelected = FALSE, DWORD dwAdditionalFlags = 0, DWORD dwRemoveFlags = 0 );
+    BOOL doModal( LPCTSTR lpszInitialDir = NULL, LPCTSTR lpFilter = NULL );
+    String getFilePath() const; // é€‰æ‹©çš„æ–‡ä»¶è·¯å¾„
+    String getDirPath() const; // è·å–ç›®å½•è·¯å¾„
+    int getFilePaths( StringArray * pArr ) const; // å½“å¤šé€‰æ—¶é€šè¿‡æ­¤è·å¾—é€‰æ‹©çš„æ–‡ä»¶
 
 };
+
+/* ç³»ç»Ÿæ‰˜ç›˜å›¾æ ‡é€šçŸ¥ç±» */
+class WINPLUS_DLL Notification
+{
+private:
+    NOTIFYICONDATA _nid;
+    bool _isAdd;
+protected:
+    void _construct();
+
+public:
+    Notification();
+    ~Notification();
+    bool add( HWND hwnd, UINT notificationId, Icon const & ico, String const & strTip );
+
+    bool modify();
+
+    void setMessage( UINT msg );
+
+    void setBalloonInfo( String const & infoTitle, String const & infoText, DWORD infoFlags = NIIF_USER | NIIF_RESPECT_QUIET_TIME );
+
+    void setIconInfo( Icon const & ico, String const & strTip );
+
+    bool del();
+};
+
 
 } // namespace winplus
 

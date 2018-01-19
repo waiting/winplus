@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose: ¸´ºÏÎÄ¼şÏà¹Ø
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose: å¤åˆæ–‡ä»¶ç›¸å…³
 // author:  WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,16 +13,17 @@
 namespace winplus
 {
 
-// IStream Ïà¹Ø -----------------------------------------------------------
+// IStream ç›¸å…³ -----------------------------------------------------------
+/** åˆ›å»ºä¸€ä¸ªæ–°çš„å†…å­˜IStreamï¼Œè‡ªåŠ¨å¢é•¿ */
+WINPLUS_FUNC_DECL(IStreamPtr) CreateNewStream();
+/* ä»ç£ç›˜è½½å…¥æ–‡ä»¶åˆ°å†…å­˜ä¸­,å¹¶å¾—åˆ°IStreamæ¥å£æŒ‡é’ˆ */
+WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamExistingFile( String const & fileName );
+/* ä»æŒ‡å®šç¼“å†²åŒºæ–°å»ºä¸€ä¸ªIStream */
+WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamFromBuffer( LPCVOID buffer, DWORD size );
 
-/* ´Ó´ÅÅÌÔØÈëÎÄ¼şµ½ÄÚ´æÖĞ,²¢µÃµ½IStream½Ó¿ÚÖ¸Õë */
-IStreamPtr CreateStreamExistingFile( String const & fileName );
-/* ´ÓÖ¸¶¨»º³åÇøĞÂ½¨Ò»¸öIStream */
-IStreamPtr CreateStreamFromBuffer( LPCVOID buffer, DWORD size );
-
-/* ´Ó×ÊÔ´´´½¨Ò»¸öIStream */
-IStreamPtr CreateStreamFromResourceEx( HMODULE module, UINT resourceId, LPCTSTR type );
-IStreamPtr CreateStreamFromResource( UINT resourceId, LPCTSTR type );
+/* ä»èµ„æºåˆ›å»ºä¸€ä¸ªIStream */
+WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamFromResourceEx( HMODULE module, UINT resourceId, LPCTSTR type );
+WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamFromResource( UINT resourceId, LPCTSTR type );
 
 } // namespace winplus
 

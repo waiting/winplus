@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////
-// desc:    ¿ØÖÆÌ¨Ïà¹Ø
+ï»¿//////////////////////////////////////////////////////////////////////
+// desc:    æ§åˆ¶å°ç›¸å…³
 // author:  WT
 //////////////////////////////////////////////////////////////////////
 
@@ -62,20 +62,20 @@ inline text_attr_t<_VarType> ConsoleColor( WORD wAttr, _VarType const & v )
     return text_attr_t<_VarType>( wAttr, v );
 }
 
-/* È·±£ÎÄ±¾¿í¶È */
-String MakesureTextWidth( String const & text, int text_width, bool left_align = false, int ellipsis = 3 );
+/* ç¡®ä¿æ–‡æœ¬å®½åº¦ */
+WINPLUS_FUNC_DECL(String) MakesureTextWidth( String const & text, int text_width, bool left_align = false, int ellipsis = 3 );
 
-/* ¼ÆËã½ø¶È¿éÊıÄ¿ */
+/* è®¡ç®—è¿›åº¦å—æ•°ç›® */
 inline int CalcBarBlocks( int text_limit, int screen_width )
 {
     return ( screen_width - text_limit - 1 - 1 - 1 ) / 2;
 }
 
-/* Êä³öÒ»¸öºáÌõ£¬×ó±ß´øÒ»¸öÎÄ×ÖËµÃ÷ */
-void PrintBarEx( String const & text, int text_width, int screen_width, WORD clr, int bar_blocks );
+/* è¾“å‡ºä¸€ä¸ªæ¨ªæ¡ï¼Œå·¦è¾¹å¸¦ä¸€ä¸ªæ–‡å­—è¯´æ˜ */
+WINPLUS_FUNC_DECL(void) PrintBarEx( String const & text, int text_width, int screen_width, WORD clr, int bar_blocks );
 
-/* ÔÚguiÄ£Ê½ÏÂ¿ªÆô¿ØÖÆÌ¨´°¿Ú */
-void Win32GUI_ShowConsole();
+/* åœ¨guiæ¨¡å¼ä¸‹å¼€å¯æ§åˆ¶å°çª—å£ */
+WINPLUS_FUNC_DECL(void) Win32GUI_ShowConsole();
 
 } // namespace winplus
 

@@ -1,4 +1,4 @@
-#ifdef __GNUC__
+﻿#ifdef __GNUC__
 #define WINVER 0x0501
 #define _WIN32_IE 0x0501
 #endif
@@ -134,20 +134,20 @@ namespace winplus
 #define SM_SERVERR2             89
 #endif /* _WIN32_WINNT >= 0x0501 */
 
-/* Ŀ¼�ָ�� */
+/* 目录分割符 */
 String const dirSep = TEXT("\\");
 String const dirSepUnix = TEXT("/");
 String const dirSepMac = TEXT("/");
 
-/* windows�зָ�� */
+/* windows行分割符 */
 String const lineSep = TEXT("\r\n");
-/* unix�зָ�� */
+/* unix行分割符 */
 String const lineSepUnix = TEXT("\n");
-/* mac�зָ�� */
+/* mac行分割符 */
 String const lineSepMac = TEXT("\r");
 
-/* �ж�һ���ַ����Ƿ��չ�������Ƿ����%varname% */
-bool IsExpandString( String const & str )
+/* 判断一个字符串是否可展开，即是否包含%varname% */
+WINPLUS_FUNC_IMPL(bool) IsExpandString( String const & str )
 {
     LPCTSTR p = str.c_str();
     INT i = 0, j;
@@ -171,8 +171,8 @@ bool IsExpandString( String const & str )
     return false;
 }
 
-/* չ���ַ����д��ڵ�'%����%' */
-String ExpandVars( String const & str )
+/* 展开字符串中存在的'%变量%' */
+WINPLUS_FUNC_IMPL(String) ExpandVars( String const & str )
 {
     String strRes;
     LPCTSTR p = str.c_str();
@@ -206,7 +206,7 @@ String ExpandVars( String const & str )
 
 }
 
-String GetAppPathFromHWND( HWND hWnd, DWORD * processId )
+WINPLUS_FUNC_IMPL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId )
 {
     DWORD dwProcessId;
     GetWindowThreadProcessId( hWnd, &dwProcessId );
@@ -231,7 +231,7 @@ String GetAppPathFromHWND( HWND hWnd, DWORD * processId )
     return fullName.c_str();
 }
 
-String GetCurrentDir( void )
+WINPLUS_FUNC_IMPL(String) GetCurrentDir( void )
 {
     LPTSTR p;
     String buf;
@@ -247,7 +247,7 @@ String GetCurrentDir( void )
     return p ? p : TEXT("");
 }
 
-String ModulePath( HMODULE module/* = NULL*/, String * fileName/* = NULL*/ )
+WINPLUS_FUNC_IMPL(String) ModulePath( HMODULE module/* = NULL*/, String * fileName/* = NULL*/ )
 {
     String buffer;
     buffer.resize(MAX_PATH);
@@ -255,7 +255,7 @@ String ModulePath( HMODULE module/* = NULL*/, String * fileName/* = NULL*/ )
     return FilePath( buffer, fileName );
 }
 
-String FilePath( String const & fullPath, String * fileName )
+WINPLUS_FUNC_IMPL(String) FilePath( String const & fullPath, String * fileName )
 {
     String path;
     String buffer = fullPath.c_str();
@@ -277,7 +277,7 @@ String FilePath( String const & fullPath, String * fileName )
     return path;
 }
 
-String FileTitle( String const & fileName, String * extName )
+WINPLUS_FUNC_IMPL(String) FileTitle( String const & fileName, String * extName )
 {
     String temp = fileName;
     String fileTitle;
@@ -298,7 +298,7 @@ String FileTitle( String const & fileName, String * extName )
     return fileTitle;
 }
 
-bool IsDir( String const & path )
+WINPLUS_FUNC_IMPL(bool) IsDir( String const & path )
 {
     DWORD attr = GetFileAttributes( path.c_str() );
     if ( attr != INVALID_FILE_ATTRIBUTES && attr & FILE_ATTRIBUTE_DIRECTORY )
@@ -308,23 +308,23 @@ bool IsDir( String const & path )
     return false;
 }
 
-uint64 FileSize( String const & fullpath )
+WINPLUS_FUNC_IMPL(uint64) FileSize( String const & fullpath )
 {
     struct _stati64 st;
     _wstati64( StringToUnicode(fullpath).c_str(), &st );
     return st.st_size;
 }
 
-String PathWithSep( String const & path )
+WINPLUS_FUNC_IMPL(String) PathWithSep( String const & path )
 {
     String res_path;
     if ( !path.empty() )
     {
-        if ( path[path.length() - 1] != dirSep[0] ) // ĩβ���Ƿָ���
+        if ( path[path.length() - 1] != dirSep[0] ) // 末尾不是分隔符
         {
             res_path = path + dirSep;
         }
-        else // ĩβ�Ƿָ���
+        else // 末尾是分隔符
         {
             res_path = path;
         }
@@ -332,16 +332,16 @@ String PathWithSep( String const & path )
     return res_path;
 }
 
-String PathNoSep( String const & path )
+WINPLUS_FUNC_IMPL(String) PathNoSep( String const & path )
 {
     String res_path;
     if ( !path.empty() )
     {
-        if ( path[path.length() - 1] != dirSep[0] ) // ĩβ���Ƿָ���
+        if ( path[path.length() - 1] != dirSep[0] ) // 末尾不是分隔符
         {
             res_path = path;
         }
-        else // ĩβ�Ƿָ���
+        else // 末尾是分隔符
         {
             res_path = path.substr( 0, path.length() - 1 );
         }
@@ -349,9 +349,9 @@ String PathNoSep( String const & path )
     return res_path;
 }
 
-INT CommandArguments( StringArray * arr )
+WINPLUS_FUNC_IMPL(INT) CommandArguments( StringArray * arr )
 {
-    // �����в�������
+    // 命令行参数处理
     LPWSTR cmdLine = GetCommandLineW();
     INT numArgs, i;
     LPWSTR * argsArr = CommandLineToArgvW( cmdLine, &numArgs );
@@ -363,7 +363,7 @@ INT CommandArguments( StringArray * arr )
     return numArgs;
 }
 
-bool ShutdownPrivilege( bool enable )
+WINPLUS_FUNC_IMPL(bool) ShutdownPrivilege( bool enable )
 {
     HANDLE token;
     bool ret = OpenProcessToken( GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token ) != FALSE;
@@ -378,7 +378,7 @@ bool ShutdownPrivilege( bool enable )
     return ret;
 }
 
-String GetNtVersion( void )
+WINPLUS_FUNC_IMPL(String) GetNtVersion( void )
 {
     String version;
     OSVERSIONINFO osvi;
@@ -407,7 +407,7 @@ String GetNtVersion( void )
     return version;
 }
 
-String GetOsVersion( void )
+WINPLUS_FUNC_IMPL(String) GetOsVersion( void )
 {
     String version;
     typedef void (WINAPI * PGNSI)(LPSYSTEM_INFO);
@@ -620,14 +620,14 @@ String GetOsVersion( void )
     return version;
 }
 
-String GetSelfModuleVersion( void )
+WINPLUS_FUNC_IMPL(String) GetSelfModuleVersion( void )
 {
     String fullPath;
     fullPath = ModulePath( NULL, &fullPath ) + dirSep + fullPath;
     return GetModuleVersion(fullPath);
 }
 
-String GetModuleVersion( String const & moduleFile )
+WINPLUS_FUNC_IMPL(String) GetModuleVersion( String const & moduleFile )
 {
     String version;
     DWORD verInfoSize = 0;
@@ -647,7 +647,7 @@ String GetModuleVersion( String const & moduleFile )
         memoryData = GlobalLock(memory);
         GetFileVersionInfo( moduleFile.c_str(), verHandle, verInfoSize, memoryData );
         ::VerQueryValue( memoryData, TEXT("\\"), (LPVOID *)&fileInfo, &infoSize );
-        //���ݲ����Ĳ�ͬ�����Ի�ȡ��ͬ���ļ��汾��Ϣ
+        //根据参数的不同，可以获取不同的文件版本信息
         // Product version from the FILEVERSION of the version info resource
         prodVersion[0] = HIWORD(fileInfo->dwFileVersionMS);
         prodVersion[1] = LOWORD(fileInfo->dwFileVersionMS);
@@ -668,7 +668,7 @@ String GetModuleVersion( String const & moduleFile )
     return version;
 }
 
-void FolderData( String const & path, StringArray * files, StringArray * sub_folders, int sort_type )
+WINPLUS_FUNC_IMPL(void) FolderData( String const & path, StringArray * files, StringArray * sub_folders, int sort_type )
 {
     String realpath = PathWithSep(path);
     String filespec = realpath + TEXT("*");
@@ -703,7 +703,7 @@ void FolderData( String const & path, StringArray * files, StringArray * sub_fol
     }
 }
 
-int EnumFiles( String const & path, StringArray const & extnames, StringArray * files, bool is_recursion /*= true */ )
+WINPLUS_FUNC_IMPL(int) EnumFiles( String const & path, StringArray const & extnames, StringArray * files, bool is_recursion /*= true */ )
 {
     int files_count = 0;
     StringArray filenames, paths;
@@ -798,7 +798,7 @@ bool CommandLine::include( String const & name, int * valueIndex /*= NULL */ ) c
         {
             if ( valueIndex != NULL )
             {
-                if ( i + 1 == (int)this->_args.size() ) // ��������һ������ζ��û�в���ֵ��
+                if ( i + 1 == (int)this->_args.size() ) // 如果是最后一个，意味着没有参数值了
                 {
                     *valueIndex = -1;
                 }

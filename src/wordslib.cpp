@@ -1,4 +1,4 @@
-#include "../include/definitions.hpp"
+ï»¿#include "../include/definitions.hpp"
 #include "../include/wordslib.hpp"
 #include "../include/strings.hpp"
 
@@ -31,23 +31,24 @@ _file(INVALID_HANDLE_VALUE),
     _dataSize(0),
     _curIndex(-1)
 {
-    _file = CreateFile( filename.c_str(), FILE_ALL_ACCESS | GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL );
+    _file = CreateFile( filename.c_str(), /*FILE_ALL_ACCESS*/GENERIC_READ, /*FILE_SHARE_READ*/0, NULL, OPEN_EXISTING, 0, NULL );
     if ( _file == INVALID_HANDLE_VALUE )
     {
-        throw WordsLibException("´Ê¿âÎÄ¼şÎ´ÕÒµ½");
+        DWORD dwErr = GetLastError();
+        throw WordsLibException( ((String)Mixed(dwErr) + "è¯åº“æ–‡ä»¶æœªæ‰¾åˆ°").c_str() );
     }
 
     filesize = (uint)GetFileSize( _file, NULL );
     _fileMapping = CreateFileMapping( _file, NULL, PAGE_READONLY, 0, 0, NULL );
 
-    this->readHeaders();// ¶ÁÈ¡Í·ĞÅÏ¢
+    this->readHeaders();// è¯»å–å¤´ä¿¡æ¯
 
     if ( this->type != TEXT("equal") )
     {
-        throw WordsLibException("²»Ö§³ÖµÄ´Ê¿â");
+        throw WordsLibException("ä¸æ”¯æŒçš„è¯åº“");
     }
 
-    // Ö¸ÕëÖ¸Ïò´Ê»ãÊı¾İ
+    // æŒ‡é’ˆæŒ‡å‘è¯æ±‡æ•°æ®
     _dataSize = filesize - _dataOffset;
     _p = (LPBYTE)MapViewOfFile( _fileMapping, FILE_MAP_READ, 0, 0, 0 );
     _data = _p + _dataOffset;
@@ -91,7 +92,7 @@ void WordsLib::readHeaders()
 
     UnmapViewOfFile(p);
 
-    // ½âÎö
+    // è§£æ
     header.clear();
     AnsiStringMap tmpHeader;
     AnsiStringArray arrHeaders;
@@ -106,22 +107,22 @@ void WordsLib::readHeaders()
             kv.push_back("");
         }
         AnsiString k = _StrTrim(kv[0]);
-        _strlwr(&k[0]); // Ğ¡Ğ´
+        _strlwr(&k[0]); // å°å†™
         tmpHeader[k] = _StrTrim(kv[1]);
     }
-    // ¼ì²â±àÂë
+    // æ£€æµ‹ç¼–ç 
     encoding = isset( tmpHeader, "encoding" ) ? Mixed(tmpHeader["encoding"]) : Mixed("");
     _strlwr(&encoding[0]);
     if ( encoding == "utf-8" )
     {
-        // utf-8±àÂë
+        // utf-8ç¼–ç 
         AnsiStringMap::const_iterator it = tmpHeader.begin();
         for ( ; it != tmpHeader.end(); ++it )
         {
             header[Utf8ToString(it->first)] = Utf8ToString(it->second);
         }
     }
-    else // µ±×÷±¾µØ±àÂë´¦Àí
+    else // å½“ä½œæœ¬åœ°ç¼–ç å¤„ç†
     {
         AnsiStringMap::const_iterator it = tmpHeader.begin();
         for ( ; it != tmpHeader.end(); ++it )
@@ -130,7 +131,7 @@ void WordsLib::readHeaders()
         }
     }
 
-    // ¸³Öµ¸ø±äÁ¿
+    // èµ‹å€¼ç»™å˜é‡
     name = this->getHeader( TEXT("name"), TEXT("") );
     desc = this->getHeader( TEXT("desc"), TEXT("") );
     type = this->getHeader( TEXT("type"), TEXT("equal") );
@@ -207,7 +208,7 @@ int WordsLib::find( String const & word, int first, int last ) const
 int WordsLib::findEx( String const & word, int first, int last, int * count ) const
 {
     count && ( *count = 0 );
-    // Ê×ÏÈ,ÏÈËÑÆ¥ÅäwordµÄÒ»¸ö´ÊµÄÎ»ÖÃ
+    // é¦–å…ˆ,å…ˆæœåŒ¹é…wordçš„ä¸€ä¸ªè¯çš„ä½ç½®
     int posMatch = -1;
     while ( first <= last )
     {
@@ -227,12 +228,12 @@ int WordsLib::findEx( String const & word, int first, int last, int * count ) co
             first = mid + 1;
         }
     }
-    // ËÑµ½
+    // æœåˆ°
     if ( posMatch != -1 )
     {
         String text;
         int pos;
-        // ÏòÇ°
+        // å‘å‰
         this->seek(posMatch);
         pos = posMatch;
         int prevCount = 0;
@@ -254,7 +255,7 @@ int WordsLib::findEx( String const & word, int first, int last, int * count ) co
                 }
             }
         }
-        // Ïòºó
+        // å‘å
         this->seek(posMatch);
         pos = posMatch;
         int nextCount = 0;
@@ -319,7 +320,7 @@ int WordsLib::splitWords( String const & text, StringArray * arrWords ) const
             strMat = str;
             p++;
         }
-        else // ËÑ²»µ½
+        else // æœä¸åˆ°
         {
             if ( haveMatch != -1 )
             {
@@ -328,7 +329,7 @@ int WordsLib::splitWords( String const & text, StringArray * arrWords ) const
                     arrWords->push_back(strMat);
                 }
                 haveMatch = -1;
-                // ÍË»ØÈ¥
+                // é€€å›å»
                 p -= cch - 1;
             }
             else
@@ -350,7 +351,7 @@ int WordsLib::splitWords( String const & text, StringArray * arrWords ) const
         }
         i++;
     }
-    // ½áÊøÑ­»·ÔÙÅĞ¶ÏÒ»´Î
+    // ç»“æŸå¾ªç¯å†åˆ¤æ–­ä¸€æ¬¡
     if ( haveMatch != -1 )
     {
         if ( this->at(haveMatch) == strMat )

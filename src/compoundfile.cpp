@@ -1,4 +1,4 @@
-#include <windows.h>
+Ôªø#include <windows.h>
 #include <comdef.h>
 #include "../include/definitions.hpp"
 #include "../include/compoundfile.hpp"
@@ -6,11 +6,11 @@
 namespace winplus
 {
 
-IStreamPtr CreateNewStream()
+WINPLUS_FUNC_IMPL(IStreamPtr) CreateNewStream()
 {
     HRESULT hr;
     IStreamPtr stream;
-    hr = CreateStreamOnHGlobal( NULL, TRUE, &stream ); // ¥¥Ω® IStream
+    hr = CreateStreamOnHGlobal( NULL, TRUE, &stream ); // ÂàõÂª∫ IStream
     if ( FAILED(hr) )
     {
         return NULL;
@@ -18,7 +18,7 @@ IStreamPtr CreateNewStream()
     return stream;
 }
 
-IStreamPtr CreateStreamExistingFile( String const & fileName )
+WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamExistingFile( String const & fileName )
 {
     IStreamPtr stream;
     HRESULT hr;
@@ -36,7 +36,7 @@ IStreamPtr CreateStreamExistingFile( String const & fileName )
         return NULL;
     }
     DWORD fileSize, tmpSize;
-    fileSize = GetFileSize( file, &tmpSize ); // ªÒµ√Œƒº˛¥Û–°
+    fileSize = GetFileSize( file, &tmpSize ); // Ëé∑ÂæóÊñá‰ª∂Â§ßÂ∞è
     HGLOBAL block = GlobalAlloc( GMEM_MOVEABLE, fileSize );
     if ( block == NULL )
     {
@@ -48,9 +48,9 @@ IStreamPtr CreateStreamExistingFile( String const & fileName )
     ReadFile( file, buffer, fileSize, &tmpSize, NULL );
     GlobalUnlock(block);
     
-    CloseHandle(file); // ƒ⁄»›“—øΩ±¥µΩƒ⁄¥Ê,‘ŸŒﬁ–ËFile
+    CloseHandle(file); // ÂÜÖÂÆπÂ∑≤Êã∑Ë¥ùÂà∞ÂÜÖÂ≠ò,ÂÜçÊó†ÈúÄFile
     
-    hr = CreateStreamOnHGlobal( block, TRUE, &stream ); // ¥¥Ω® IStream
+    hr = CreateStreamOnHGlobal( block, TRUE, &stream ); // ÂàõÂª∫ IStream
     if ( FAILED(hr) )
     {
         GlobalFree(block);
@@ -60,7 +60,7 @@ IStreamPtr CreateStreamExistingFile( String const & fileName )
     return stream;
 }
 
-IStreamPtr CreateStreamFromBuffer( LPCVOID buffer, DWORD size )
+WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromBuffer( LPCVOID buffer, DWORD size )
 {
     HRESULT hr;
     IStreamPtr stream;
@@ -74,7 +74,7 @@ IStreamPtr CreateStreamFromBuffer( LPCVOID buffer, DWORD size )
     CopyMemory( data, buffer, size );
     GlobalUnlock(block);
 
-    hr = CreateStreamOnHGlobal( block, TRUE, &stream ); // ¥¥Ω® IStream
+    hr = CreateStreamOnHGlobal( block, TRUE, &stream ); // ÂàõÂª∫ IStream
     if ( FAILED(hr) )
     {
         GlobalFree(block);
@@ -83,7 +83,7 @@ IStreamPtr CreateStreamFromBuffer( LPCVOID buffer, DWORD size )
     return stream;
 }
 
-IStreamPtr CreateStreamFromResourceEx( HMODULE module, UINT resourceId, LPCTSTR type )
+WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromResourceEx( HMODULE module, UINT resourceId, LPCTSTR type )
 {
     IStreamPtr stream;
     HRSRC resource = FindResource( module, MAKEINTRESOURCE(resourceId), type);
@@ -100,7 +100,7 @@ IStreamPtr CreateStreamFromResourceEx( HMODULE module, UINT resourceId, LPCTSTR 
     return stream;
 }
 
-IStreamPtr CreateStreamFromResource( UINT resourceId, LPCTSTR type )
+WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromResource( UINT resourceId, LPCTSTR type )
 {
     return CreateStreamFromResourceEx( GetModuleHandle(NULL), resourceId, type );
 }

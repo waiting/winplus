@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose:  ◊ ‘¥œ‡πÿ
+Ôªø//////////////////////////////////////////////////////////////////////////
+// purpose:  ËµÑÊ∫êÁõ∏ÂÖ≥
 // author:   WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,55 +13,64 @@
 namespace winplus
 {
 
-class Resource
+class WINPLUS_DLL Resource
 {
 public:
-	Resource( HMODULE hModule, UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
-	{
-		new(this) Resource( hModule, MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
-	}
-	Resource( UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
-	{
-		new(this) Resource( GetModuleHandle(NULL), nResourceId, lpType, wLanguage );
-	}
-	Resource( LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
-	{
-		new(this) Resource( GetModuleHandle(NULL), lpszName, lpType, wLanguage );
-	}
-	Resource( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) );
-	Resource();
-	~Resource();
+    Resource( HMODULE hModule, UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
+    {
+        _construct( hModule, MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
+    }
+    Resource( UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
+    {
+        _construct( GetModuleHandle(NULL), MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
+    }
+    Resource( LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
+    {
+        _construct( GetModuleHandle(NULL), lpszName, lpType, wLanguage );
+    }
+    Resource( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
+    {
+        _construct( hModule, lpszName, lpType, wLanguage );
+    }
+    Resource()
+    {
+        _construct();
+    }
+    ~Resource();
 
-	bool load( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) );
-	bool load( LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
-	{
-		return load( GetModuleHandle(NULL), lpszName, lpType, wLanguage );
-	}
-	bool load( HMODULE hModule, UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
-	{
-		return load( hModule, MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
-	}
-	bool load( UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
-	{
-		return load( GetModuleHandle(NULL), nResourceId, lpType, wLanguage );
-	}
-	void free();
-	// øΩ±¥µΩƒø±Íª∫≥Â«¯,∑µªÿƒø±Íª∫≥Â«¯”Î◊ ‘¥µƒ¥Û–°≤Ó
-	// 0:«°∫√œ‡Õ¨,’˝ ˝:ƒø±Íª∫≥Â«¯¥Û–°¥Û”⁄◊ ‘¥,∏∫ ˝:ƒø±Íª∫≥Â«¯¥Û–°–°”⁄◊ ‘¥
-	int copyTo( LPVOID lpDestination, DWORD dwDestinationSize ) const;
+    bool load( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) );
+    bool load( LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
+    {
+        return load( GetModuleHandle(NULL), lpszName, lpType, wLanguage );
+    }
+    bool load( HMODULE hModule, UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
+    {
+        return load( hModule, MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
+    }
+    bool load( UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
+    {
+        return load( GetModuleHandle(NULL), nResourceId, lpType, wLanguage );
+    }
+    void free();
+    // Êã∑Ë¥ùÂà∞ÁõÆÊ†áÁºìÂÜ≤Âå∫,ËøîÂõûÁõÆÊ†áÁºìÂÜ≤Âå∫‰∏éËµÑÊ∫êÁöÑÂ§ßÂ∞èÂ∑Æ
+    // 0:ÊÅ∞Â•ΩÁõ∏Âêå,Ê≠£Êï∞:ÁõÆÊ†áÁºìÂÜ≤Âå∫Â§ßÂ∞èÂ§ß‰∫éËµÑÊ∫ê,Ë¥üÊï∞:ÁõÆÊ†áÁºìÂÜ≤Âå∫Â§ßÂ∞èÂ∞è‰∫éËµÑÊ∫ê
+    int copyTo( LPVOID lpDestination, DWORD dwDestinationSize ) const;
 
-	LPCVOID getData() const { return _lpData; }
-	DWORD getSize() const { return _dwSize; }
+    LPCVOID getData() const { return _lpData; }
+    DWORD getSize() const { return _dwSize; }
 
-	operator bool() const { return _lpData != NULL; }
+    operator bool() const { return _lpData != NULL; }
+protected:
+    void _construct();
+    void _construct( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) );
 private:
-	HRSRC _hRSRC;
-	HGLOBAL _hResMemBlock;
-	HMODULE _hModule;
-	DWORD _dwSize;
-	LPCVOID _lpData;
-	Resource( Resource const & );
-	Resource & operator = ( Resource const & );
+    HRSRC _hRSRC;
+    HGLOBAL _hResMemBlock;
+    HMODULE _hModule;
+    DWORD _dwSize;
+    LPCVOID _lpData;
+    Resource( Resource const & );
+    Resource & operator = ( Resource const & );
 };
 
 } // namespace winplus

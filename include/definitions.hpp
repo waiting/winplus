@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose: WinPlus¿âÏà¹Ø¶¨Òå
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose: WinPlusåº“ç›¸å…³å®šä¹‰
 // author:  WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -25,34 +25,35 @@
 #define _WIN32_WINNT 0x0501
 #endif
 
-// ÒÔÏÂÊÇÓĞDLLºÍÎŞDLLµÄ¼æÈİĞÔºê
-// µ±´æÔÚDLLÊ±(Éú³ÉDLL»òÕßÊ¹ÓÃDLL), WINPLUS_DLL_EXPORTSºêÓÃÓÚ¾ö¶¨ÊÇµ¼³ö(Éú³É)»¹ÊÇµ¼Èë(Ê¹ÓÃ).
-// WINPLUS_APIÓÃÓÚ¾ö¶¨µ÷ÓÃÔ¼¶¨, ÓĞdllÊ±Îªstdcall, ÎŞdllÊ±ÎªÄ¬ÈÏ.
-// µ±ÎŞDLLÊ±, ºêÎª¿Õ°×, ÓÃÒÔ¼æÈİ.
-#ifndef	EXIST_WINPLUS_DLL
+// ä»¥ä¸‹æ˜¯æœ‰DLLå’Œæ— DLLçš„å…¼å®¹æ€§å®
+// å½“å­˜åœ¨DLLæ—¶(ç”ŸæˆDLLæˆ–è€…ä½¿ç”¨DLL), WINPLUS_DLL_EXPORTSå®ç”¨äºå†³å®šæ˜¯å¯¼å‡º(ç”Ÿæˆ)è¿˜æ˜¯å¯¼å…¥(ä½¿ç”¨).
+// WINPLUS_APIç”¨äºå†³å®šè°ƒç”¨çº¦å®š, æœ‰dllæ—¶ä¸ºstdcall, æ— dllæ—¶ä¸ºé»˜è®¤.
+// å½“æ— DLLæ—¶, å®ä¸ºç©ºç™½, ç”¨ä»¥å…¼å®¹.
+#ifndef WINPLUS_DLL_USE
 
-	#define	WINPLUS_DLL
-	#define WINPLUS_API
+    #define WINPLUS_DLL
+    #define WINPLUS_API
 
 #else
 
-	#ifdef	WINPLUS_DLL_EXPORTS
-		#define	WINPLUS_DLL	__declspec(dllexport)
-	#else
-		#define	WINPLUS_DLL	__declspec(dllimport)
-	#endif
+    #pragma warning( disable: 4251 )
+    #ifdef  WINPLUS_DLL_EXPORTS
+        #define WINPLUS_DLL __declspec(dllexport)
+    #else
+        #define WINPLUS_DLL __declspec(dllimport)
+    #endif
 
-	#define WINPLUS_API __stdcall
+    #define WINPLUS_API __stdcall
 
 #endif
 
-#define WINPLUS_DECL(ret) WINPLUS_DLL ret WINPLUS_API
-#define WINPLUS_IMPL(ret) ret WINPLUS_API
+#define WINPLUS_FUNC_DECL(ret) WINPLUS_DLL ret WINPLUS_API
+#define WINPLUS_FUNC_IMPL(ret) ret WINPLUS_API
 
 // win32 platform --------------------------------------------------------
 #include <windows.h>
 #include <comdef.h> // com wrapper
-#include <shlobj.h> // shell Íâ¿Ç
+#include <shlobj.h> // shell å¤–å£³
 #include <gdiplus.h> // gdi+
 //#include <dsclient.h> // DsClient
 // cpp stl ---------------------------------------------------------------
@@ -71,13 +72,13 @@ namespace winplus
 
 #ifdef NOMINMAX
 
-	#ifndef max
-		#define max(a,b)            (((a) > (b)) ? (a) : (b))
-	#endif
+    #ifndef max
+        #define max(a,b)            (((a) > (b)) ? (a) : (b))
+    #endif
 
-	#ifndef min
-		#define min(a,b)            (((a) < (b)) ? (a) : (b))
-	#endif
+    #ifndef min
+        #define min(a,b)            (((a) < (b)) ? (a) : (b))
+    #endif
 
 #endif
 
@@ -85,14 +86,14 @@ namespace winplus
 #define countof(arr) ( sizeof(arr) / sizeof(arr[0]) )
 #endif
 
-// »º³åÇø×ª»»Îªansi_string¶ş½øÖÆ´®
+// ç¼“å†²åŒºè½¬æ¢ä¸ºansi_stringäºŒè¿›åˆ¶ä¸²
 #define BufferToAnsiString( buf, size ) AnsiString( (char const *)(buf), (size_t)(size) )
 
 // if pointer
 #define IfPTR(ptr) if( (ptr) != NULL ) (ptr)
 #define AssignPTR(ptr) if( (ptr) != NULL ) *(ptr)
 
-// ÀàĞÍÖ§³Ö --------------------------------------------------------------
+// ç±»å‹æ”¯æŒ --------------------------------------------------------------
 
 typedef std::basic_string<CHAR> AnsiString;
 typedef AnsiString LocalString;
@@ -134,181 +135,182 @@ typedef __int64 longlong;
 typedef unsigned char byte;
 #endif
 
-// »ìºÏÌå£¬ÄÜ±íÊ¾¶àÖÖÀàĞÍµÄÖµ£¬MT_ARRAYºÍMTBINARYÔİ²»Ö§³Ö ----------------
+// æ··åˆä½“ï¼Œèƒ½è¡¨ç¤ºå¤šç§ç±»å‹çš„å€¼ï¼ŒMT_ARRAYå’ŒMTBINARYæš‚ä¸æ”¯æŒ ----------------
 enum MixedType
 {
-	MT_NULL,
-	MT_BOOLEAN,
-	MT_BYTE,
-	MT_SHORT, MT_USHORT,
-	MT_INT, MT_UINT,
-	MT_LONG, MT_ULONG,
-	MT_FLOAT,
-	MT_INT64, MT_UINT64,
-	MT_DOUBLE,
-	MT_STRING, MT_UNICODE,
-	MT_ARRAY,
-	MT_BINARY,
+    MT_NULL,
+    MT_BOOLEAN,
+    MT_BYTE,
+    MT_SHORT, MT_USHORT,
+    MT_INT, MT_UINT,
+    MT_LONG, MT_ULONG,
+    MT_FLOAT,
+    MT_INT64, MT_UINT64,
+    MT_DOUBLE,
+    MT_STRING, MT_UNICODE,
+    MT_ARRAY,
+    MT_BINARY,
 };
 
-/* »ìºÏÖµ½á¹¹Ìå */
+/* æ··åˆå€¼ç»“æ„ä½“ */
 struct MIXED
 {
-	MixedType type;
-	uint buf_size;  // µ±ÊÇÖ¸ÕëÊ±£¬´ËÓò±íÊ¾»º³åÇø³¤¶È
-	union
-	{
-		bool boolVal;
-		byte btVal;
-		short shVal;
-		ushort ushVal;
-		int iVal;
-		uint uiVal;
-		long lVal;
-		ulong ulVal;
-		float fltVal;
-		int64 i64Val;
-		uint64 ui64Val;
-		double dblVal;
-		struct // ×Ö·û´®
-		{
-			int str_length; // ×Ö·û´®³¤¶È£º×Ö·ûÊı
-			union
-			{
-				PSTR pStr;
-				PWSTR pWStr;
-			};
-		};
-		struct // Êı×é
-		{
-			int elements_count;
-			struct MIXED * pArray;
-		};
-		byte * pBinary; // ¶ş½øÖÆÊı¾İ
-	};
+    MixedType type;
+    uint buf_size;  // å½“æ˜¯æŒ‡é’ˆæ—¶ï¼Œæ­¤åŸŸè¡¨ç¤ºç¼“å†²åŒºé•¿åº¦
+    union
+    {
+        bool boolVal;
+        byte btVal;
+        short shVal;
+        ushort ushVal;
+        int iVal;
+        uint uiVal;
+        long lVal;
+        ulong ulVal;
+        float fltVal;
+        int64 i64Val;
+        uint64 ui64Val;
+        double dblVal;
+        struct // å­—ç¬¦ä¸²
+        {
+            int str_length; // å­—ç¬¦ä¸²é•¿åº¦ï¼šå­—ç¬¦æ•°
+            union
+            {
+                PSTR pStr;
+                PWSTR pWStr;
+            };
+        };
+        struct // æ•°ç»„
+        {
+            int elements_count;
+            struct MIXED * pArray;
+        };
+        byte * pBinary; // äºŒè¿›åˆ¶æ•°æ®
+    };
 };
 
-/* »ìºÏÀàĞÍ */
-class Mixed : public MIXED
+/* æ··åˆç±»å‹ */
+class WINPLUS_DLL Mixed : public MIXED
 {
 public:
-	Mixed( void );
-	Mixed( AnsiString const & str ); // ¶à×Ö½Ú×Ö·û´®
-	Mixed( UnicodeString const & str ); // Unicode×Ö·û´®
-	Mixed( PCSTR str ); // ¶à×Ö½Ú×Ö·û´®
-	Mixed( PCWSTR str ); // Unicode×Ö·û´®
-	Mixed( bool boolVal );
-	Mixed( byte btVal );
-	Mixed( short shVal );
-	Mixed( ushort ushVal );
-	Mixed( int iVal );
-	Mixed( uint uiVal );
-	Mixed( long lVal );
-	Mixed( ulong ulVal );
-	Mixed( float fltVal );
-	Mixed( int64 i64Val );
-	Mixed( uint64 ui64Val );
-	Mixed( double dblVal );
-	Mixed( Mixed const & other );
-	~Mixed( void );
-	Mixed & operator = ( Mixed const & other );
-	// ÀàĞÍ×ª»»
-	operator AnsiString( void ) const;
-	operator UnicodeString( void ) const;
-	operator bool( void ) const;
-	operator byte( void ) const;
-	operator short( void ) const;
-	operator ushort( void ) const;
-	operator int( void ) const;
-	operator uint( void ) const;
-	operator long( void ) const;
-	operator ulong( void ) const;
-	operator float( void ) const;
-	operator int64( void ) const;
-	operator uint64( void ) const;
-	operator double( void ) const;
+    Mixed( void );
+    Mixed( AnsiString const & str ); // å¤šå­—èŠ‚å­—ç¬¦ä¸²
+    Mixed( UnicodeString const & str ); // Unicodeå­—ç¬¦ä¸²
+    Mixed( PCSTR str ); // å¤šå­—èŠ‚å­—ç¬¦ä¸²
+    Mixed( PCWSTR str ); // Unicodeå­—ç¬¦ä¸²
+    Mixed( bool boolVal );
+    Mixed( byte btVal );
+    Mixed( short shVal );
+    Mixed( ushort ushVal );
+    Mixed( int iVal );
+    Mixed( uint uiVal );
+    Mixed( long lVal );
+    Mixed( ulong ulVal );
+    Mixed( float fltVal );
+    Mixed( int64 i64Val );
+    Mixed( uint64 ui64Val );
+    Mixed( double dblVal );
+    Mixed( Mixed const & other );
+    ~Mixed( void );
+    Mixed & operator = ( Mixed const & other );
+    // ç±»å‹è½¬æ¢
+    operator AnsiString( void ) const;
+    operator UnicodeString( void ) const;
+    operator bool( void ) const;
+    operator byte( void ) const;
+    operator short( void ) const;
+    operator ushort( void ) const;
+    operator int( void ) const;
+    operator uint( void ) const;
+    operator long( void ) const;
+    operator ulong( void ) const;
+    operator float( void ) const;
+    operator int64( void ) const;
+    operator uint64( void ) const;
+    operator double( void ) const;
 protected:
-	void free( void );
-	void assign( PCSTR str );
-	void assign( PCWSTR str );
-	void assign( bool boolVal );
-	void assign( byte btVal );
-	void assign( short shVal );
-	void assign( ushort ushVal );
-	void assign( int iVal );
-	void assign( uint uiVal );
-	void assign( long lVal );
-	void assign( ulong ulVal );
-	void assign( float fltVal );
-	void assign( int64 i64Val );
-	void assign( uint64 ui64Val );
-	void assign( double dblVal );
+    void free( void );
+    void assign( PCSTR str );
+    void assign( PCWSTR str );
+    void assign( bool boolVal );
+    void assign( byte btVal );
+    void assign( short shVal );
+    void assign( ushort ushVal );
+    void assign( int iVal );
+    void assign( uint uiVal );
+    void assign( long lVal );
+    void assign( ulong ulVal );
+    void assign( float fltVal );
+    void assign( int64 i64Val );
+    void assign( uint64 ui64Val );
+    void assign( double dblVal );
+
+    void _construct();
 };
 
-// map Ö§³Ö --------------------------------------------------------------
-/* ¼ì²âmapÖĞÊÇ·ñÓĞ¸Ã¼üµÄÖµ */
+// map æ”¯æŒ --------------------------------------------------------------
+/* æ£€æµ‹mapä¸­æ˜¯å¦æœ‰è¯¥é”®çš„å€¼ */
 template < typename _MAP, typename _KEY >
 inline bool isset( _MAP const & m, _KEY const & k )
 {
-	return m.find(k) != m.end();
+    return m.find(k) != m.end();
 }
 
-// ×Ö·û´®×ª»»µ½64Î»ÕûÊı --------------------------------------------------
+// å­—ç¬¦ä¸²è½¬æ¢åˆ°64ä½æ•´æ•° --------------------------------------------------
+WINPLUS_FUNC_DECL(int64) StrToInt64( AnsiString const & num_str, int ibase );
+WINPLUS_FUNC_DECL(uint64) StrToUint64( AnsiString const & num_str, int ibase );
 
-int64 StrToInt64( AnsiString const & num_str, int ibase );
-uint64 StrToUint64( AnsiString const & num_str, int ibase );
-
-/* Ëæ»úÊı,Ëæ»ú²úÉún1~n2µÄÊı×Ö. °üÀ¨n1,n2±¾Éí */
-int Random( int n1, int n2 );
-// Ä£°åÔª±à³ÌÖ§³Ö --------------------------------------------------------
-/* µ÷ÓÃÒ»¸ö·µ»ØvoidµÄº¯Êı»òº¯Êı¶ÔÏó,·µ»ØÒ»¸öÊı×Ö
-   Í¨³£ÊÇÎªÁËÔÚ³õÊ¼»¯Óï¾äÖĞ·½±ãµ÷ÓÃ·µ»ØvoidµÄº¯Êı */
+/* éšæœºæ•°,éšæœºäº§ç”Ÿn1~n2çš„æ•°å­—. åŒ…æ‹¬n1,n2æœ¬èº« */
+WINPLUS_FUNC_DECL(int) Random( int n1, int n2 );
+// æ¨¡æ¿å…ƒç¼–ç¨‹æ”¯æŒ --------------------------------------------------------
+/* è°ƒç”¨ä¸€ä¸ªè¿”å›voidçš„å‡½æ•°æˆ–å‡½æ•°å¯¹è±¡,è¿”å›ä¸€ä¸ªæ•°å­—
+   é€šå¸¸æ˜¯ä¸ºäº†åœ¨åˆå§‹åŒ–è¯­å¥ä¸­æ–¹ä¾¿è°ƒç”¨è¿”å›voidçš„å‡½æ•° */
 template < typename FN >
 int VoidReturnInt( FN fn )
 {
-	fn();
-	return 1;
+    fn();
+    return 1;
 }
 template < typename FN, typename ARG1 >
 int VoidReturnInt( FN fn, ARG1 a1 )
 {
-	fn(a1);
-	return 1;
+    fn(a1);
+    return 1;
 }
 template < typename FN, typename ARG1, typename ARG2 >
 int VoidReturnInt( FN fn, ARG1 a1, ARG2 a2 )
 {
-	fn( a1, a2 );
-	return 1;
+    fn( a1, a2 );
+    return 1;
 }
 template < typename FN, typename ARG1, typename ARG2, typename ARG3 >
 int VoidReturnInt( FN fn, ARG1 a1, ARG2 a2, ARG3 a3 )
 {
-	fn( a1, a2, a3 );
-	return 1;
+    fn( a1, a2, a3 );
+    return 1;
 }
 
 
-/* ¶ş½øÖÆÊı,±àÒëÊ±¼ÆËã, 1¿ªÍ·(»ùÓÚ10½øÖÆ) */
+/* äºŒè¿›åˆ¶æ•°,ç¼–è¯‘æ—¶è®¡ç®—, 1å¼€å¤´(åŸºäº10è¿›åˆ¶) */
 template < uint64 n > struct Bin1
 {
-	enum { val = ( Bin1< n / 10 >::val  << 1 ) + n % 10 };
+    enum { val = ( Bin1< n / 10 >::val  << 1 ) + n % 10 };
 };
 
 template <> struct Bin1<0>
 {
-	enum { val = 0 };
+    enum { val = 0 };
 };
 
-/* ¶ş½øÖÆÊı,±àÒëÊ±¼ÆËã, 0¿ªÍ·(»ùÓÚ8½øÖÆ) */
+/* äºŒè¿›åˆ¶æ•°,ç¼–è¯‘æ—¶è®¡ç®—, 0å¼€å¤´(åŸºäº8è¿›åˆ¶) */
 template < uint64 n > struct Bin0
 {
-	enum { val = ( Bin0< n / 8 >::val  << 1 ) + n % 8 };
+    enum { val = ( Bin0< n / 8 >::val  << 1 ) + n % 8 };
 };
 
 template <> struct Bin0<0>
 {
-	enum { val = 0 };
+    enum { val = 0 };
 };
 
 } // namespace winplus

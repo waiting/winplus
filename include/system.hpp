@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose: ÏµÍ³»·¾³Ïà¹Ø
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose: ç³»ç»Ÿç¯å¢ƒç›¸å…³
 // author:  WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -14,80 +14,80 @@ namespace winplus
 {
 
 //////////////////////////////////////////////////
-// Ò»Ğ©³£Á¿
+// ä¸€äº›å¸¸é‡
 //////////////////////////////////////////////////
 
-/* Ä¿Â¼·Ö¸î·û */
-extern String const dirSep;// = TEXT("\\");
-extern String const dirSepUnix;// = TEXT("/");
-extern String const dirSepMac;// = TEXT("/");
+/* ç›®å½•åˆ†å‰²ç¬¦ */
+extern WINPLUS_DLL String const dirSep;// = TEXT("\\");
+extern WINPLUS_DLL String const dirSepUnix;// = TEXT("/");
+extern WINPLUS_DLL String const dirSepMac;// = TEXT("/");
 
-/* windowsĞĞ·Ö¸î·û */
-extern String const lineSep;// = TEXT("\r\n");
-/* unixĞĞ·Ö¸î·û */
-extern String const lineSepUnix;// = TEXT("\n");
-/* macĞĞ·Ö¸î·û */
-extern String const lineSepMac;// = TEXT("\r");
+/* windowsè¡Œåˆ†å‰²ç¬¦ */
+extern WINPLUS_DLL String const lineSep;// = TEXT("\r\n");
+/* unixè¡Œåˆ†å‰²ç¬¦ */
+extern WINPLUS_DLL String const lineSepUnix;// = TEXT("\n");
+/* macè¡Œåˆ†å‰²ç¬¦ */
+extern WINPLUS_DLL String const lineSepMac;// = TEXT("\r");
 
-/* ÅĞ¶ÏÒ»¸ö×Ö·û´®ÊÇ·ñ¿ÉÕ¹¿ª£¬¼´ÊÇ·ñ°üº¬%varname% */
-bool IsExpandString( String const & str );
-/* Õ¹¿ª×Ö·û´®ÖĞ´æÔÚµÄ'%±äÁ¿%' */
-String ExpandVars( String const & str );
+/* åˆ¤æ–­ä¸€ä¸ªå­—ç¬¦ä¸²æ˜¯å¦å¯å±•å¼€ï¼Œå³æ˜¯å¦åŒ…å«%varname% */
+WINPLUS_FUNC_DECL(bool) IsExpandString( String const & str );
+/* å±•å¼€å­—ç¬¦ä¸²ä¸­å­˜åœ¨çš„'%å˜é‡%' */
+WINPLUS_FUNC_DECL(String) ExpandVars( String const & str );
 
-/* Í¨¹ıHWND»ñµÃ³ÌĞòÂ·¾¶ºÍ½ø³ÌID */
-String GetAppPathFromHWND( HWND hWnd, DWORD * processId = NULL );
-/* ·µ»Øµ±Ç°¹¤×÷Ä¿Â¼(Ä©Î²²»º¬Ä¿Â¼·Ö¸ô·û) */
-String GetCurrentDir( void );
-/* ·µ»ØÄ£¿éÂ·¾¶(Ä©Î²²»º¬Ä¿Â¼·Ö¸ô·û)£¬Êä³öÄ£¿éÎÄ¼şÃû */
-String ModulePath( HMODULE module = NULL, String * fileName = NULL );
-/* »ñÈ¡Â·¾¶Ãû(Ä©Î²²»º¬Ä¿Â¼·Ö¸ô·û) */
-String FilePath( String const & fullPath, String * fileName = NULL );
-/* »ñÈ¡Ò»¸öÎÄ¼şÃûµÄ±êÌâºÍÀ©Õ¹Ãû */
-String FileTitle( String const & fileName, String * extName = NULL );
-/* ÅĞ¶ÏÊÇ·ñÊÇÒ»¸öÄ¿Â¼ */
-bool IsDir( String const & path );
-/* »ñÈ¡ÎÄ¼ş´óĞ¡ */
-uint64 FileSize( String const & fullpath );
+/* é€šè¿‡HWNDè·å¾—ç¨‹åºè·¯å¾„å’Œè¿›ç¨‹ID */
+WINPLUS_FUNC_DECL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId = NULL );
+/* è¿”å›å½“å‰å·¥ä½œç›®å½•(æœ«å°¾ä¸å«ç›®å½•åˆ†éš”ç¬¦) */
+WINPLUS_FUNC_DECL(String) GetCurrentDir( void );
+/* è¿”å›æ¨¡å—è·¯å¾„(æœ«å°¾ä¸å«ç›®å½•åˆ†éš”ç¬¦)ï¼Œè¾“å‡ºæ¨¡å—æ–‡ä»¶å */
+WINPLUS_FUNC_DECL(String) ModulePath( HMODULE module = NULL, String * fileName = NULL );
+/* è·å–è·¯å¾„å(æœ«å°¾ä¸å«ç›®å½•åˆ†éš”ç¬¦) */
+WINPLUS_FUNC_DECL(String) FilePath( String const & fullPath, String * fileName = NULL );
+/* è·å–ä¸€ä¸ªæ–‡ä»¶åçš„æ ‡é¢˜å’Œæ‰©å±•å */
+WINPLUS_FUNC_DECL(String) FileTitle( String const & fileName, String * extName = NULL );
+/* åˆ¤æ–­æ˜¯å¦æ˜¯ä¸€ä¸ªç›®å½• */
+WINPLUS_FUNC_DECL(bool) IsDir( String const & path );
+/* è·å–æ–‡ä»¶å¤§å° */
+WINPLUS_FUNC_DECL(uint64) FileSize( String const & fullpath );
 
-/* Â·¾¶·Ö¸ô·ûÕûÀí */
-String PathWithSep( String const & path );
-String PathNoSep( String const & path );
+/* è·¯å¾„åˆ†éš”ç¬¦æ•´ç† */
+WINPLUS_FUNC_DECL(String) PathWithSep( String const & path );
+WINPLUS_FUNC_DECL(String) PathNoSep( String const & path );
 
-/* »ñµÃ³ÌĞòµÄÃüÁîĞĞ²ÎÊı */
-INT CommandArguments( StringArray * arr );
-/* Ê¹ÄÜ¹Ø»ú */
-bool ShutdownPrivilege( bool enable );
+/* è·å¾—ç¨‹åºçš„å‘½ä»¤è¡Œå‚æ•° */
+WINPLUS_FUNC_DECL(INT) CommandArguments( StringArray * arr );
+/* ä½¿èƒ½å…³æœº */
+WINPLUS_FUNC_DECL(bool) ShutdownPrivilege( bool enable );
 
-/* »ñµÃÃèÊöNT°æ±¾µÄ×Ö·û´® */
-String GetNtVersion( void );
-/* »ñµÃÃèÊöÏµÍ³°æ±¾µÄ×Ö·û´® */
-String GetOsVersion( void );
-/* »ñµÃ×ÔÉíÄ£¿é°æ±¾ºÅ */
-String GetSelfModuleVersion( void );
-/* »ñµÃÄ£¿é°æ±¾ºÅ */
-String GetModuleVersion( String const & moduleFile );
+/* è·å¾—æè¿°NTç‰ˆæœ¬çš„å­—ç¬¦ä¸² */
+WINPLUS_FUNC_DECL(String) GetNtVersion( void );
+/* è·å¾—æè¿°ç³»ç»Ÿç‰ˆæœ¬çš„å­—ç¬¦ä¸² */
+WINPLUS_FUNC_DECL(String) GetOsVersion( void );
+/* è·å¾—è‡ªèº«æ¨¡å—ç‰ˆæœ¬å· */
+WINPLUS_FUNC_DECL(String) GetSelfModuleVersion( void );
+/* è·å¾—æ¨¡å—ç‰ˆæœ¬å· */
+WINPLUS_FUNC_DECL(String) GetModuleVersion( String const & moduleFile );
 
 
-// ÎÄ¼ş±éÀúËÑË÷
+// æ–‡ä»¶éå†æœç´¢
 
 ////////////////////////////////////////////////
-// »ñÈ¡ÎÄ¼ş¼ĞÖĞµÄÎÄ¼şºÍ×ÓÎÄ¼ş¼Ğ
+// è·å–æ–‡ä»¶å¤¹ä¸­çš„æ–‡ä»¶å’Œå­æ–‡ä»¶å¤¹
 // sort_type:
-// 0 - ²»ÅÅĞò, 1 - ÅÅĞò, 2 - ÄæĞò
+// 0 - ä¸æ’åº, 1 - æ’åº, 2 - é€†åº
 ////////////////////////////////////////////////
-void FolderData( String const & path, StringArray * files, StringArray * sub_folders, int sort_type = 0 );
+WINPLUS_FUNC_DECL(void) FolderData( String const & path, StringArray * files, StringArray * sub_folders, int sort_type = 0 );
 ////////////////////////////////////////////////
-// ÔÚÖ¸¶¨Â·¾¶ÏÂÃ¶¾ÙÖ¸¶¨À©Õ¹ÃûµÄÎÄ¼ş
-// files: ½«ÊÕµ½ÎÄ¼şµÄÍêÕûÂ·¾¶Êı×é
-// is_recursion: ÊÇ·ñµİ¹éËÑË÷
+// åœ¨æŒ‡å®šè·¯å¾„ä¸‹æšä¸¾æŒ‡å®šæ‰©å±•åçš„æ–‡ä»¶
+// files: å°†æ”¶åˆ°æ–‡ä»¶çš„å®Œæ•´è·¯å¾„æ•°ç»„
+// is_recursion: æ˜¯å¦é€’å½’æœç´¢
 ////////////////////////////////////////////////
-int EnumFiles( String const & path, StringArray const & extnames, StringArray * files, bool is_recursion = true );
+WINPLUS_FUNC_DECL(int) EnumFiles( String const & path, StringArray const & extnames, StringArray * files, bool is_recursion = true );
 
 //////////////////////////////////////////////////////////////////////////
 
-/* ¹²ÏíÄÚ´æ(»ùÓÚFileMapping)
-   ¹²ÏíÄÚ´æÊôÓÚWindowsÄÚºË¶ÔÏó,¹Ê¿ÉÒÔ¿ç½ø³Ì·ÃÎÊ
-   ³£ÓÃÓÚ½ø³Ì¼äÍ¨Ñ¶ */
+/* å…±äº«å†…å­˜(åŸºäºFileMapping)
+   å…±äº«å†…å­˜å±äºWindowså†…æ ¸å¯¹è±¡,æ•…å¯ä»¥è·¨è¿›ç¨‹è®¿é—®
+   å¸¸ç”¨äºè¿›ç¨‹é—´é€šè®¯ */
 template < typename _Ty > class SharedMemory
 {
 public:
@@ -153,15 +153,15 @@ private:
     SharedMemory & operator = ( SharedMemory const & );
 };
 
-/* ÃüÁîĞĞÀà
-   ÓÃÓÚ´ÓÃüÁîĞĞÖĞÌáÈ¡Ö¸¶¨²ÎÊı */
-class CommandLine
+/* å‘½ä»¤è¡Œç±»
+   ç”¨äºä»å‘½ä»¤è¡Œä¸­æå–æŒ‡å®šå‚æ•° */
+class WINPLUS_DLL CommandLine
 {
     StringArray _args;
     String _paramPrefix;
-    // ²ÎÊıÃû±È½Ï
+    // å‚æ•°åæ¯”è¾ƒ
     bool compareEqv( String const & name, String const & arg ) const;
-    // ÊÇ·ñÊÇ²ÎÊı
+    // æ˜¯å¦æ˜¯å‚æ•°
     bool isParamName( String const & arg ) const;
 public:
     CommandLine( String const & paramPrefix = TEXT("-/") );
@@ -171,7 +171,7 @@ public:
     bool includeValue( String const & value ) const;
 };
 
-/* DLL¶¯Ì¬ÔØÈëÆ÷ */
+/* DLLåŠ¨æ€è½½å…¥å™¨ */
 class DllLoader
 {
 public:
@@ -197,7 +197,7 @@ private:
     DllLoader & operator = ( DllLoader const & );
 };
 
-/* Dllº¯Êı¶¯Ì¬µ÷ÓÃ */
+/* Dllå‡½æ•°åŠ¨æ€è°ƒç”¨ */
 template < typename _PfnType >
 class DllFunction
 {

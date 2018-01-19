@@ -1,9 +1,11 @@
 Windows实用C++工具库 - WinPlus
-=======================
+============================
 
 WinPlus是一个轻量级的C++库，提供一些windows程序开发中的常用功能。
+
+最低编译器：VS2010
 相关模块:
->
+
 	compoundfile - 复合文件相关
 	console      - 控制台相关
 	definitions  - 基本类型定义，系统头文件包含
@@ -19,4 +21,3 @@ WinPlus是一个轻量级的C++库，提供一些windows程序开发中的常用
 	winctrl      - 窗口控件相关
 	winplus      - 主头文件，包含winplus全部头文件
 	wordslib     - 词库相关
-

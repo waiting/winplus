@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose: ×Ö´®Ïà¹Ø
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose: å­—ä¸²ç›¸å…³
 // author:  WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,230 +13,232 @@
 namespace winplus
 {
 
-/* ·µ»ØÒ»¸ö±¾µØ×Ö·û´®ÀïÓĞ¶àÉÙ¸öÊµ¼ÊµÄ×Ö·û(by local CodePage),ÓÃÓÚmbstowcs */
-UINT LocalCharsCount( LocalString const & local );
-/* ·µ»ØÒ»¸öunicode×Ö·û´®×îÉÙ³¤¶È(by local CodePage),ÓÃÓÚwcstombs */
-UINT UnicodeMinLength( UnicodeString const & unicode );
-/* Unicode×ª»»µ½±¾µØAnsi */
-LocalString UnicodeToLocal( UnicodeString const & unicode );
-/* ±¾µØANSI×ªµ½Unicode */
-UnicodeString LocalToUnicode( LocalString const & local );
+/* è¿”å›ä¸€ä¸ªæœ¬åœ°å­—ç¬¦ä¸²é‡Œæœ‰å¤šå°‘ä¸ªå®é™…çš„å­—ç¬¦(by local CodePage),ç”¨äºmbstowcs */
+WINPLUS_FUNC_DECL(UINT) LocalCharsCount( LocalString const & local );
+/* è¿”å›ä¸€ä¸ªunicodeå­—ç¬¦ä¸²æœ€å°‘é•¿åº¦(by local CodePage),ç”¨äºwcstombs */
+WINPLUS_FUNC_DECL(UINT) UnicodeMinLength( UnicodeString const & unicode );
+/* Unicodeè½¬æ¢åˆ°æœ¬åœ°Ansi */
+WINPLUS_FUNC_DECL(LocalString) UnicodeToLocal( UnicodeString const & unicode );
+/* æœ¬åœ°ANSIè½¬åˆ°Unicode */
+WINPLUS_FUNC_DECL(UnicodeString) LocalToUnicode( LocalString const & local );
 
-/* ¼æÈİ×Ö·û´®ÓëUnicode,Local×Ö·û´®Ïà»¥×ª»» */
-String LocalToString( LocalString const & local );
-String UnicodeToString( UnicodeString const & unicode );
-LocalString StringToLocal( String const & str );
-UnicodeString StringToUnicode( String const & str );
+/* å…¼å®¹å­—ç¬¦ä¸²ä¸Unicode,Localå­—ç¬¦ä¸²ç›¸äº’è½¬æ¢ */
+WINPLUS_FUNC_DECL(String) LocalToString( LocalString const & local );
+WINPLUS_FUNC_DECL(String) UnicodeToString( UnicodeString const & unicode );
+WINPLUS_FUNC_DECL(LocalString) StringToLocal( String const & str );
+WINPLUS_FUNC_DECL(UnicodeString) StringToUnicode( String const & str );
 
-/* UTF8Óë¼æÈİ´®Ö®¼äµÄ×ª»» */
-String Utf8ToString( AnsiString const & utf8 );
-AnsiString StringToUtf8( String const & str );
+/* UTF8ä¸å…¼å®¹ä¸²ä¹‹é—´çš„è½¬æ¢ */
+WINPLUS_FUNC_DECL(String) Utf8ToString( AnsiString const & utf8 );
+WINPLUS_FUNC_DECL(AnsiString) StringToUtf8( String const & str );
 
-/* ·Ö¸î×Ö·û´® */
-INT StrSplit( String const & str, String const & delim, StringArray * arr );
-INT StrSplit( AnsiString const & str, AnsiString const & delim, AnsiStringArray * arr );
-INT StrSplit( UnicodeString const & str, UnicodeString const & delim, UnicodeStringArray * arr );
+/* åˆ†å‰²å­—ç¬¦ä¸² */
+WINPLUS_FUNC_DECL(INT) StrSplit( String const & str, String const & delim, StringArray * arr );
+WINPLUS_FUNC_DECL(INT) StrSplit( AnsiString const & str, AnsiString const & delim, AnsiStringArray * arr );
+WINPLUS_FUNC_DECL(INT) StrSplit( UnicodeString const & str, UnicodeString const & delim, UnicodeStringArray * arr );
 
-StringArray StrSplit( String const & str, String const & delim );
-/* Ê¹ÓÃ¶ººÅ·Ö¸î×Ö·û´® */
+WINPLUS_FUNC_DECL(StringArray) StrSplit( String const & str, String const & delim );
+/* ä½¿ç”¨é€—å·åˆ†å‰²å­—ç¬¦ä¸² */
 inline StringArray StrSplitComma( String const & str )
 {
-	return StrSplit( str, TEXT(",") );
+    return StrSplit( str, TEXT(",") );
 }
-/* Ê¹ÓÃ·ÖºÅ·Ö¸î×Ö·û´® */
+/* ä½¿ç”¨åˆ†å·åˆ†å‰²å­—ç¬¦ä¸² */
 inline StringArray StrSplitSemicolon( String const & str )
 {
-	return StrSplit( str, TEXT(";") );
+    return StrSplit( str, TEXT(";") );
 }
-String StrJoin( String const & delim, StringArray const & arr );
-String StrInsert( String const & str, INT start, INT end, String const & insert );
-String FormatExV( INT cch, LPCTSTR fmt, va_list args );
-String FormatEx( INT cch, LPCTSTR fmt, ... );
-String Format( LPCTSTR fmt, ... );
-// È¥µô×óÓÒÁ½¶ËµÄ¿Õ°××Ö·û
-AnsiString _StrTrim( AnsiString const & str );
-UnicodeString _StrTrim( UnicodeString const & str );
-String _StrTrim( String const & str );
+WINPLUS_FUNC_DECL(String) StrJoin( String const & delim, StringArray const & arr );
+WINPLUS_FUNC_DECL(String) StrInsert( String const & str, INT start, INT end, String const & insert );
+WINPLUS_DLL String FormatExV( INT cch, LPCTSTR fmt, va_list args );
+WINPLUS_DLL String FormatEx( INT cch, LPCTSTR fmt, ... );
+WINPLUS_DLL String Format( LPCTSTR fmt, ... );
+// å»æ‰å·¦å³ä¸¤ç«¯çš„ç©ºç™½å­—ç¬¦
+WINPLUS_FUNC_DECL(AnsiString) _StrTrim( AnsiString const & str );
+WINPLUS_FUNC_DECL(UnicodeString) _StrTrim( UnicodeString const & str );
+WINPLUS_FUNC_DECL(String) _StrTrim( String const & str );
 
-/* ÔØÈë×Ö·û´®×ÊÔ´ */
-UnicodeString LoadStringExW( HMODULE module, UINT id );
-String LoadStringEx( HMODULE module, UINT id );
-/* ²ÉÓÃGetModuleHandle(NULL)Ö¸¶¨Ä£¿é */
-String LoadString( UINT id );
+/* è½½å…¥å­—ç¬¦ä¸²èµ„æº */
+WINPLUS_FUNC_DECL(UnicodeString) LoadStringExW( HMODULE module, UINT id );
+WINPLUS_FUNC_DECL(String) LoadStringEx( HMODULE module, UINT id );
+/* é‡‡ç”¨GetModuleHandle(NULL)æŒ‡å®šæ¨¡å— */
+WINPLUS_FUNC_DECL(String) LoadString( UINT id );
 
-/* ·´Ğ±¸Ü²Ù×÷ */
-AnsiString AddSlashes( AnsiString const & str, AnsiString const & charlist );
-AnsiString StripSlashes( AnsiString const & str, AnsiString const & charlist );
+/* åæ–œæ æ“ä½œ */
+WINPLUS_FUNC_DECL(AnsiString) AddSlashes( AnsiString const & str, AnsiString const & charlist );
+WINPLUS_FUNC_DECL(AnsiString) StripSlashes( AnsiString const & str, AnsiString const & charlist );
 
-/* KMP¶àÏîÆ¥ÅäÌæ»» */
-class MultiMatch
+/* KMPå¤šé¡¹åŒ¹é…æ›¿æ¢ */
+class WINPLUS_DLL MultiMatch
 {
 public:
-	typedef std::map<String, String> StringMap;
-	typedef std::vector<String> StringArray;
-	#define KmpCalcNext _Templ_KmpCalcNext<short>
-	typedef std::vector<short> KmpNextValueArray;
+    typedef std::map<String, String> StringMap;
+    typedef std::vector<String> StringArray;
+    #define KmpCalcNext _Templ_KmpCalcNext<short>
+    typedef std::vector<short> KmpNextValueArray;
 
-	struct MatchState
-	{
-		int j; //ÏÂÒ»´Î´Ó×Ó´®¿ªÊ¼µÄÎ»ÖÃ
-		int markpos;// ±ê¼Ç£¬±íÊ¾½øĞĞµ½Õâ¸öÎ»ÖÃÁË£¬¸Ã´ÓÕâ¸öÎ»ÖÃ¿ªÊ¼
-	};
+    struct MatchState
+    {
+        int j; //ä¸‹ä¸€æ¬¡ä»å­ä¸²å¼€å§‹çš„ä½ç½®
+        int markpos;// æ ‡è®°ï¼Œè¡¨ç¤ºè¿›è¡Œåˆ°è¿™ä¸ªä½ç½®äº†ï¼Œè¯¥ä»è¿™ä¸ªä½ç½®å¼€å§‹
+    };
 
-	typedef std::vector<MatchState> MatchStates;
+    typedef std::vector<MatchState> MatchStates;
 
-	struct MatchResult
-	{
-		int pos;
-		int item;   // Æ¥ÅäÏîµÄË÷Òı
-	};
+    struct MatchResult
+    {
+        int pos;
+        int item;   // åŒ¹é…é¡¹çš„ç´¢å¼•
+    };
 
-	typedef String (* ReplaceFuncType)( MultiMatch const * matchObj, int item, void * extra );
+    typedef String (* ReplaceFuncType)( MultiMatch const * matchObj, int item, void * extra );
 
-	MultiMatch( String matches[], uint m, String replaces[], uint n );
-	MultiMatch( String matches[], uint count, ReplaceFuncType replaceFunc, void * extra = NULL );
-	MultiMatch( StringArray const & matches, StringArray const & replaces );
-	MultiMatch( StringArray const & matches, ReplaceFuncType replaceFunc, void * extra = NULL );
+    MultiMatch( String matches[], uint m, String replaces[], uint n );
+    MultiMatch( String matches[], uint count, ReplaceFuncType replaceFunc, void * extra = NULL );
+    MultiMatch( StringArray const & matches, StringArray const & replaces );
+    MultiMatch( StringArray const & matches, ReplaceFuncType replaceFunc, void * extra = NULL );
 
-	MultiMatch();
-	void init( StringArray const & matches, StringArray const & replaces );
-	void init( StringArray const & matches, ReplaceFuncType replaceFunc, void * extra = NULL );
+    MultiMatch();
+    void init( StringArray const & matches, StringArray const & replaces );
+    void init( StringArray const & matches, ReplaceFuncType replaceFunc, void * extra = NULL );
 
-	/** Ìí¼ÓÒ»¶ÔÆ¥ÅäÌæ»»Ïî,·µ»ØÒªÆ¥ÅäµÄÏîÊı */
-	int addMatchReplacePair( String const & match, String const & replace );
-	/** Ìí¼ÓÒªÆ¥ÅäÏî */
-	int addMatch( String const & match );
-	/** ÉèÖÃĞÂµÄÌæ»»»Øµ÷º¯Êı£¬·µ»Ø¾ÉµÄÌæ»»»Øµ÷º¯Êı */
-	ReplaceFuncType setReplaceFunc( ReplaceFuncType newReplaceFunc );
+    /** æ·»åŠ ä¸€å¯¹åŒ¹é…æ›¿æ¢é¡¹,è¿”å›è¦åŒ¹é…çš„é¡¹æ•° */
+    int addMatchReplacePair( String const & match, String const & replace );
+    /** æ·»åŠ è¦åŒ¹é…é¡¹ */
+    int addMatch( String const & match );
+    /** è®¾ç½®æ–°çš„æ›¿æ¢å›è°ƒå‡½æ•°ï¼Œè¿”å›æ—§çš„æ›¿æ¢å›è°ƒå‡½æ•° */
+    ReplaceFuncType setReplaceFunc( ReplaceFuncType newReplaceFunc );
 
-	/** ËÑË÷ÈÎÒâÒ»ÏîÆ¥Åä str:×Ö·û´®, offset:Æ«ÒÆ,±íÊ¾´ÓÄÄ¸öÎ»ÖÃ¿ªÊ¼ËÑ
-	 * ·µ»ØµÄÎ»ÖÃ°üº¬offsetÖµ */
-	MatchResult search( String const & str, int offset = 0 ) const;
-	/* Ì°À·Ä£Ê½ */
-	//MatchResult greedSearch( String const & str, int offset = 0 ) const;
-	/** Ìæ»» */
-	String replace( String const & str) const;
+    /** æœç´¢ä»»æ„ä¸€é¡¹åŒ¹é… str:å­—ç¬¦ä¸², offset:åç§»,è¡¨ç¤ºä»å“ªä¸ªä½ç½®å¼€å§‹æœ
+     * è¿”å›çš„ä½ç½®åŒ…å«offsetå€¼ */
+    MatchResult search( String const & str, int offset = 0 ) const;
+    /* è´ªå©ªæ¨¡å¼ */
+    //MatchResult greedSearch( String const & str, int offset = 0 ) const;
+    /** æ›¿æ¢ */
+    String replace( String const & str) const;
 
-	String getMatchItem( int item ) const;
-	String getReplaceItem( int item ) const;
+    String getMatchItem( int item ) const;
+    String getReplaceItem( int item ) const;
+protected:
+    void _construct();
 
 private:
-	std::vector<KmpNextValueArray> _nextVals;
-	StringArray _matchItems;
-	StringArray _replaceItems;
-	ReplaceFuncType _replaceFunc;
-	void * _extra;
+    std::vector<KmpNextValueArray> _nextVals;
+    StringArray _matchItems;
+    StringArray _replaceItems;
+    ReplaceFuncType _replaceFunc;
+    void * _extra;
 };
 
 ///////////////////////////////////////////////////////////////////////////
-/* Ìî³äbased-zero×Ö·û´®»º³åÇø°ü×°Àà */
+/* å¡«å……based-zeroå­—ç¬¦ä¸²ç¼“å†²åŒºåŒ…è£…ç±» */
 class SZInput
 {
-	union
-	{
-		char * _psz;
-		wchar_t * _pwsz;
-	};
-	enum { szCharInput, szWCharInput } _type;
-	size_t _count;
+    union
+    {
+        char * _psz;
+        wchar_t * _pwsz;
+    };
+    enum { szCharInput, szWCharInput } _type;
+    size_t _count;
 public:
-	explicit SZInput( char * psz, size_t count ) : _psz(psz), _type(szCharInput), _count(count) { }
-	explicit SZInput( wchar_t * pwsz, size_t count ) : _pwsz(pwsz), _type(szWCharInput), _count(count) { }
+    SZInput( char * psz, size_t count ) : _psz(psz), _type(szCharInput), _count(count) { }
+    SZInput( wchar_t * pwsz, size_t count ) : _pwsz(pwsz), _type(szWCharInput), _count(count) { }
 
-	SZInput & operator = ( char const * pstr )
-	{
-		switch ( _type )
-		{
-		case szCharInput:
-			{
-				size_t uTextLen = strlen(pstr);
-				if ( _count - 1 < uTextLen )
-				{
-					memcpy( _psz, pstr, sizeof(char) * ( _count - 1 ) );
-					_psz[_count - 1] = 0;
-				}
-				else
-				{
-					memcpy( _psz, pstr, sizeof(char) * uTextLen );
-					_psz[uTextLen] = 0;
-				}
-			}
-			break;
-		case szWCharInput:
-			{
-				UnicodeString str = LocalToUnicode(pstr);
-				size_t uTextLen = str.length();
-				if ( _count - 1 < uTextLen )
-				{
-					memcpy( _pwsz, str.c_str(), sizeof(wchar_t) * ( _count - 1 ) );
-					_pwsz[_count - 1] = 0;
-				}
-				else
-				{
-					memcpy( _pwsz, str.c_str(), sizeof(wchar_t) * uTextLen );
-					_pwsz[uTextLen] = 0;
-				}
-			}
-			break;
-		}
-		return *this;
-	}
+    SZInput & operator = ( char const * pstr )
+    {
+        switch ( _type )
+        {
+        case szCharInput:
+            {
+                size_t uTextLen = strlen(pstr);
+                if ( _count - 1 < uTextLen )
+                {
+                    memcpy( _psz, pstr, sizeof(char) * ( _count - 1 ) );
+                    _psz[_count - 1] = 0;
+                }
+                else
+                {
+                    memcpy( _psz, pstr, sizeof(char) * uTextLen );
+                    _psz[uTextLen] = 0;
+                }
+            }
+            break;
+        case szWCharInput:
+            {
+                UnicodeString str = LocalToUnicode(pstr);
+                size_t uTextLen = str.length();
+                if ( _count - 1 < uTextLen )
+                {
+                    memcpy( _pwsz, str.c_str(), sizeof(wchar_t) * ( _count - 1 ) );
+                    _pwsz[_count - 1] = 0;
+                }
+                else
+                {
+                    memcpy( _pwsz, str.c_str(), sizeof(wchar_t) * uTextLen );
+                    _pwsz[uTextLen] = 0;
+                }
+            }
+            break;
+        }
+        return *this;
+    }
 
-	SZInput & operator = ( wchar_t const * pwstr )
-	{
-		switch ( _type )
-		{
-		case szCharInput:
-			{
-				LocalString str = UnicodeToLocal(pwstr);
-				size_t uTextLen = str.length();
-				if ( _count - 1 < uTextLen )
-				{
-					memcpy( _psz, str.c_str(), sizeof(char) * ( _count - 1 ) );
-					_psz[_count - 1] = 0;
-				}
-				else
-				{
-					memcpy( _psz, str.c_str(), sizeof(char) * uTextLen );
-					_psz[uTextLen] = 0;
-				}
-			}
-			break;
-		case szWCharInput:
-			{
-				size_t uTextLen = wcslen(pwstr);
-				if ( _count - 1 < uTextLen )
-				{
-					memcpy( _pwsz, pwstr, sizeof(wchar_t) * ( _count - 1 ) );
-					_pwsz[_count - 1] = 0;
-				}
-				else
-				{
-					memcpy( _pwsz, pwstr, sizeof(wchar_t) * uTextLen );
-					_pwsz[uTextLen] = 0;
-				}
-			}
-			break;
-		}
-		return *this;
-	}
+    SZInput & operator = ( wchar_t const * pwstr )
+    {
+        switch ( _type )
+        {
+        case szCharInput:
+            {
+                LocalString str = UnicodeToLocal(pwstr);
+                size_t uTextLen = str.length();
+                if ( _count - 1 < uTextLen )
+                {
+                    memcpy( _psz, str.c_str(), sizeof(char) * ( _count - 1 ) );
+                    _psz[_count - 1] = 0;
+                }
+                else
+                {
+                    memcpy( _psz, str.c_str(), sizeof(char) * uTextLen );
+                    _psz[uTextLen] = 0;
+                }
+            }
+            break;
+        case szWCharInput:
+            {
+                size_t uTextLen = wcslen(pwstr);
+                if ( _count - 1 < uTextLen )
+                {
+                    memcpy( _pwsz, pwstr, sizeof(wchar_t) * ( _count - 1 ) );
+                    _pwsz[_count - 1] = 0;
+                }
+                else
+                {
+                    memcpy( _pwsz, pwstr, sizeof(wchar_t) * uTextLen );
+                    _pwsz[uTextLen] = 0;
+                }
+            }
+            break;
+        }
+        return *this;
+    }
 
 };
 
 #if _MSC_VER >= 1600
-/* VC2010ÒÔÉÏÖ§³ÖÄ£°åÈ¡Êı×é´óĞ¡ */
+/* VC2010ä»¥ä¸Šæ”¯æŒæ¨¡æ¿å–æ•°ç»„å¤§å° */
 template < typename _CHAR, DWORD _N >
 SZInput SZ( _CHAR (&sz)[_N] )
 {
-	return SZInput( sz, _N );
+    return SZInput( sz, _N );
 }
 
 #else
-/* ·ñÔòÊ¹ÓÃºê¶¨Òå */
+/* å¦åˆ™ä½¿ç”¨å®å®šä¹‰ */
 #define SZ(sz) SZInput( sz, sizeof(sz) / sizeof(sz[0]) )
 
 #endif
-/* Èç¹û²Ù×÷¶ÔÏóÊÇ»º³åÇøÖ¸Õë£¬ÔòÊ¹ÓÃSZPºê */
+/* å¦‚æœæ“ä½œå¯¹è±¡æ˜¯ç¼“å†²åŒºæŒ‡é’ˆï¼Œåˆ™ä½¿ç”¨SZPå® */
 #define SZP SZInput
 
 } // namespace winplus

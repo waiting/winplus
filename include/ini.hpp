@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-// purpose: iniÎÄ¼ş¶ÁĞ´
+ï»¿//////////////////////////////////////////////////////////////////////////
+// purpose: iniæ–‡ä»¶è¯»å†™
 // author:  WT
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,63 +13,63 @@
 namespace winplus
 {
 
-/* Ini ¶ÁĞ´Ö§³ÖÀà */
-class Ini
+/* Ini è¯»å†™æ”¯æŒç±» */
+class WINPLUS_DLL Ini
 {
 private:
-	String _strIniFile;
+    String _strIniFile;
 public:
 
-	class Section
-	{
-		Ini * _i;
-		LPCTSTR _sectionName;
-	public:
+    class WINPLUS_DLL Section
+    {
+        Ini * _i;
+        LPCTSTR _sectionName;
+    public:
 
-		Section( Ini * i, LPCTSTR sectionName ) : _i(i), _sectionName(sectionName) {}
-		String get_name() const { return _sectionName; }
+        Section( Ini * i, LPCTSTR sectionName ) : _i(i), _sectionName(sectionName) {}
+        String get_name() const { return _sectionName; }
 
-		Section & set( String const & key, String const & value );
-		Section & set( String const & key, int value );
-		Section & set( String const & key, uint value );
-		Section & set( String const & key, double value );
-		Section & set( String const & key, LPCVOID value, uint size );
+        Section & set( String const & key, String const & value );
+        Section & set( String const & key, int value );
+        Section & set( String const & key, uint value );
+        Section & set( String const & key, double value );
+        Section & set( String const & key, LPCVOID value, uint size );
 
-		String get( String const & key, String const & defVal ) const;
-		int get( String const & key, int defVal ) const;
-		uint get( String const & key, uint defVal ) const;
-		double get( String const & key, double defVal ) const;
-		bool get( String const & key, LPVOID data, uint size ) const;
+        String get( String const & key, String const & defVal ) const;
+        int get( String const & key, int defVal ) const;
+        uint get( String const & key, uint defVal ) const;
+        double get( String const & key, double defVal ) const;
+        bool get( String const & key, LPVOID data, uint size ) const;
 
-		Ini & ends() { return *this->_i; }
+        Ini & ends() { return *this->_i; }
 
-		//Section operator()( LPCTSTR sectionName )
-		//{
-		//	return Section( this->_i, sectionName );
-		//}
-	};
+        //Section operator()( LPCTSTR sectionName )
+        //{
+        //  return Section( this->_i, sectionName );
+        //}
+    };
 
-	Section operator()( LPCTSTR sectionName )
-	{
-		return Section( this, sectionName );
-	}
+    Section operator()( LPCTSTR sectionName )
+    {
+        return Section( this, sectionName );
+    }
 
 public:
-	// ¹¹Ôìº¯Êı, bInWindowsDir±íÊ¾µ±szIniFile²»Ö¸¶¨Â·¾¶Ê±, ÊÇ·ñÔ¸Òâ·ÅÔÚwindowsÄ¿Â¼ÏÂ
-	// ·ñÔò½«×Ô¶¯ÔÚszIniFile¿ªÍ·Á¬½Ó".\\"×Ö·û´®, ±íÊ¾·ÅÔÚµ±Ç°Ä¿Â¼ÏÂ
-	Ini( String const & szIniFile, BOOL bInWindowsDir = FALSE );
+    // æ„é€ å‡½æ•°, bInWindowsDirè¡¨ç¤ºå½“szIniFileä¸æŒ‡å®šè·¯å¾„æ—¶, æ˜¯å¦æ„¿æ„æ”¾åœ¨windowsç›®å½•ä¸‹
+    // å¦åˆ™å°†è‡ªåŠ¨åœ¨szIniFileå¼€å¤´è¿æ¥".\\"å­—ç¬¦ä¸², è¡¨ç¤ºæ”¾åœ¨å½“å‰ç›®å½•ä¸‹
+    Ini( String const & szIniFile, BOOL bInWindowsDir = FALSE );
 
-	BOOL setValue( LPCTSTR szSection, LPCTSTR szKeyName, LPCTSTR szValue );
-	BOOL setValue( LPCTSTR szSection, LPCTSTR szKeyName, INT nValue, BOOL bSigned = TRUE );
-	BOOL setValue( LPCTSTR szSection, LPCTSTR szKeyName, DOUBLE dblValue );
-	BOOL setData( LPCTSTR szSection, LPCTSTR szKeyName, LPCVOID lpDataBuf, UINT uSizeData );
+    BOOL setValue( LPCTSTR szSection, LPCTSTR szKeyName, LPCTSTR szValue );
+    BOOL setValue( LPCTSTR szSection, LPCTSTR szKeyName, INT nValue, BOOL bSigned = TRUE );
+    BOOL setValue( LPCTSTR szSection, LPCTSTR szKeyName, DOUBLE dblValue );
+    BOOL setData( LPCTSTR szSection, LPCTSTR szKeyName, LPCVOID lpDataBuf, UINT uSizeData );
 
-	INT getValue( LPCTSTR szSection, LPCTSTR szKeyName, INT nDefault );
-	String getValue( LPCTSTR szSection, LPCTSTR szKeyName, LPCTSTR szDefault );
-	DOUBLE getValue( LPCTSTR szSection, LPCTSTR szKeyName, DOUBLE dblDefault );
-	BOOL getData( LPCTSTR szSection, LPCTSTR szKeyName, LPVOID lpDataBuf, UINT uSizeData );
+    INT getValue( LPCTSTR szSection, LPCTSTR szKeyName, INT nDefault );
+    String getValue( LPCTSTR szSection, LPCTSTR szKeyName, LPCTSTR szDefault );
+    DOUBLE getValue( LPCTSTR szSection, LPCTSTR szKeyName, DOUBLE dblDefault );
+    BOOL getData( LPCTSTR szSection, LPCTSTR szKeyName, LPVOID lpDataBuf, UINT uSizeData );
 
-	String const & getIniFile() const { return _strIniFile; }
+    String const & getIniFile() const { return _strIniFile; }
 };
 
 } // namespace winplus
