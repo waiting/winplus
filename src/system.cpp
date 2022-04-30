@@ -434,106 +434,138 @@ WINPLUS_FUNC_IMPL(String) GetOsVersion( void )
     else
         GetSystemInfo(&si);
 
-    version += _T("Microsoft ");
+    version += _T("Microsoft");
 
     if ( VER_PLATFORM_WIN32_NT == osvi.dwPlatformId && osvi.dwMajorVersion > 4 )
     {
-        // Test for the specific product.
-
-        if ( osvi.dwMajorVersion == 6 )
+        typedef void (__stdcall * PFN_RtlGetNtVersionNumbers)(DWORD*, DWORD*, DWORD*);
+        DWORD dwMajor, dwMinor, dwBuildNumber;
+        PFN_RtlGetNtVersionNumbers pfnRtlGetNtVersionNumbers = (PFN_RtlGetNtVersionNumbers)GetProcAddress( GetModuleHandle( _T("ntdll.dll") ), "RtlGetNtVersionNumbers");
+        if ( pfnRtlGetNtVersionNumbers )
         {
-            if( osvi.dwMinorVersion == 0 )
+            pfnRtlGetNtVersionNumbers(&dwMajor, &dwMinor, &dwBuildNumber);
+
+            osvi.dwMajorVersion = dwMajor;
+            osvi.dwMinorVersion = dwMinor;
+        }
+
+        // Test for the specific product.
+        if ( osvi.dwMajorVersion == 10 )
+        {
+            if ( osvi.dwMinorVersion == 0 )
             {
-                if( osvi.wProductType == VER_NT_WORKSTATION )
-                    version += _T("Windows Vista ");  
+                version += _T(" Windows 10");
+            }
+        }
+        else if ( osvi.dwMajorVersion == 6 )
+        {
+            if ( osvi.dwMinorVersion == 0 )
+            {
+                if ( osvi.wProductType == VER_NT_WORKSTATION )
+                    version += _T(" Windows Vista");
                 else
-                    version += _T("Windows Server 2008 ");  
+                    version += _T(" Windows Server 2008");
             }
             else if ( osvi.dwMinorVersion == 1 )
             {
-                if( osvi.wProductType == VER_NT_WORKSTATION )
-                    version += _T("Windows 7 ");
+                if ( osvi.wProductType == VER_NT_WORKSTATION )
+                    version += _T(" Windows 7");
                 else
-                    version += _T("Windows Server 2008 R2 ");
+                    version += _T(" Windows Server 2008 R2");
+            }
+            else if ( osvi.dwMinorVersion == 2 )
+            {
+                if ( osvi.wProductType == VER_NT_WORKSTATION )
+                    version += _T(" Windows 8");
+                else
+                    version += _T(" Windows Server 2012");
+            }
+            else if ( osvi.dwMinorVersion == 3 )
+            {
+		        if ( dwBuildNumber == 4026541440 ) // WinServer2012R2的BuildNumber号
+		        {
+			        version += _T("Windows Server 2012 R2");
+		        }
+		        else
+		        {
+			        version += _T("Windows 8.1");
+		        }
             }
 
-            pGPI = (PGPI)GetProcAddress(
-                GetModuleHandle( _T("kernel32.dll") ),
-                "GetProductInfo"
-            );
-
+            pGPI = (PGPI)GetProcAddress( GetModuleHandle( _T("kernel32.dll") ), "GetProductInfo" );
             pGPI( osvi.dwMajorVersion, osvi.dwMinorVersion, 0, 0, &dwType);
 
             switch( dwType )
             {
             case PRODUCT_ULTIMATE:
-                version += _T("Ultimate Edition");
+                version += _T(" Ultimate Edition");
                 break;
             case PRODUCT_PROFESSIONAL:
-                version += _T("Professional");
+                version += _T(" Professional");
                 break;
             case PRODUCT_HOME_PREMIUM:
-                version += _T("Home Premium Edition");
+                version += _T(" Home Premium Edition");
                 break;
             case PRODUCT_HOME_BASIC:
-                version += _T("Home Basic Edition");
+                version += _T(" Home Basic Edition");
                 break;
             case PRODUCT_ENTERPRISE:
-                version += _T("Enterprise Edition");
+                version += _T(" Enterprise Edition");
                 break;
             case PRODUCT_BUSINESS:
-                version += _T("Business Edition");
+                version += _T(" Business Edition");
                 break;
             case PRODUCT_STARTER:
-                version += _T("Starter Edition");
+                version += _T(" Starter Edition");
                 break;
             case PRODUCT_CLUSTER_SERVER:
-                version += _T("Cluster Server Edition");
+                version += _T(" Cluster Server Edition");
                 break;
             case PRODUCT_DATACENTER_SERVER:
-                version += _T("Datacenter Edition");
+                version += _T(" Datacenter Edition");
                 break;
             case PRODUCT_DATACENTER_SERVER_CORE:
-                version += _T("Datacenter Edition (core installation)");
+                version += _T(" Datacenter Edition (core installation)");
                 break;
             case PRODUCT_ENTERPRISE_SERVER:
-                version += _T("Enterprise Edition");
+                version += _T(" Enterprise Edition");
                 break;
             case PRODUCT_ENTERPRISE_SERVER_CORE:
-                version += _T("Enterprise Edition (core installation)");
+                version += _T(" Enterprise Edition (core installation)");
                 break;
             case PRODUCT_ENTERPRISE_SERVER_IA64:
-                version += _T("Enterprise Edition for Itanium-based Systems");
+                version += _T(" Enterprise Edition for Itanium-based Systems");
                 break;
             case PRODUCT_SMALLBUSINESS_SERVER:
-                version += _T("Small Business Server");
+                version += _T(" Small Business Server");
                 break;
             case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM:
-                version += _T("Small Business Server Premium Edition");
+                version += _T(" Small Business Server Premium Edition");
                 break;
             case PRODUCT_STANDARD_SERVER:
-                version += _T("Standard Edition");
+                version += _T(" Standard Edition");
                 break;
             case PRODUCT_STANDARD_SERVER_CORE:
-                version += _T("Standard Edition (core installation)");
+                version += _T(" Standard Edition (core installation)");
                 break;
             case PRODUCT_WEB_SERVER:
-                version += _T("Web Server Edition");
+                version += _T(" Web Server Edition");
                 break;
             }
+
         }
         else if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2 )
         {
             if( GetSystemMetrics(SM_SERVERR2) )
-                version += _T("Windows Server 2003 R2 ");
+                version += _T(" Windows Server 2003 R2");
             else if ( osvi.wSuiteMask & VER_SUITE_STORAGE_SERVER )
-                version += _T("Windows Storage Server 2003 ");
+                version += _T(" Windows Storage Server 2003");
             else if ( osvi.wSuiteMask & VER_SUITE_WH_SERVER )
-                version += _T("Windows Home Server ");
+                version += _T(" Windows Home Server");
             else if( osvi.wProductType == VER_NT_WORKSTATION && si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 )
-                version += _T("Windows XP Professional x64 Edition");
+                version += _T(" Windows XP Professional x64 Edition");
             else
-                version += _T("Windows Server 2003 ");
+                version += _T(" Windows Server 2003");
 
             // Test for the server type.
             if ( osvi.wProductType != VER_NT_WORKSTATION )  
@@ -541,57 +573,57 @@ WINPLUS_FUNC_IMPL(String) GetOsVersion( void )
                 if ( si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 )
                 {
                     if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
-                        version += _T("Datacenter Edition for Itanium-based Systems");
+                        version += _T(" Datacenter Edition for Itanium-based Systems");
                     else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
-                        version += _T("Enterprise Edition for Itanium-based Systems");
+                        version += _T(" Enterprise Edition for Itanium-based Systems");
                 }
                 else if ( si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 )
                 {
                     if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
-                        version += _T("Datacenter x64 Edition");
+                        version += _T(" Datacenter x64 Edition");
                     else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
-                        version += _T("Enterprise x64 Edition");
+                        version += _T(" Enterprise x64 Edition");
                     else
-                        version += _T("Standard x64 Edition");
+                        version += _T(" Standard x64 Edition");
                 }
                 else  
                 {  
                     if ( osvi.wSuiteMask & VER_SUITE_COMPUTE_SERVER )
-                        version += _T("Compute Cluster Edition");
+                        version += _T(" Compute Cluster Edition");
                     else if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
-                        version += _T("Datacenter Edition");
+                        version += _T(" Datacenter Edition");
                     else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
-                        version += _T("Enterprise Edition");
+                        version += _T(" Enterprise Edition");
                     else if ( osvi.wSuiteMask & VER_SUITE_BLADE )
-                        version += _T("Web Edition");
+                        version += _T(" Web Edition");
                     else
-                        version += _T("Standard Edition");
+                        version += _T(" Standard Edition");
                 }
             }
         }
         else if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1 )
         {
-            version += _T("Windows XP ");
+            version += _T(" Windows XP");
             if( osvi.wSuiteMask & VER_SUITE_PERSONAL )
-                version += _T("Home Edition");
+                version += _T(" Home Edition");
             else
-                version += _T("Professional");
+                version += _T(" Professional");
         }
         else if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0 )
         {
-            version += _T("Windows 2000 ");
+            version += _T(" Windows 2000");
             if ( osvi.wProductType == VER_NT_WORKSTATION )
             {
-                version += _T("Professional");
+                version += _T(" Professional");
             }
             else
             {
                 if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
-                    version += _T("Datacenter Server");
+                    version += _T(" Datacenter Server");
                 else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
-                    version += _T("Advanced Server");
+                    version += _T(" Advanced Server");
                 else
-                    version += _T("Server");
+                    version += _T(" Server");
             }
         }
 
@@ -614,7 +646,7 @@ WINPLUS_FUNC_IMPL(String) GetOsVersion( void )
     }
     else
     {
-        version += _T("Windows 9x or lower");
+        version += _T(" Windows 9x or lower");
     }
 
     return version;
