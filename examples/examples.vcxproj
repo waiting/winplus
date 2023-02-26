@@ -102,13 +102,10 @@
     <ClCompile Include="sample_notification.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="examples.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Manifest Include="..\..\..\Tutorials\教程\C&amp;C++教程\XP_Style文件\XP_Application.manifest" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="examples.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

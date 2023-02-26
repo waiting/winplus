@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////////
 // Purpose:   
 // Desc:      WinPlus sample 6
 // Author:    WT
@@ -74,7 +74,7 @@ void TaskBox( HWND hwndConsole, String consoleTitle )
         hwndConsole,
         NULL,
         LocalToUnicode(consoleTitle).c_str(),
-        L"ÄÚ±êÌâ",
+        L"å†…æ ‡é¢˜",
         LocalToUnicode(consoleTitle).c_str(),
         TDCBF_OK_BUTTON | TDCBF_CANCEL_BUTTON|0x3f,
         TD_WARNING_ICON, 
@@ -101,7 +101,7 @@ void Subclassing( HWND hwnd )
     if ( !r )
     {
         auto err = GetLastError();
-        cout << "×ÓÀà»¯¿ØÖÆÌ¨´°¿Ú´íÎó:"<< ErrStr(err) ;//<< endl;
+        cout << "å­ç±»åŒ–æŽ§åˆ¶å°çª—å£é”™è¯¯:"<< ErrStr(err) ;//<< endl;
     }
 }
 /*
@@ -193,7 +193,7 @@ BOOL AddNotificationIcon( HWND hwnd, UINT id )
     LoadIconMetric( GetModuleHandle(NULL), MAKEINTRESOURCEW(IDI_ICON1), LIM_SMALL, &nid.hIcon );
     //nid.hIcon = LoadIcon( GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1) );
     //LoadString(g_hInst, IDS_TOOLTIP, nid.szTip, ARRAYSIZE(nid.szTip));
-    SZ(nid.szTip) = "ÕâÊÇ¸ö¹¤¾ßÌáÊ¾´®\nÊÔÊÔ»»ÐÐ";
+    SZ(nid.szTip) = "è¿™æ˜¯ä¸ªå·¥å…·æç¤ºä¸²\nè¯•è¯•æ¢è¡Œ";
 
     Shell_NotifyIcon( NIM_ADD, &nid );
 
@@ -219,10 +219,10 @@ BOOL ShowBalloon( HWND hwnd, UINT id, DWORD infoFlags )
     nid.uFlags = NIF_INFO | NIF_TIP | NIF_SHOWTIP;
     // respect quiet time since this balloon did not come from a direct user action.
     nid.dwInfoFlags = infoFlags;
-    SZ(nid.szInfoTitle) = "¹§Ï²ÓÃ»§1002»ñµÃ100ÍòÏÖ½ð½±Àø";
-    SZ(nid.szInfo) = "ÓÃ»§1002ÔÚÎÒÕ¾³é½±»ñµÃ100ÍòÏÖ½ð£¬Çë¾¡¿ìÁìÈ¡¡£";
+    SZ(nid.szInfoTitle) = "æ­å–œç”¨æˆ·1002èŽ·å¾—100ä¸‡çŽ°é‡‘å¥–åŠ±";
+    SZ(nid.szInfo) = "ç”¨æˆ·1002åœ¨æˆ‘ç«™æŠ½å¥–èŽ·å¾—100ä¸‡çŽ°é‡‘ï¼Œè¯·å°½å¿«é¢†å–ã€‚";
 
-    SZ(nid.szTip) = "ÕâÊÇ¸ö¹¤¾ßÌáÊ¾´®\nÊÔÊÔ»»ÐÐ";
+    SZ(nid.szTip) = "è¿™æ˜¯ä¸ªå·¥å…·æç¤ºä¸²\nè¯•è¯•æ¢è¡Œ";
 
     //LoadString(g_hInst, IDS_LOWINK_TITLE, nid.szInfoTitle, ARRAYSIZE(nid.szInfoTitle));
     //LoadString(g_hInst, IDS_LOWINK_TEXT, nid.szInfo, ARRAYSIZE(nid.szInfo));
@@ -333,11 +333,11 @@ int main( int argc, char * args[] )
     HWND hwndConsole = GetConsoleWindow();
     //Subclassing(hwndConsole);
     Notification noti;
-    noti.add( hwndConsole, 1, Icon(IDI_ICON1), "Hello World\n¤³¤ó¤Ë¤Á¤ï£¡ÊÀ½ç£¡" );
+    noti.add( hwndConsole, 1, Icon(IDI_ICON1), "Hello World\nã“ã‚“ã«ã¡ã‚ï¼ä¸–ç•Œï¼" );
     noti.setMessage(WM_COMMAND);
-    noti.setBalloonInfo( "Ò»¸öÆøÅÝ","ÆøÅÝÍ¨Öª" );
+    noti.setBalloonInfo( "ä¸€ä¸ªæ°”æ³¡","æ°”æ³¡é€šçŸ¥" );
     noti.modify();
-    MsgBox("noti");
+    MsgBox( GetOsVersion() );
 
 //    AddNotificationIcon( hwndConsole, 1 );
 //    //MsgBox("notify icon");
@@ -351,12 +351,12 @@ int main( int argc, char * args[] )
 //    DeleteNotificationIcon(hwndConsole,1);
 
 /*
-    // ÍÐÅÌÍ¼±êÊµÑé
+    // æ‰˜ç›˜å›¾æ ‡å®žéªŒ
     NOTIFYICONDATA nid = { 0 };
     nid.hWnd = hwndConsole;
     nid.uID = 1;
     nid.uFlags = NIF_TIP | NIF_SHOWTIP | NIF_ICON;
-    SZ(nid.szTip) = "¹¤¾ßÌáÊ¾×Ö·û´®szTip";
+    SZ(nid.szTip) = "å·¥å…·æç¤ºå­—ç¬¦ä¸²szTip";
 
     auto r = LoadIconMetric( GetModuleHandle(NULL), MAKEINTRESOURCEW(IDI_ICON1), LIM_SMALL, &nid.hIcon );
     BOOL r1 = Shell_NotifyIcon( NIM_ADD, &nid );

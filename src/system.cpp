@@ -440,13 +440,16 @@ WINPLUS_FUNC_IMPL(String) GetOsVersion( void )
     {
         typedef void (__stdcall * PFN_RtlGetNtVersionNumbers)(DWORD*, DWORD*, DWORD*);
         DWORD dwMajor, dwMinor, dwBuildNumber;
+        bool isHighVersion = false;
         PFN_RtlGetNtVersionNumbers pfnRtlGetNtVersionNumbers = (PFN_RtlGetNtVersionNumbers)GetProcAddress( GetModuleHandle( _T("ntdll.dll") ), "RtlGetNtVersionNumbers");
         if ( pfnRtlGetNtVersionNumbers )
         {
-            pfnRtlGetNtVersionNumbers(&dwMajor, &dwMinor, &dwBuildNumber);
+            pfnRtlGetNtVersionNumbers( &dwMajor, &dwMinor, &dwBuildNumber );
 
             osvi.dwMajorVersion = dwMajor;
             osvi.dwMinorVersion = dwMinor;
+            osvi.dwBuildNumber = dwBuildNumber;
+            isHighVersion = true;
         }
 
         // Test for the specific product.
@@ -454,8 +457,12 @@ WINPLUS_FUNC_IMPL(String) GetOsVersion( void )
         {
             if ( osvi.dwMinorVersion == 0 )
             {
-                version += _T(" Windows 10");
+                if ( osvi.wProductType == VER_NT_WORKSTATION )
+                    version += _T(" Windows 10");
+                else
+                    version += _T(" Windows Server 2016");
             }
+            goto OS_TYPE;
         }
         else if ( osvi.dwMajorVersion == 6 )
         {
@@ -482,16 +489,17 @@ WINPLUS_FUNC_IMPL(String) GetOsVersion( void )
             }
             else if ( osvi.dwMinorVersion == 3 )
             {
-		        if ( dwBuildNumber == 4026541440 ) // WinServer2012R2的BuildNumber号
-		        {
-			        version += _T("Windows Server 2012 R2");
-		        }
-		        else
-		        {
-			        version += _T("Windows 8.1");
-		        }
+                if ( osvi.wProductType == VER_NT_WORKSTATION )
+                {
+                    version += _T(" Windows 8.1");
+                }
+                else
+                {
+                    version += _T(" Windows Server 2012 R2");
+                }
             }
 
+        OS_TYPE:
             pGPI = (PGPI)GetProcAddress( GetModuleHandle( _T("kernel32.dll") ), "GetProductInfo" );
             pGPI( osvi.dwMajorVersion, osvi.dwMinorVersion, 0, 0, &dwType);
 
@@ -634,7 +642,7 @@ WINPLUS_FUNC_IMPL(String) GetOsVersion( void )
             version += osvi.szCSDVersion;
         }
 
-        version += Format( TEXT(" (build %d)"), osvi.dwBuildNumber );
+        version += Format( TEXT(" (build %u)"), isHighVersion ? osvi.dwBuildNumber & 0xFFFF : osvi.dwBuildNumber );
 
         if ( osvi.dwMajorVersion >= 6 )
         {
