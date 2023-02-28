@@ -13,6 +13,7 @@ cache/
 .deps/
 autom4te.cache/
 build-aux/
+thirdparties/
 Makefile
 libtool
 *.opt

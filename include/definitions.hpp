@@ -36,7 +36,7 @@
     #define WINPLUS_API
 
 #else
-
+    #pragma warning( disable: 4275 )
     #pragma warning( disable: 4251 )
     #ifdef  WINPLUS_DLL_EXPORTS
         #define WINPLUS_DLL __declspec(dllexport)

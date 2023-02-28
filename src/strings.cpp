@@ -187,13 +187,13 @@ WINPLUS_FUNC_IMPL(INT) StrSplit( UnicodeString const & str, UnicodeString const 
     WCHAR * token;
     INT count;
     dup = _wcsdup( str.c_str() );
-    token = wcstok( dup, delim.c_str() );
+    token = _wcstok( dup, delim.c_str() );
     count = 0;
     while ( token != NULL )
     {
         count++;
         if ( arr != NULL ) arr->push_back(token);
-        token = wcstok( NULL, delim.c_str() );
+        token = _wcstok( NULL, delim.c_str() );
     }
     free(dup);
     return count;

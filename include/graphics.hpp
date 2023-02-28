@@ -208,7 +208,7 @@ struct GdiPoint
     }
     POINT getPOINT() const
     {
-        POINT pt = { x, y };
+        POINT pt = { (LONG)x, (LONG)y };
         return pt;
     }
 };
@@ -226,7 +226,7 @@ struct GdiSize
     }
     SIZE getSIZE() const
     {
-        SIZE si = { cx, cy };
+        SIZE si = { (LONG)cx, (LONG)cy };
         return si;
     }
 };
@@ -250,7 +250,7 @@ struct GdiRect
     }
     RECT getRECT() const
     {
-        RECT rect = { left, top, right, bottom };
+        RECT rect = { (LONG)left, (LONG)top, (LONG)right, (LONG)bottom };
         return rect;
     }
     void offset( DOUBLE cx, DOUBLE cy )
