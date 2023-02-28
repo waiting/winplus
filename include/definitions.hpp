@@ -15,6 +15,7 @@
 #pragma warning( disable : 4239 )
 #pragma warning( disable : 4018 )
 #pragma warning( disable : 4290 )
+#pragma warning( disable : 4091 )
 
 #ifdef __GNUC__
 #define WINVER 0x0501

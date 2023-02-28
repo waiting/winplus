@@ -1,6 +1,4 @@
-﻿#include <windows.h>
-#include <shlobj.h>
-#include "../include/definitions.hpp"
+﻿#include "../include/definitions.hpp"
 #include "../include/shell.hpp"
 #include "../include/strings.hpp"
 

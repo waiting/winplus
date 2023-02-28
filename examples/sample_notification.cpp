@@ -190,7 +190,9 @@ BOOL AddNotificationIcon( HWND hwnd, UINT id )
     nid.uFlags = NIF_ICON | NIF_TIP | NIF_SHOWTIP ;
     //nid.guidItem = __uuidof(PrinterIcon);
     //nid.uCallbackMessage = WMAPP_NOTIFYCALLBACK;
+
     LoadIconMetric( GetModuleHandle(NULL), MAKEINTRESOURCEW(IDI_ICON1), LIM_SMALL, &nid.hIcon );
+
     //nid.hIcon = LoadIcon( GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1) );
     //LoadString(g_hInst, IDS_TOOLTIP, nid.szTip, ARRAYSIZE(nid.szTip));
     SZ(nid.szTip) = "这是个工具提示串\n试试换行";
@@ -335,7 +337,7 @@ int main( int argc, char * args[] )
     Notification noti;
     noti.add( hwndConsole, 1, Icon(IDI_ICON1), "Hello World\nこんにちわ！世界！" );
     noti.setMessage(WM_COMMAND);
-    noti.setBalloonInfo( "一个气泡","气泡通知" );
+    noti.setBalloonInfo( "一个气泡", "气泡通知! 123" );
     noti.modify();
     MsgBox( GetOsVersion() );
 
