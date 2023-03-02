@@ -1,6 +1,7 @@
-﻿#include "../include/definitions.hpp"
-#include "../include/wordslib.hpp"
-#include "../include/strings.hpp"
+﻿#include "winplus_definitions.hpp"
+#include "winplus_wordslib.hpp"
+#include "winplus_strings.hpp"
+#include "strings.hpp"
 
 namespace winplus
 {
@@ -94,7 +95,7 @@ void WordsLib::readHeaders()
 
     // 解析
     header.clear();
-    AnsiStringMap tmpHeader;
+    StringStringMap tmpHeader;
     AnsiStringArray arrHeaders;
     int count = StrSplit( headers, "\r\n", &arrHeaders );
 
@@ -106,9 +107,9 @@ void WordsLib::readHeaders()
         {
             kv.push_back("");
         }
-        AnsiString k = _StrTrim(kv[0]);
+        AnsiString k = StrTrim(kv[0]);
         _strlwr(&k[0]); // 小写
-        tmpHeader[k] = _StrTrim(kv[1]);
+        tmpHeader[k] = StrTrim(kv[1]);
     }
     // 检测编码
     encoding = isset( tmpHeader, "encoding" ) ? Mixed(tmpHeader["encoding"]) : Mixed("");
@@ -116,7 +117,7 @@ void WordsLib::readHeaders()
     if ( encoding == "utf-8" )
     {
         // utf-8编码
-        AnsiStringMap::const_iterator it = tmpHeader.begin();
+        auto it = tmpHeader.begin();
         for ( ; it != tmpHeader.end(); ++it )
         {
             header[Utf8ToString(it->first)] = Utf8ToString(it->second);
@@ -124,7 +125,7 @@ void WordsLib::readHeaders()
     }
     else // 当作本地编码处理
     {
-        AnsiStringMap::const_iterator it = tmpHeader.begin();
+        auto it = tmpHeader.begin();
         for ( ; it != tmpHeader.end(); ++it )
         {
             header[LocalToString(it->first)] = LocalToString(it->second);

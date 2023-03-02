@@ -1,6 +1,5 @@
-﻿#include <windows.h>
-#include "../include/definitions.hpp"
-#include "../include/resource.hpp"
+﻿#include "winplus_definitions.hpp"
+#include "winplus_resource.hpp"
 
 namespace winplus
 {

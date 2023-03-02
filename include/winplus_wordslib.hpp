@@ -86,7 +86,7 @@ public:
     String at( int i ) const;
     String seek( int index ) const;
 
-    StringMap header;
+    StringStringMap header;
     String name, desc, type, compress, encoding;
     int itemsize, wordscount;
     uint filesize;

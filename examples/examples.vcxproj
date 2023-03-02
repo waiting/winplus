@@ -71,28 +71,28 @@
     <OutDir>$(SolutionDir)build\$(PlatformShortName)-$(Configuration)\bin\</OutDir>
     <IntDir>objs\$(PlatformShortName)-$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\thirdparties\winux\include;..\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)build\$(PlatformShortName)-$(Configuration)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MD-Release|Win32'">
     <OutDir>$(SolutionDir)build\$(PlatformShortName)-$(Configuration)\bin\</OutDir>
     <IntDir>objs\$(PlatformShortName)-$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\thirdparties\winux\include;..\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)build\$(PlatformShortName)-$(Configuration)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MT-Debug|Win32'">
     <OutDir>$(SolutionDir)build\$(PlatformShortName)-$(Configuration)\bin\</OutDir>
     <IntDir>objs\$(PlatformShortName)-$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\thirdparties\winux\include;..\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)build\$(PlatformShortName)-$(Configuration)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MD-Debug|Win32'">
     <OutDir>$(SolutionDir)build\$(PlatformShortName)-$(Configuration)\bin\</OutDir>
     <IntDir>objs\$(PlatformShortName)-$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\thirdparties\winux\include;..\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)build\$(PlatformShortName)-$(Configuration)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MT-Release|Win32'">

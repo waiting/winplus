@@ -1,6 +1,6 @@
-﻿#include "../include/definitions.hpp"
-#include "../include/shell.hpp"
-#include "../include/strings.hpp"
+﻿#include "winplus_definitions.hpp"
+#include "winplus_shell.hpp"
+#include "strings.hpp"
 
 namespace winplus
 {

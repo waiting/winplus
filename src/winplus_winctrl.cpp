@@ -1,12 +1,10 @@
-﻿#include <windows.h>
-#include "../include/definitions.hpp"
-#include "../Include/picture.hpp"
-#include "../include/winctrl.hpp"
-#include "../include/shell.hpp"
-#include "../include/strings.hpp"
-#include "../include/system.hpp"
-#include "../include/compoundfile.hpp"
-#include <commctrl.h>
+﻿#include "winplus_definitions.hpp"
+#include "winplus_picture.hpp"
+#include "winplus_winctrl.hpp"
+#include "winplus_shell.hpp"
+#include "winplus_system.hpp"
+#include "winplus_compoundfile.hpp"
+#include "strings.hpp"
 
 #pragma comment( lib, "comctl32.lib" )
 

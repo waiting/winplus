@@ -11,7 +11,7 @@ using namespace std;
 #include <CommCtrl.h>
 
 //#pragma comment ( lib, "comctl32" )
-
+#include <winux.hpp>
 #include <winplus.hpp>
 using namespace winplus;
 
@@ -308,7 +308,7 @@ int main0()
         {
             cout << hr;
         }
-        hr = pNotification2->PlaySound(L"F:\\music\\gimmick\\gimmick_18_good_night_take_2.wav");
+        hr = pNotification2->PlaySound(L"J:\\music\\gimmick\\gimmick_18_good_night_take_2.wav");
         if ( FAILED(hr) )
         {
             cout << hr<<" sound\n";
@@ -339,7 +339,8 @@ int main( int argc, char * args[] )
     noti.setMessage(WM_COMMAND);
     noti.setBalloonInfo( "一个气泡", "气泡通知! 123" );
     noti.modify();
-    MsgBox( GetOsVersion() );
+    //MsgBox( GetOsVersion() );
+    cout << GetOsVersion() << endl;
 
 //    AddNotificationIcon( hwndConsole, 1 );
 //    //MsgBox("notify icon");
@@ -351,6 +352,7 @@ int main( int argc, char * args[] )
 //    Sleep(2000);
 //    MsgBox("notify icon");
 //    DeleteNotificationIcon(hwndConsole,1);
+    MsgBox( ModulePath() );
 
 /*
     // 托盘图标实验

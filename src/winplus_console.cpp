@@ -1,7 +1,8 @@
-﻿#include "../include/definitions.hpp"
+﻿#include "winplus_definitions.hpp"
+#include "winplus_console.hpp"
+#include "console.hpp"
 #include <io.h>
 #include <fcntl.h>
-#include "../include/console.hpp"
 
 namespace winplus
 {
@@ -38,6 +39,7 @@ WINPLUS_FUNC_IMPL(void) PrintBarEx( String const & text, int text_width, int scr
     {
         tmp += "■";
     }
+
     std::cout << ConsoleColor( clr, tmp );
     std::cout << std::endl;
 }

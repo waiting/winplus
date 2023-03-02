@@ -36,22 +36,9 @@ WINPLUS_FUNC_DECL(String) ExpandVars( String const & str );
 
 /* 通过HWND获得程序路径和进程ID */
 WINPLUS_FUNC_DECL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId = NULL );
-/* 返回当前工作目录(末尾不含目录分隔符) */
-WINPLUS_FUNC_DECL(String) GetCurrentDir( void );
-/* 返回模块路径(末尾不含目录分隔符)，输出模块文件名 */
-WINPLUS_FUNC_DECL(String) ModulePath( HMODULE module = NULL, String * fileName = NULL );
-/* 获取路径名(末尾不含目录分隔符) */
-WINPLUS_FUNC_DECL(String) FilePath( String const & fullPath, String * fileName = NULL );
-/* 获取一个文件名的标题和扩展名 */
-WINPLUS_FUNC_DECL(String) FileTitle( String const & fileName, String * extName = NULL );
-/* 判断是否是一个目录 */
-WINPLUS_FUNC_DECL(bool) IsDir( String const & path );
-/* 获取文件大小 */
-WINPLUS_FUNC_DECL(uint64) FileSize( String const & fullpath );
 
-/* 路径分隔符整理 */
-WINPLUS_FUNC_DECL(String) PathWithSep( String const & path );
-WINPLUS_FUNC_DECL(String) PathNoSep( String const & path );
+/* 返回模块路径(末尾不含目录分隔符)，输出模块文件名 */
+WINPLUS_FUNC_DECL(String) ModulePath( HMODULE mod = NULL, String * fileName = NULL );
 
 /* 获得程序的命令行参数 */
 WINPLUS_FUNC_DECL(INT) CommandArguments( StringArray * arr );
@@ -68,25 +55,10 @@ WINPLUS_FUNC_DECL(String) GetSelfModuleVersion( void );
 WINPLUS_FUNC_DECL(String) GetModuleVersion( String const & moduleFile );
 
 
-// 文件遍历搜索
-
-////////////////////////////////////////////////
-// 获取文件夹中的文件和子文件夹
-// sort_type:
-// 0 - 不排序, 1 - 排序, 2 - 逆序
-////////////////////////////////////////////////
-WINPLUS_FUNC_DECL(void) FolderData( String const & path, StringArray * files, StringArray * sub_folders, int sort_type = 0 );
-////////////////////////////////////////////////
-// 在指定路径下枚举指定扩展名的文件
-// files: 将收到文件的完整路径数组
-// is_recursion: 是否递归搜索
-////////////////////////////////////////////////
-WINPLUS_FUNC_DECL(int) EnumFiles( String const & path, StringArray const & extnames, StringArray * files, bool is_recursion = true );
-
 //////////////////////////////////////////////////////////////////////////
 
 /* 共享内存(基于FileMapping)
-   共享内存属于Windows内核对象,故可以跨进程访问
+   共享内存属于Windows内核对象，故可以跨进程访问
    常用于进程间通讯 */
 template < typename _Ty > class SharedMemory
 {
@@ -153,64 +125,6 @@ private:
     SharedMemory & operator = ( SharedMemory const & );
 };
 
-/* 命令行类
-   用于从命令行中提取指定参数 */
-class WINPLUS_DLL CommandLine
-{
-    StringArray _args;
-    String _paramPrefix;
-    // 参数名比较
-    bool compareEqv( String const & name, String const & arg ) const;
-    // 是否是参数
-    bool isParamName( String const & arg ) const;
-public:
-    CommandLine( String const & paramPrefix = TEXT("-/") );
-    String getParam( String const & name, String const & defValue = TEXT("") ) const;
-    int getParamInt( String const & name, int defValue = 0 ) const;
-    bool include( String const & name, int * valueIndex = NULL ) const;
-    bool includeValue( String const & value ) const;
-};
-
-/* DLL动态载入器 */
-class DllLoader
-{
-public:
-    DllLoader( LPCTSTR dllName ) : _hDll(NULL)
-    {
-        _hDll = LoadLibrary(dllName);
-    }
-    ~DllLoader()
-    {
-        if ( _hDll )
-        {
-            FreeLibrary(_hDll);
-            _hDll = NULL;
-        }
-    }
-    operator bool() const { return _hDll != NULL; }
-    operator HMODULE() const { return _hDll; }
-
-private:
-    HMODULE _hDll;
-
-    DllLoader( DllLoader const & );
-    DllLoader & operator = ( DllLoader const & );
-};
-
-/* Dll函数动态调用 */
-template < typename _PfnType >
-class DllFunction
-{
-    _PfnType _pfn;
-public:
-    DllFunction( HMODULE module, LPCSTR procName )
-    {
-        _pfn = (_PfnType)GetProcAddress( module, procName );
-    }
-
-    operator bool() const { return _pfn != NULL; }
-    operator _PfnType() const { return _pfn; }
-};
 
 } // namespace winplus
 

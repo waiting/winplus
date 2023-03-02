@@ -10,19 +10,16 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "definitions.hpp"
-#include "resource.hpp"
-#include "strings.hpp"
-#include "md5.hpp"
-#include "system.hpp"
-#include "time.hpp"
-#include "picture.hpp"
-#include "winctrl.hpp"
-#include "compoundfile.hpp"
-#include "shell.hpp"
-#include "graphics.hpp"
-#include "console.hpp"
-#include "wordslib.hpp"
-#include "ini.hpp"
+#include "winplus_definitions.hpp"
+#include "winplus_resource.hpp"
+#include "winplus_system.hpp"
+#include "winplus_picture.hpp"
+#include "winplus_winctrl.hpp"
+#include "winplus_compoundfile.hpp"
+#include "winplus_shell.hpp"
+#include "winplus_graphics.hpp"
+#include "winplus_console.hpp"
+#include "winplus_wordslib.hpp"
+#include "winplus_ini.hpp"
 
 #endif // !defined(__WINPLUS_HPP__)

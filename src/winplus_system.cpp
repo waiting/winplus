@@ -5,10 +5,12 @@
 
 #define _WIN32_WINNT 0x0501
 
-#include <windows.h>
-#include "../include/definitions.hpp"
-#include "../include/strings.hpp"
-#include "../include/system.hpp"
+#include "winplus_definitions.hpp"
+#include "winplus_system.hpp"
+#include "strings.hpp"
+#include "smartptr.hpp"
+#include "filesys.hpp"
+#include "system.hpp"
 #include <tchar.h>
 #include <direct.h>
 #include <algorithm>
@@ -210,7 +212,7 @@ WINPLUS_FUNC_IMPL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId )
 {
     DWORD dwProcessId;
     GetWindowThreadProcessId( hWnd, &dwProcessId );
-    AssignPTR(processId) = dwProcessId;
+    ASSIGN_PTR(processId) = dwProcessId;
     HANDLE hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, dwProcessId );
     if ( !hProcess )
     {
@@ -224,129 +226,25 @@ WINPLUS_FUNC_IMPL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId )
         //dw = GetLastError();
         dw = fullName.size();
         DllLoader dll("Kernel32.dll");
-        DllFunction<BOOL (WINAPI *)( HANDLE, DWORD, LPSTR, PDWORD )> func( dll, "QueryFullProcessImageNameA" );
-        func && func( hProcess, 0, &fullName[0], &dw );
+        auto func = dll.func<BOOL (WINAPI *)( HANDLE, DWORD, LPSTR, PDWORD )>("QueryFullProcessImageNameA");
+        func && func.call( hProcess, 0, &fullName[0], &dw );
     }
     CloseHandle(hProcess);
     return fullName.c_str();
 }
 
-WINPLUS_FUNC_IMPL(String) GetCurrentDir( void )
+WINPLUS_FUNC_IMPL(String) ModulePath( HMODULE mod, String * fileName )
 {
-    LPTSTR p;
-    String buf;
-    int size = 128;
-
-    do
+    String sz;
+    DWORD dwSize = MAX_PATH >> 1;
+    DWORD dwGet = 0;
+    do 
     {
-        size <<= 1;
-        buf.resize( size - 1 );
-        p = _tgetcwd( &buf[0], size );
-    }
-    while ( !p && errno == ERANGE );
-    return p ? p : TEXT("");
-}
-
-WINPLUS_FUNC_IMPL(String) ModulePath( HMODULE module/* = NULL*/, String * fileName/* = NULL*/ )
-{
-    String buffer;
-    buffer.resize(MAX_PATH);
-    GetModuleFileName( module, &buffer[0], MAX_PATH );
-    return FilePath( buffer, fileName );
-}
-
-WINPLUS_FUNC_IMPL(String) FilePath( String const & fullPath, String * fileName )
-{
-    String path;
-    String buffer = fullPath.c_str();
-    TCHAR * psz = _tcsrchr( &buffer[0], dirSep[0] );
-    TCHAR * pszFile;
-    if ( psz != NULL )
-    {
-        *psz = 0;
-        path = &buffer[0];
-        if ( fileName != NULL ) *fileName = psz + 1;
-        pszFile = psz + 1;
-    }
-    else
-    {
-        path = TEXT("");
-        if ( fileName != NULL ) *fileName = &buffer[0];
-        pszFile = &buffer[0];
-    }
-    return path;
-}
-
-WINPLUS_FUNC_IMPL(String) FileTitle( String const & fileName, String * extName )
-{
-    String temp = fileName;
-    String fileTitle;
-    TCHAR * pszFile = &temp[0];
-    TCHAR * psz;
-    psz = _tcsrchr( pszFile, _T('.') );
-    if ( psz != NULL )
-    {
-        *psz = 0;
-        fileTitle = pszFile;
-        if ( extName != NULL ) *extName = psz + 1;
-    }
-    else
-    {
-        fileTitle = pszFile;
-        if ( extName != NULL ) *extName = TEXT("");
-    }
-    return fileTitle;
-}
-
-WINPLUS_FUNC_IMPL(bool) IsDir( String const & path )
-{
-    DWORD attr = GetFileAttributes( path.c_str() );
-    if ( attr != INVALID_FILE_ATTRIBUTES && attr & FILE_ATTRIBUTE_DIRECTORY )
-    {
-        return true;
-    }
-    return false;
-}
-
-WINPLUS_FUNC_IMPL(uint64) FileSize( String const & fullpath )
-{
-    struct _stati64 st;
-    _wstati64( StringToUnicode(fullpath).c_str(), &st );
-    return st.st_size;
-}
-
-WINPLUS_FUNC_IMPL(String) PathWithSep( String const & path )
-{
-    String res_path;
-    if ( !path.empty() )
-    {
-        if ( path[path.length() - 1] != dirSep[0] ) // 末尾不是分隔符
-        {
-            res_path = path + dirSep;
-        }
-        else // 末尾是分隔符
-        {
-            res_path = path;
-        }
-    }
-    return res_path;
-}
-
-WINPLUS_FUNC_IMPL(String) PathNoSep( String const & path )
-{
-    String res_path;
-    if ( !path.empty() )
-    {
-        if ( path[path.length() - 1] != dirSep[0] ) // 末尾不是分隔符
-        {
-            res_path = path;
-        }
-        else // 末尾是分隔符
-        {
-            res_path = path.substr( 0, path.length() - 1 );
-        }
-    }
-    return res_path;
+        dwSize <<= 1;
+        sz.resize(dwSize);
+        dwGet = GetModuleFileName( mod, &sz[0], dwSize );
+    } while ( dwGet == dwSize );
+    return FilePath( String( sz.c_str(), dwGet ), fileName );
 }
 
 WINPLUS_FUNC_IMPL(INT) CommandArguments( StringArray * arr )
@@ -706,164 +604,6 @@ WINPLUS_FUNC_IMPL(String) GetModuleVersion( String const & moduleFile )
     }
     
     return version;
-}
-
-WINPLUS_FUNC_IMPL(void) FolderData( String const & path, StringArray * files, StringArray * sub_folders, int sort_type )
-{
-    String realpath = PathWithSep(path);
-    String filespec = realpath + TEXT("*");
-    _tfinddata_t find_data;
-
-    long handle = _tfindfirst( filespec.c_str(), &find_data );
-    if ( handle == -1 ) return;
-
-    do
-    {
-        String filename = find_data.name;
-        if ( filename == TEXT(".") || filename == TEXT("..") ) continue;
-        if ( IsDir( realpath + filename ) )
-            sub_folders->push_back(filename);
-        else
-            files->push_back(filename);
-        
-    } while ( _tfindnext( handle, &find_data ) != -1 );
-    _findclose(handle);
-
-    //sort();
-    switch ( sort_type )
-    {
-    case 1:
-        std::sort( files->begin(), files->end(), std::less<String>() );
-        std::sort( sub_folders->begin(), sub_folders->end(), std::less<String>() );
-        break;
-    case 2:
-        std::sort( files->begin(), files->end(), std::greater<String>() );
-        std::sort( sub_folders->begin(), sub_folders->end(), std::greater<String>() );
-        break;
-    }
-}
-
-WINPLUS_FUNC_IMPL(int) EnumFiles( String const & path, StringArray const & extnames, StringArray * files, bool is_recursion /*= true */ )
-{
-    int files_count = 0;
-    StringArray filenames, paths;
-    String realpath = PathWithSep(path);
-
-    FolderData( path, &filenames, &paths, 1 );
-    for ( StringArray::const_iterator it = filenames.begin(); it != filenames.end(); ++it )
-    {
-        String extname;
-        FileTitle( *it, &extname );
-        
-        if ( std::find( extnames.begin(), extnames.end(), extname ) != extnames.end() )
-        {
-            files->push_back( realpath + *it );
-            files_count++;
-        }
-    }
-    if ( is_recursion )
-    {
-        for ( StringArray::const_iterator it = paths.begin(); it != paths.end(); ++it )
-        {
-            files_count += EnumFiles( realpath + *it, extnames, files, is_recursion );
-        }
-    }
-    
-    return files_count;
-    
-}
-
-// class CommandLine ----------------------------------------------------------------------------------
-CommandLine::CommandLine( String const & paramPrefix /*= TEXT("-/") */ ) : _paramPrefix(paramPrefix)
-{
-    CommandArguments(&this->_args);
-}
-
-bool CommandLine::compareEqv( String const & name, String const & arg ) const
-{
-    int i;
-    for ( i = 0; i < this->_paramPrefix.length(); i++ )
-    {
-        TCHAR s[2] = {0};
-        s[0] = this->_paramPrefix[i];
-        if ( s + name == arg )
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool CommandLine::isParamName( String const & arg ) const
-{
-    if ( arg.length() < 1 )
-        return false;
-    int i;
-    for ( i = 0; i < this->_paramPrefix.length(); i++ )
-    {
-        if ( arg[0] == this->_paramPrefix[i] )
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-String CommandLine::getParam( String const & name, String const & defValue /*= TEXT("") */ ) const
-{
-    int i;
-    if ( include( name, &i ) )
-    {
-        return ( i != -1 ? this->_args[i] : defValue );
-    }
-    return defValue;
-}
-
-int CommandLine::getParamInt( String const & name, int defValue /*= 0 */ ) const
-{
-    int i;
-    if ( include( name, &i ) )
-    {
-        return ( i != -1 ? _ttoi( this->_args[i].c_str() ) : defValue );
-    }
-    return defValue;
-}
-
-bool CommandLine::include( String const & name, int * valueIndex /*= NULL */ ) const
-{
-    int i;
-    for ( i = 1; i < (int)this->_args.size(); i++ )
-    {
-        if ( compareEqv( name, this->_args[i] ) )
-        {
-            if ( valueIndex != NULL )
-            {
-                if ( i + 1 == (int)this->_args.size() ) // 如果是最后一个，意味着没有参数值了
-                {
-                    *valueIndex = -1;
-                }
-                else
-                {
-                    *valueIndex = isParamName( this->_args[i] ) ? i + 1 : -1;
-                }
-            }
-            return true;
-        }
-    }
-    return false;
-}
-
-bool CommandLine::includeValue( String const & value ) const
-{
-    int i;
-    for ( i = 1; i < (int)this->_args.size(); i++ )
-    {
-        if ( value == this->_args[i] )
-        {
-            return true;
-        }
-    }
-    return false;
 }
 
 } // namespace winplus

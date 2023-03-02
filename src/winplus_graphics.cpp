@@ -1,6 +1,5 @@
-﻿#include <windows.h>
-#include "../include/definitions.hpp"
-#include "../include/graphics.hpp"
+﻿#include "winplus_definitions.hpp"
+#include "winplus_graphics.hpp"
 
 #ifdef __GNUC__
 #define WINVER 0x0501

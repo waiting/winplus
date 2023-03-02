@@ -1,6 +1,6 @@
-﻿#include "../include/definitions.hpp"
-#include "../include/strings.hpp"
-#include "../include/ini.hpp"
+﻿#include "winplus_definitions.hpp"
+#include "winplus_ini.hpp"
+#include "strings.hpp"
 #include <tchar.h>
 #ifdef _DEBUG
 #undef THIS_FILE

@@ -180,7 +180,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINPLUS_DLL_USE;WINPLUS_DLL_EXPORTS;_WINDOWS;_USRDLL;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparties\winux\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -198,7 +198,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINPLUS_DLL_USE;WINPLUS_DLL_EXPORTS;_WINDOWS;_USRDLL;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparties\winux\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -215,7 +215,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINPLUS_DLL_USE;WINPLUS_DLL_EXPORTS;_WINDOWS;_USRDLL;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparties\winux\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -229,7 +229,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINPLUS_DLL_USE;WINPLUS_DLL_EXPORTS;_WINDOWS;_USRDLL;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparties\winux\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -244,7 +244,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINPLUS_DLL_USE;WINPLUS_DLL_EXPORTS;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparties\winux\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -258,7 +258,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINPLUS_DLL_USE;WINPLUS_DLL_EXPORTS;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparties\winux\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -275,7 +275,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINPLUS_DLL_USE;WINPLUS_DLL_EXPORTS;_WINDOWS;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparties\winux\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -293,7 +293,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WINPLUS_DLL_USE;WINPLUS_DLL_EXPORTS;_WINDOWS;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparties\winux\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -305,39 +305,63 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\compoundfile.hpp" />
-    <ClInclude Include="..\include\console.hpp" />
-    <ClInclude Include="..\include\definitions.hpp" />
-    <ClInclude Include="..\include\graphics.hpp" />
-    <ClInclude Include="..\include\ini.hpp" />
-    <ClInclude Include="..\include\md5.hpp" />
-    <ClInclude Include="..\include\picture.hpp" />
-    <ClInclude Include="..\include\resource.hpp" />
-    <ClInclude Include="..\include\shell.hpp" />
-    <ClInclude Include="..\include\strings.hpp" />
-    <ClInclude Include="..\include\system.hpp" />
-    <ClInclude Include="..\include\time.hpp" />
-    <ClInclude Include="..\include\winctrl.hpp" />
+    <ClInclude Include="..\include\winplus_strings.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\archives.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\compress.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\console.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\encoding.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\filesys.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\json.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\md5.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\smartptr.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\strings.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\system.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\threads.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\threadtask.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\time.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\utilities.hpp" />
+    <ClInclude Include="..\thirdparties\winux\include\winux.hpp" />
+    <ClInclude Include="..\include\winplus_compoundfile.hpp" />
+    <ClInclude Include="..\include\winplus_console.hpp" />
+    <ClInclude Include="..\include\winplus_definitions.hpp" />
+    <ClInclude Include="..\include\winplus_graphics.hpp" />
+    <ClInclude Include="..\include\winplus_ini.hpp" />
+    <ClInclude Include="..\include\winplus_picture.hpp" />
+    <ClInclude Include="..\include\winplus_resource.hpp" />
+    <ClInclude Include="..\include\winplus_shell.hpp" />
+    <ClInclude Include="..\include\winplus_system.hpp" />
+    <ClInclude Include="..\include\winplus_winctrl.hpp" />
     <ClInclude Include="..\include\winplus.hpp" />
-    <ClInclude Include="..\include\wordslib.hpp" />
+    <ClInclude Include="..\include\winplus_wordslib.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\compoundfile.cpp" />
-    <ClCompile Include="..\src\console.cpp" />
-    <ClCompile Include="..\src\definitions.cpp" />
-    <ClCompile Include="..\src\graphics.cpp" />
-    <ClCompile Include="..\src\ini.cpp" />
-    <ClCompile Include="..\src\md5.cpp" />
-    <ClCompile Include="..\src\picture.cpp" />
-    <ClCompile Include="..\src\resource.cpp" />
-    <ClCompile Include="..\src\shell.cpp" />
-    <ClCompile Include="..\src\strings.cpp" />
-    <ClCompile Include="..\src\system.cpp" />
-    <ClCompile Include="..\src\time.cpp" />
-    <ClCompile Include="..\src\winctrl.cpp" />
-    <ClCompile Include="..\src\wordslib.cpp" />
+    <ClCompile Include="..\src\winplus_compoundfile.cpp" />
+    <ClCompile Include="..\src\winplus_console.cpp" />
+    <ClCompile Include="..\src\winplus_definitions.cpp" />
+    <ClCompile Include="..\src\winplus_graphics.cpp" />
+    <ClCompile Include="..\src\winplus_ini.cpp" />
+    <ClCompile Include="..\src\winplus_picture.cpp" />
+    <ClCompile Include="..\src\winplus_resource.cpp" />
+    <ClCompile Include="..\src\winplus_shell.cpp" />
+    <ClCompile Include="..\src\winplus_strings.cpp" />
+    <ClCompile Include="..\src\winplus_system.cpp" />
+    <ClCompile Include="..\src\winplus_winctrl.cpp" />
+    <ClCompile Include="..\src\winplus_wordslib.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\console.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\filesys.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\json.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\strings.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\system.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\time.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\thirdparties\winux\include\func_invoker.inl" />
+    <None Include="..\thirdparties\winux\include\func_runable.inl" />
+    <None Include="..\thirdparties\winux\include\func_traits.inl" />
+    <None Include="..\thirdparties\winux\include\is_x_funcs.inl" />
+    <None Include="..\thirdparties\winux\include\mixed_ref_specified_type.inl" />
+    <None Include="..\thirdparties\winux\include\system_detection.inl" />
     <None Include="..\src\winplus.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

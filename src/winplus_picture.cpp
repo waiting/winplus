@@ -1,10 +1,8 @@
-﻿#include <windows.h>
-#include <comdef.h>
-#include "../include/definitions.hpp"
-#include "../include/picture.hpp"
-#include "../include/compoundfile.hpp"
-#include "../include/strings.hpp"
-#include "../include/graphics.hpp"
+﻿#include "winplus_definitions.hpp"
+#include "winplus_picture.hpp"
+#include "winplus_compoundfile.hpp"
+#include "winplus_graphics.hpp"
+#include "strings.hpp"
 #include <tchar.h>
 
 namespace winplus

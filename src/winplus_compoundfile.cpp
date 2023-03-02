@@ -1,7 +1,6 @@
-﻿#include <windows.h>
-#include <comdef.h>
-#include "../include/definitions.hpp"
-#include "../include/compoundfile.hpp"
+﻿
+#include "winplus_definitions.hpp"
+#include "winplus_compoundfile.hpp"
 
 namespace winplus
 {
