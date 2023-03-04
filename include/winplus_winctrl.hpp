@@ -23,15 +23,14 @@ public:
     WindowTimer( void );
     void create( HWND window, UINT elapse, UINT_PTR id = -1 );
     void destroy( void );
-    UINT getId( void ) const { return _id; }
+    UINT_PTR getId( void ) const { return _id; }
     ~WindowTimer( void );
 private:
     HWND _window;
     UINT_PTR _id;
     static UINT_PTR _idAutoIncrement;
 
-    WindowTimer( WindowTimer const & );
-    WindowTimer & operator = ( WindowTimer const & );
+    DISABLE_OBJECT_COPY(WindowTimer)
 };
 
 // 窗口相关 --------------------------------------------------------------

@@ -187,5 +187,8 @@
     <ClCompile Include="..\src\winplus_wordslib.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\thirdparties\winux\src\smartptr.cpp">
+      <Filter>源文件\winux</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

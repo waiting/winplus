@@ -164,6 +164,9 @@
     <ClCompile Include="..\thirdparties\winux\src\time.cpp">
       <Filter>源文件\winux</Filter>
     </ClCompile>
+    <ClCompile Include="..\thirdparties\winux\src\smartptr.cpp">
+      <Filter>源文件\winux</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\winplus.def">

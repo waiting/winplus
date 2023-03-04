@@ -14,7 +14,7 @@ WINPLUS_FUNC_IMPL(String) Utf8ToString( AnsiString const & utf8 )
         CP_UTF8,
         0,
         utf8.c_str(),
-        utf8.length(),
+        (INT)utf8.length(),
         NULL,
         0
     );
@@ -23,11 +23,11 @@ WINPLUS_FUNC_IMPL(String) Utf8ToString( AnsiString const & utf8 )
         CP_UTF8,
         0,
         utf8.c_str(),
-        utf8.length(),
+        (INT)utf8.length(),
         &unicode[0],
         cch
     );
-    return UnicodeToString(unicode.c_str());
+    return UnicodeToString( unicode.c_str() );
 }
 
 WINPLUS_FUNC_IMPL(AnsiString) StringToUtf8( String const & str )
@@ -38,7 +38,7 @@ WINPLUS_FUNC_IMPL(AnsiString) StringToUtf8( String const & str )
         CP_UTF8,
         0,
         unicode.c_str(),
-        unicode.length(),
+        (INT)unicode.length(),
         NULL,
         0,
         NULL,
@@ -49,7 +49,7 @@ WINPLUS_FUNC_IMPL(AnsiString) StringToUtf8( String const & str )
         CP_UTF8,
         0,
         unicode.c_str(),
-        unicode.length(),
+        (INT)unicode.length(),
         &utf8[0],
         length,
         NULL,

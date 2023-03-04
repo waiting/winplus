@@ -89,6 +89,7 @@
     <ClCompile Include="..\thirdparties\winux\src\console.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\filesys.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\json.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\smartptr.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\strings.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\system.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\time.cpp" />

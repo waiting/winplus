@@ -8,6 +8,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winplus-lib", "projects\winplus-lib.vcxproj", "{3F7002B7-6973-4B69-B9B0-7C6AC06AEEB2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tests", "tests\tests.vcxproj", "{B536167E-6633-4FB4-97A5-16EA9E0DFE3C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3F7002B7-6973-4B69-B9B0-7C6AC06AEEB2} = {3F7002B7-6973-4B69-B9B0-7C6AC06AEEB2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

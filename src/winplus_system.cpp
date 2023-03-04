@@ -220,11 +220,11 @@ WINPLUS_FUNC_IMPL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId )
     }
     String fullName;
     fullName.resize(512);
-    DWORD dw = GetModuleFileNameEx( hProcess, NULL, &fullName[0], fullName.size() );
+    DWORD dw = GetModuleFileNameEx( hProcess, NULL, &fullName[0], (DWORD)fullName.size() );
     if ( !dw )
     {
         //dw = GetLastError();
-        dw = fullName.size();
+        dw = (DWORD)fullName.size();
         DllLoader dll("Kernel32.dll");
         auto func = dll.func<BOOL (WINAPI *)( HANDLE, DWORD, LPSTR, PDWORD )>("QueryFullProcessImageNameA");
         func && func.call( hProcess, 0, &fullName[0], &dw );

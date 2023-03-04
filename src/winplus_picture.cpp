@@ -38,7 +38,7 @@ WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename
         wBitCount = 32;
     //计算调色板大小，4,8位位图，需建立调色板
     if ( wBitCount <= 8 )
-        dwPaletteSize = ( 1 << wBitCount ) * sizeof(RGBQUAD);
+        dwPaletteSize = ( 1 << wBitCount ) * (DWORD)sizeof(RGBQUAD);
 
     //设置位图信息头
     GetObject( bitmap, sizeof(BITMAP), &bmpObj );
@@ -274,7 +274,7 @@ WINPLUS_FUNC_IMPL(INT) ImageEncoderFromExtName( String const & extname, CLSID * 
         ImageCodecInfo & info = pImageCodecInfo[i];
         String strFilenameExtension = UnicodeToString( info.FilenameExtension ? info.FilenameExtension : L"" );
         StringArray arrExtName;
-        INT nExtNameCount = StrSplit( strFilenameExtension.c_str(), TEXT(";"), &arrExtName );
+        INT nExtNameCount = (INT)StrSplit( strFilenameExtension.c_str(), TEXT(";"), &arrExtName );
         INT j;
         for ( j = 0; j < nExtNameCount; ++j )
         {

@@ -13,8 +13,7 @@ namespace winplus
 
 Ini::Ini( String const & szIniFile, BOOL bInWindowsDir ) : _strIniFile(szIniFile)
 {
-    int len;
-    len = _strIniFile.length();
+    size_t len = _strIniFile.length();
     /* 不是全路径,eg C:\ */
     if ( !( len > 1 && _strIniFile[1] == _T(':') ) )
     {

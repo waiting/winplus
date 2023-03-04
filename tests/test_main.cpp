@@ -4,7 +4,7 @@ using namespace std;
 int main()
 {
     winplus::DirIterator dir{"."};
-
+    auto iptr = winplus::MakeShared(new int);
     while ( dir.next() )
     {
         cout << dir.getFullPath() << endl;

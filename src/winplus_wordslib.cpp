@@ -97,12 +97,12 @@ void WordsLib::readHeaders()
     header.clear();
     StringStringMap tmpHeader;
     AnsiStringArray arrHeaders;
-    int count = StrSplit( headers, "\r\n", &arrHeaders );
+    int count = (int)StrSplit( headers, "\r\n", &arrHeaders );
 
     for ( i = 0; i < count; ++i )
     {
         AnsiStringArray kv;
-        int c = StrSplit( arrHeaders[i], ":", &kv );
+        int c = (int)StrSplit( arrHeaders[i], ":", &kv );
         if ( c == 1 )
         {
             kv.push_back("");
@@ -367,8 +367,8 @@ int WordsLib::splitWords( String const & text, StringArray * arrWords ) const
 
 int WordsLib::StrMatch( String const & str1, String const & str2 )
 {
-    int len1 = str1.length();
-    int len2 = str2.length();
+    int len1 = (int)str1.length();
+    int len2 = (int)str2.length();
     int i;
     for ( i = 0; i < len1 && i < len2; i++ )
     {

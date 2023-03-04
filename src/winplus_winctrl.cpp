@@ -191,7 +191,7 @@ WINPLUS_FUNC_IMPL(INT) Report_AddStrings( HWND report, StringArray const & cols 
     item.lParam = 0;
 
     INT index = ListView_InsertItem( report, &item );
-    INT i, colsCount = cols.size();
+    INT i, colsCount = (INT)cols.size();
 
     for ( i = 0; i < colsCount && i < realColsCount; i++ )
     {
@@ -215,7 +215,7 @@ WINPLUS_FUNC_IMPL(INT) Report_InsertStrings( HWND report, INT item_index, String
     item.lParam = 0;
 
     INT index = ListView_InsertItem( report, &item );
-    INT i, colsCount = cols.size();
+    INT i, colsCount = (INT)cols.size();
     
     for ( i = 0; i < colsCount && i < realColsCount; i++ )
     {
@@ -228,7 +228,7 @@ WINPLUS_FUNC_IMPL(INT) Report_InsertStrings( HWND report, INT item_index, String
 WINPLUS_FUNC_IMPL(void) Report_SetStrings( HWND report, INT item_index, StringArray const & cols )
 {
     INT realColsCount = Header_GetItemCount( ListView_GetHeader(report) );
-    INT i, colsCount = cols.size();
+    INT i, colsCount = (INT)cols.size();
 
     for ( i = 0; i < colsCount && i < realColsCount; i++ )
     {
@@ -252,7 +252,7 @@ WINPLUS_FUNC_IMPL(INT) Report_GetStrings( HWND report, INT item_index, StringArr
         item.cchTextMax = len + 1;
         item.pszText = &text[0];
 
-        len = SendMessage( report, LVM_GETITEMTEXT, item_index, (LPARAM)&item );
+        len = (INT)SendMessage( report, LVM_GETITEMTEXT, item_index, (LPARAM)&item );
 
         cols->push_back(item.pszText);
     }
@@ -473,7 +473,7 @@ BOOL FileDialog::doModal( LPCTSTR lpszInitialDir, LPCTSTR lpFilter )
     if ( _ofn.Flags & OFN_ALLOWMULTISELECT )
     {
         // 可多选的情况下,需要更多的空间来存储路径
-        _buffer.resize(0x20000);
+        _buffer.resize(0x2000);
     }
     else
     {
@@ -481,7 +481,7 @@ BOOL FileDialog::doModal( LPCTSTR lpszInitialDir, LPCTSTR lpFilter )
     }
 
     _ofn.lpstrFile = &_buffer[0];
-    _ofn.nMaxFile = _buffer.size();
+    _ofn.nMaxFile = (DWORD)_buffer.size();
 
     return _isOpen ? GetOpenFileName(&_ofn) : GetSaveFileName(&_ofn);
 }
@@ -498,7 +498,7 @@ String FileDialog::getFilePath() const
     if ( offset < _buffer.size() && _ofn.lpstrFile[offset] )
     {
         String fileName = _ofn.lpstrFile + offset;
-        offset += fileName.length();
+        offset += (int)fileName.length();
         offset += 1;
         return dirpath + dirSep + fileName;
     }
@@ -512,11 +512,11 @@ int FileDialog::getFilePaths( StringArray * pArr ) const
     while ( offset < _buffer.size() && _ofn.lpstrFile[offset] )
     {
         String fileName = _ofn.lpstrFile + offset;
-        offset += fileName.length();
+        offset += (int)fileName.length();
         offset += 1;
         pArr->push_back( dirpath + dirSep + fileName );
     }
-    return pArr->size();
+    return (int)pArr->size();
 }
 
 // class Notification ---------------------------------------------------------------------
