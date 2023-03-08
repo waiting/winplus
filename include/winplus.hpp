@@ -12,6 +12,7 @@
 
 #include "winplus_definitions.hpp"
 #include "winplus_resource.hpp"
+#include "winplus_strings.hpp"
 #include "winplus_system.hpp"
 #include "winplus_picture.hpp"
 #include "winplus_winctrl.hpp"

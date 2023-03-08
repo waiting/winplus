@@ -46,52 +46,54 @@ WINPLUS_FUNC_IMPL(void) PrintBarEx( String const & text, int text_width, int scr
 
 WINPLUS_FUNC_IMPL(void) Win32GUI_ShowConsole()
 {
-    /*
-        AllocConsole(); // 分配一个控制台资源
-        // 标准设备指针重定向
-        freopen( "CONOUT$", "wt+", stdout );
-        freopen( "CONIN$", "rt+", stdin );
-        freopen( "CONERR$", "rt+", stderr );
-    */
+    AllocConsole(); // 分配一个控制台资源
+    // 标准设备指针重定向
+    freopen( "CONOUT$", "w+", stdout );
+    freopen( "CONIN$", "r+", stdin );
+    freopen( "CONERR$", "r+", stderr );
+    //freopen( "CONOUT$", "wt+", stdout );
+    //freopen( "CONIN$", "rt+", stdin );
+    //freopen( "CONERR$", "rt+", stderr );
 
-    static const WORD MAX_CONSOLE_LINES = 1000;
-    int hConHandle;
-    intptr_t lStdHandle;
-    CONSOLE_SCREEN_BUFFER_INFO coninfo;
-    FILE *fp;
 
-    // allocate a console for this app
-    AllocConsole();
+    //static const WORD MAX_CONSOLE_LINES = 1000;
+    //int hConHandle;
+    //intptr_t lStdHandle;
+    //CONSOLE_SCREEN_BUFFER_INFO coninfo;
+    //FILE *fp;
 
-    // set the screen buffer to be big enough to let us scroll text
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
-    coninfo.dwSize.Y = MAX_CONSOLE_LINES;
-    SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
+    //// allocate a console for this app
+    //AllocConsole();
 
-    // redirect unbuffered STDOUT to the console
-    lStdHandle = (intptr_t)GetStdHandle(STD_OUTPUT_HANDLE);
-    hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-    fp = _fdopen( hConHandle, "w" );
-    *stdout = *fp;
-    setvbuf( stdout, NULL, _IONBF, 0 );
+    //// set the screen buffer to be big enough to let us scroll text
+    //GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
+    //coninfo.dwSize.Y = MAX_CONSOLE_LINES;
+    //SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
 
-    // redirect unbuffered STDIN to the console
-    lStdHandle = (intptr_t)GetStdHandle(STD_INPUT_HANDLE);
-    hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-    fp = _fdopen( hConHandle, "r" );
-    *stdin = *fp;
-    setvbuf( stdin, NULL, _IONBF, 0 );
+    //// redirect unbuffered STDOUT to the console
+    //lStdHandle = (intptr_t)GetStdHandle(STD_OUTPUT_HANDLE);
+    //hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+    //fp = _fdopen( hConHandle, "w" );
+    //*stdout = *fp;
+    //setvbuf( stdout, NULL, _IONBF, 0 );
 
-    // redirect unbuffered STDERR to the console
-    lStdHandle = (intptr_t)GetStdHandle(STD_ERROR_HANDLE);
-    hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-    fp = _fdopen( hConHandle, "w" );
-    *stderr = *fp;
-    setvbuf( stderr, NULL, _IONBF, 0 );
+    //// redirect unbuffered STDIN to the console
+    //lStdHandle = (intptr_t)GetStdHandle(STD_INPUT_HANDLE);
+    //hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+    //fp = _fdopen( hConHandle, "r" );
+    //*stdin = *fp;
+    //setvbuf( stdin, NULL, _IONBF, 0 );
 
-    // make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
-    // point to console as well
-    std::ios::sync_with_stdio();
+    //// redirect unbuffered STDERR to the console
+    //lStdHandle = (intptr_t)GetStdHandle(STD_ERROR_HANDLE);
+    //hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+    //fp = _fdopen( hConHandle, "w" );
+    //*stderr = *fp;
+    //setvbuf( stderr, NULL, _IONBF, 0 );
+
+    //// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
+    //// point to console as well
+    //std::ios::sync_with_stdio();
 }
 
 } // namespace winplus

@@ -520,7 +520,7 @@ int FileDialog::getFilePaths( StringArray * pArr ) const
 }
 
 // class Notification ---------------------------------------------------------------------
-Notification::Notification()
+Notification::Notification( UINT uVersion ) : _uVersion(uVersion)
 {
     _construct();
 }
@@ -549,7 +549,7 @@ bool Notification::add( HWND hwnd, UINT notificationId, Icon const & ico, String
         return false;
 
     _isAdd = true;
-    _nid.uVersion = NOTIFYICON_VERSION_4;
+    _nid.uVersion = _uVersion;
     return Shell_NotifyIcon(NIM_SETVERSION, &_nid) != FALSE;
 }
 

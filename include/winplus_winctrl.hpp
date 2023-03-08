@@ -131,17 +131,18 @@ public:
 
 };
 
-/* 系统托盘图标通知类 */
+/** \brief 系统托盘图标通知类，包括气球 */
 class WINPLUS_DLL Notification
 {
 private:
     NOTIFYICONDATA _nid;
+    UINT _uVersion; // 0, 3, 4 版本，影响通知消息的参数表示的是什么
     bool _isAdd;
 protected:
     void _construct();
 
 public:
-    Notification();
+    Notification( UINT uVersion = 0 );
     ~Notification();
     bool add( HWND hwnd, UINT notificationId, Icon const & ico, String const & strTip );
 

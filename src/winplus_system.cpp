@@ -276,6 +276,23 @@ WINPLUS_FUNC_IMPL(bool) ShutdownPrivilege( bool enable )
     return ret;
 }
 
+WINPLUS_FUNC_IMPL(String) GetErrorStr( DWORD err )
+{
+    String::pointer buf = NULL;
+    DWORD dw = FormatMessage(
+        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+        NULL,
+        err,
+        0,
+        (LPSTR)&buf,
+        256,
+        NULL
+    );
+    String str( buf, dw );
+    LocalFree(buf);
+    return str;
+}
+
 WINPLUS_FUNC_IMPL(String) GetNtVersion( void )
 {
     String version;

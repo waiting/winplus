@@ -45,6 +45,9 @@ WINPLUS_FUNC_DECL(INT) CommandArguments( StringArray * arr );
 /* 使能关机 */
 WINPLUS_FUNC_DECL(bool) ShutdownPrivilege( bool enable );
 
+/** \brief Windows错误号转成错误字符串 */
+WINPLUS_FUNC_DECL(String) GetErrorStr( DWORD err );
+
 /* 获得描述NT版本的字符串 */
 WINPLUS_FUNC_DECL(String) GetNtVersion( void );
 /* 获得描述系统版本的字符串 */

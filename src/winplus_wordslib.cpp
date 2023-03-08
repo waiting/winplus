@@ -1,4 +1,5 @@
 ﻿#include "winplus_definitions.hpp"
+#include "winplus_system.hpp"
 #include "winplus_wordslib.hpp"
 #include "winplus_strings.hpp"
 #include "strings.hpp"
@@ -36,7 +37,7 @@ _file(INVALID_HANDLE_VALUE),
     if ( _file == INVALID_HANDLE_VALUE )
     {
         DWORD dwErr = GetLastError();
-        throw WordsLibException( ((String)Mixed(dwErr) + "词库文件未找到").c_str() );
+        throw WordsLibException( ( GetErrorStr(dwErr) + "词库文件`" + filename + "`未找到" ).c_str() );
     }
 
     filesize = (uint)GetFileSize( _file, NULL );
@@ -97,19 +98,24 @@ void WordsLib::readHeaders()
     header.clear();
     StringStringMap tmpHeader;
     AnsiStringArray arrHeaders;
-    int count = (int)StrSplit( headers, "\r\n", &arrHeaders );
+    int count = (int)StrSplit2( headers, "\r\n", &arrHeaders );
 
     for ( i = 0; i < count; ++i )
     {
         AnsiStringArray kv;
         int c = (int)StrSplit( arrHeaders[i], ":", &kv );
-        if ( c == 1 )
+        if ( c > 1 )
         {
-            kv.push_back("");
+            AnsiString k = StrTrim(kv[0]);
+            StrMakeLower(&k);
+            tmpHeader[k] = StrTrim(kv[1]);
         }
-        AnsiString k = StrTrim(kv[0]);
-        _strlwr(&k[0]); // 小写
-        tmpHeader[k] = StrTrim(kv[1]);
+        else if ( c > 0 )
+        {
+            AnsiString k = StrTrim(kv[0]);
+            StrMakeLower(&k);
+            tmpHeader[k] = "";
+        }
     }
     // 检测编码
     encoding = isset( tmpHeader, "encoding" ) ? Mixed(tmpHeader["encoding"]) : Mixed("");
