@@ -17,7 +17,7 @@ namespace winplus
 
 // 坐标转换系列函数 -------------------------------------------------------
 
-/* 从缩放到实际 */
+/** \brief 从缩放到实际 */
 template < typename _RECT >
 inline _RECT RectFromScale( _RECT const & rect, DOUBLE scale )
 {
@@ -38,7 +38,7 @@ inline _SIZE SizeFromScale( _SIZE const & si, DOUBLE scale )
     return si2;
 }
 
-/* 实际到缩放 */
+/** \brief 实际到缩放 */
 template < typename _RECT >
 inline _RECT RectToScale( _RECT const & rect, DOUBLE scale )
 {
@@ -59,7 +59,7 @@ inline _SIZE SizeToScale( _SIZE const & si, DOUBLE scale )
     return si2;
 }
 
-/* 矩形相交 */
+/** \brief 矩形相交 */
 template < typename _RECT >
 inline _RECT RectIntersect( _RECT const & rc1, _RECT const & rc2 )
 {
@@ -71,7 +71,7 @@ inline _RECT RectIntersect( _RECT const & rc1, _RECT const & rc2 )
     return rc;
 }
 
-/* 矩形联合 */
+/** \brief 矩形联合 */
 template < typename _RECT >
 inline _RECT RectUnion( _RECT const & rc1, _RECT const & rc2 )
 {
@@ -83,7 +83,7 @@ inline _RECT RectUnion( _RECT const & rc1, _RECT const & rc2 )
     return rc;
 }
 
-/* 获取包含住一些矩形的矩形 */
+/** \brief 获取包含住一些矩形的矩形 */
 template < typename _RECT >
 inline _RECT RectIncludeRects( _RECT const * arrRect, INT count )
 {
@@ -121,7 +121,7 @@ inline _RECT RectIncludeRects( _RECT const * arrRect, INT count )
     return rcResult;
 }
 
-/* 正规化矩形,调用这个函数使得一个矩形正规化 */
+/** \brief 正规化矩形，调用这个函数使得一个矩形正规化 */
 template < typename _RECT >
 inline _RECT RectNormalize( _RECT const & rect )
 {
@@ -377,8 +377,7 @@ public:
 private:
     HDC _hDC;
     _GdiObject _hGdiObjectOld;
-    GdiObjectSelector( GdiObjectSelector const & );
-    GdiObjectSelector & operator = ( GdiObjectSelector const & );
+    DISABLE_OBJECT_COPY(GdiObjectSelector)
 };
 
 // GDI+ -------------------------------------------------------------------
@@ -387,10 +386,14 @@ private:
 class WINPLUS_DLL GdiplusInit
 {
     Gdiplus::GdiplusStartupInput _gdiplusStartupInput;
+    Gdiplus::GdiplusStartupOutput _gdiplusStartupOutput;
     ULONG_PTR _gdiplusToken;
+    bool _canShutdown;
 public:
     GdiplusInit();
     ~GdiplusInit();
+    void canShutdown( bool b ) { _canShutdown = b; }
+    DISABLE_OBJECT_COPY(GdiplusInit)
 };
 
 /* 旋转后大小 */
@@ -446,10 +449,7 @@ WINPLUS_FUNC_DECL(void) FillRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Brus
 
 #endif
 
-//////////////////////////////////////////////////////////////////////
-// 内存DC,管理绘制与位图显示
-// 此类不得含有虚函数,继承此类意味着也不得含虚函数
-//////////////////////////////////////////////////////////////////////
+// 内存DC，管理绘制与位图显示
 class WINPLUS_DLL MemDC
 {
 public:
@@ -466,7 +466,7 @@ public:
 
     INT width( void ) const { return _width; }
     INT height( void ) const { return _height; }
-    //void SetSizes( SIZE si ) { _width = si.cx; _height = si.cy; }
+
     BOOL isTransparent( void ) const { return _isTransparent; }
     COLORREF getTransparentColor( void ) const { return _transparent; }
 
@@ -479,7 +479,7 @@ public:
 
     void enableTransparent( BOOL bIsTransparent, COLORREF clrTransparent = 0 );
     void setBackground( COLORREF clrBackground, BOOL bFill = FALSE );
-    /* 管理一副位图,如果只是输出现有位图,则完毕后应该调用DetachBitmap()脱离管理 */
+    /* 管理一副位图，如果只是输出现有位图，则完毕后应该调用DetachBitmap()脱离管理 */
     HBITMAP attachBitmap( HBITMAP hBitmap );
     /* 位图脱离管理 */
     HBITMAP detachBitmap( void );
@@ -501,22 +501,23 @@ protected:
 
 private:
     INT _width, _height;
-    HDC _hMemDC;
-    HBITMAP _hBitmap;
+    HDC _hMemDC; // 内存DC
+    HBITMAP _hBitmap; // 内存位图
+    HBITMAP _hOldBitmap; // 从DC中选出的位图
     COLORREF _background; // 背景色
     COLORREF _transparent; // 透明色
     BOOL _isTransparent; // 是否透明
 };
 
 #if defined(_GDIPLUS_H)
-//////////////////////////////////////////////////////////////////////
-// 内存图片,管理绘制,支持alpha通道.
-//////////////////////////////////////////////////////////////////////
+
+// 内存图片(Bitmap 32bits)。管理绘制，支持alpha通道。
 class WINPLUS_DLL MemImage
 {
 public:
     MemImage( void );
     MemImage( int nWidth, int nHeight );
+    MemImage( String const & imgFile );
     MemImage( MemImage & other );
     ~MemImage( void );
     
@@ -528,7 +529,9 @@ public:
     int height( void ) const { return _pBmpImage ? _pBmpImage->GetHeight() : 0; }
 
     BOOL create( int nWidth, int nHeight );
-    BOOL create( Gdiplus::Size const & size ) { return create( size.Width, size.Height ); };
+    BOOL create( Gdiplus::Size const & size ) { return this->create( size.Width, size.Height ); };
+    BOOL create( String const & imgFile );
+
     void destroy( void );
     BOOL clone( MemImage const & other );
     BOOL copy( Gdiplus::Image * pImage );
@@ -552,7 +555,8 @@ public:
     {
         if ( this != &imgDest )
         {
-            return stretch( Gdiplus::Graphics(imgDest._pBmpImage), xDest, yDest, nDestWidth, nDestHeight, xSrc, ySrc, nSrcWidth, nSrcHeight );
+            Gdiplus::Graphics g(imgDest._pBmpImage);
+            return stretch( g, xDest, yDest, nDestWidth, nDestHeight, xSrc, ySrc, nSrcWidth, nSrcHeight );
         }
         return FALSE;
     }
@@ -564,7 +568,8 @@ public:
     {
         if ( this != &imgDest )
         {
-            return output( Gdiplus::Graphics(imgDest._pBmpImage), xDest, yDest, xSrc, ySrc, nSrcWidth, nSrcHeight );
+            Gdiplus::Graphics g(imgDest._pBmpImage);
+            return output( g, xDest, yDest, xSrc, ySrc, nSrcWidth, nSrcHeight );
         }
         return FALSE;
     }
@@ -572,6 +577,8 @@ public:
     {
         return output( imgDest, xDest, yDest, 0, 0, width(), height() );
     }
+
+    HBITMAP ObtainHBITMAP() const;
 protected:
     void _construct();
 

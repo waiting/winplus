@@ -10,19 +10,17 @@ namespace winplus
 
 WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename )
 {
-    HDC hDC; //设备描述表
-    INT nBits;  //当前显示分辨率下每个像素所占位数
-    WORD wBitCount = 0;    //位图中每个像素所占位数
-    //调色板大小，位图中像素字节大小，位图文件大小，写入文件字节数
-    DWORD dwPaletteSize = 0, dwBmBitsSize, dwDIBSize, dwWritten;
-    BITMAP bmpObj; //位图属性
-    BITMAPFILEHEADER bmfHdr; //位图文件头
-    BITMAPINFOHEADER bi;//位图信息头
-    LPBITMAPINFOHEADER lpbi; //指向位图信息头
-    //文件句柄，分配内存句柄，调色板句柄
-    HANDLE hFile, hDibData;
-    HPALETTE hPal, hOldPal = NULL;
-    //计算位图文件每个像素所占位数
+    HDC hDC; // 设备描述表
+    INT nBits; // 当前显示分辨率下每个像素所占位数
+    WORD wBitCount = 0; // 位图中每个像素所占位数
+    DWORD dwPaletteSize = 0, dwBmBitsSize, dwDIBSize, dwWritten; // 调色板大小，位图中像素字节大小，位图文件大小，写入文件字节数
+    BITMAP bmpObj; // 位图对象结构
+    BITMAPFILEHEADER bmfHdr; // 位图文件头
+    BITMAPINFOHEADER bi; // 位图信息头
+    LPBITMAPINFOHEADER lpbi; // 指向位图信息头
+    HANDLE hFile, hDibData; // 文件句柄，分配内存句柄
+    HPALETTE hPal, hOldPal = NULL; // 调色板句柄
+    // 计算位图文件每个像素所占位数
     hDC = CreateDC( TEXT("DISPLAY"), NULL, NULL, NULL );
     nBits = GetDeviceCaps( hDC, BITSPIXEL ) * GetDeviceCaps( hDC, PLANES );
     DeleteDC(hDC);
@@ -36,11 +34,11 @@ WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename
         wBitCount = 24;
     else
         wBitCount = 32;
-    //计算调色板大小，4,8位位图，需建立调色板
+    // 计算调色板大小，4,8位位图，需建立调色板
     if ( wBitCount <= 8 )
         dwPaletteSize = ( 1 << wBitCount ) * (DWORD)sizeof(RGBQUAD);
 
-    //设置位图信息头
+    // 设置位图信息头
     GetObject( bitmap, sizeof(BITMAP), &bmpObj );
     bi.biSize = sizeof(BITMAPINFOHEADER);
     bi.biWidth = bmpObj.bmWidth;
@@ -53,56 +51,56 @@ WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename
     bi.biYPelsPerMeter = 0;
     bi.biClrUsed = 0;
     bi.biClrImportant = 0;
-    //计算像素数据字节数
+    // 计算像素数据字节数
     dwBmBitsSize = ( ( bmpObj.bmWidth * wBitCount + 31 ) / 32 ) * 4 * bmpObj.bmHeight;
-    //为位图内容分配内存
-    hDibData = GlobalAlloc( GHND, dwBmBitsSize + dwPaletteSize + sizeof( BITMAPINFOHEADER ) );
-    lpbi = ( LPBITMAPINFOHEADER )GlobalLock( hDibData );
+    // 为位图内容分配内存
+    hDibData = GlobalAlloc( GHND, dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER) );
+    lpbi = (LPBITMAPINFOHEADER)GlobalLock( hDibData );
     *lpbi = bi;
-    //处理调色板      
-    hPal = ( HPALETTE )GetStockObject(DEFAULT_PALETTE);
+    // 处理调色板
+    hPal = (HPALETTE)GetStockObject(DEFAULT_PALETTE);
     if ( hPal )
     {
         hDC = GetDC(NULL);
         hOldPal = SelectPalette( hDC, hPal, FALSE );
         RealizePalette(hDC);
     }
-    //获取该调色板下新的像素值
+    // 获取该调色板下新的像素值
     GetDIBits( hDC, bitmap, 0, (UINT)bmpObj.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) + dwPaletteSize, (LPBITMAPINFO)lpbi, DIB_RGB_COLORS );
-    //恢复调色板
+    // 恢复调色板
     if (hOldPal)
     {
         SelectPalette(hDC, hOldPal, TRUE);
         RealizePalette(hDC);
         ReleaseDC(NULL, hDC);
     }
-    //创建位图文件
+    // 创建位图文件
     hFile = CreateFile( filename.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL );
     if ( hFile == INVALID_HANDLE_VALUE )
         return false;
-    //设置位图文件头
+    // 设置位图文件头
     bmfHdr.bfType = 0x4D42; //"BM"
     dwDIBSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwBmBitsSize;
     bmfHdr.bfSize = dwDIBSize;
     bmfHdr.bfReserved1 = 0;
     bmfHdr.bfReserved2 = 0;
     bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize;
-    //写入位图文件头
+    // 写入位图文件头
     WriteFile(hFile, &bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL);
-    //写入位图文件其余内容
+    // 写入位图文件其余内容
     WriteFile(hFile, lpbi, dwDIBSize, &dwWritten, NULL);
-    //清除
+    // 清除
     GlobalUnlock(hDibData);
     GlobalFree(hDibData);
     CloseHandle(hFile);
     return true;
 }
 
-WINPLUS_FUNC_IMPL(IPicturePtr) Picture_Load( String const & pic_file )
+WINPLUS_FUNC_IMPL(IPicturePtr) Picture_Load( String const & picFile )
 {
     HRESULT hr;
     IPicturePtr pic;
-    IStreamPtr stream = CreateStreamExistingFile(pic_file);
+    IStreamPtr stream = CreateStreamExistingFile(picFile);
     if ( !(bool)stream )
     {
         return NULL;
@@ -136,28 +134,24 @@ WINPLUS_FUNC_IMPL(SIZE) Picture_GetDimensions( IPicturePtr pic )
     return dimensions;
 }
 
-WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & pic_file, MemImage * mem_img )
+WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & picFile, MemImage * mem_img )
 {
-    Gdiplus::Bitmap bmp( StringToUnicode(pic_file).c_str() );
+    Gdiplus::Bitmap bmp( StringToUnicode(picFile).c_str() );
     mem_img->create( bmp.GetWidth(), bmp.GetHeight() );
     mem_img->copy(&bmp);
     return true;
 }
 
-WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & pic_file, MemDC * memdc )
+WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & picFile, MemDC * memDC )
 {
     IPicturePtr pic;
-    if ( pic = Picture_Load(pic_file) )
+    if ( pic = Picture_Load(picFile) )
     {
         HDC hDC = GetDC(HWND_DESKTOP);
-        MemDC temp_dc;
         HBITMAP hBitmap = Picture_GetBitmap(pic);
-        temp_dc.create(hDC);
-        temp_dc.attachBitmap(hBitmap);
-        memdc->copy(temp_dc);
-        temp_dc.detachBitmap();
+        memDC->create(hDC);
+        memDC->attachBitmap(hBitmap);
         ReleaseDC( HWND_DESKTOP, hDC );
-        
         return true;
     }
     return false;

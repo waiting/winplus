@@ -1,5 +1,9 @@
-﻿// GuiTest.cpp : 定义应用程序的入口点。
-//
+﻿#include "winux.hpp"
+#include "winplus.hpp"
+using namespace winplus;
+using namespace std;
+
+#include <atlimage.h>
 
 #include "framework.h"
 #include "GuiTest.h"
@@ -8,53 +12,57 @@
 
 // 全局变量:
 HINSTANCE hInst;                                // 当前实例
-WCHAR szTitle[MAX_LOADSTRING];                  // 标题栏文本
-WCHAR szWindowClass[MAX_LOADSTRING];            // 主窗口类名
+TCHAR szTitle[MAX_LOADSTRING];                  // 标题栏文本
+TCHAR szWindowClass[MAX_LOADSTRING];            // 主窗口类名
 
 // 此代码模块中包含的函数的前向声明:
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+ATOM MyRegisterClass( HINSTANCE );
+BOOL InitInstance( HINSTANCE, int );
+LRESULT CALLBACK MainWndProc( HWND, UINT, WPARAM, LPARAM );
+INT_PTR CALLBACK AboutDlgProc( HWND, UINT, WPARAM, LPARAM );
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+int APIENTRY _tWinMain(
+    HINSTANCE hInstance,
+    HINSTANCE hPrevInstance,
+    LPTSTR lpCmdLine,
+    int nCmdShow
+)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: 在此处放置代码。
+    GdiplusInit gdipInit;
+    gdipInit.canShutdown(false);
+    Win32GUI_ShowConsole();
 
     // 初始化全局字符串
-    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_GUITEST, szWindowClass, MAX_LOADSTRING);
+    LoadString( hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING );
+    LoadString( hInstance, IDC_GUITEST, szWindowClass, MAX_LOADSTRING );
     MyRegisterClass(hInstance);
 
     // 执行应用程序初始化:
-    if (!InitInstance(hInstance, nCmdShow))
+    if ( !InitInstance( hInstance, nCmdShow ) )
     {
         return FALSE;
     }
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GUITEST));
+    HACCEL hAccelTable = LoadAccelerators( hInstance, MAKEINTRESOURCE(IDC_GUITEST) );
 
     MSG msg;
 
     // 主消息循环:
-    while (GetMessage(&msg, nullptr, 0, 0))
+    while ( GetMessage( &msg, nullptr, 0, 0 ) )
     {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+        if ( !TranslateAccelerator( msg.hwnd, hAccelTable, &msg ) )
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
     }
 
-    return (int) msg.wParam;
+    return (int)msg.wParam;
 }
-
 
 
 //
@@ -62,69 +70,90 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 //
 //  目标: 注册窗口类。
 //
-ATOM MyRegisterClass(HINSTANCE hInstance)
+ATOM MyRegisterClass( HINSTANCE hInstance )
 {
-    WNDCLASSEXW wcex;
+    WNDCLASSEX wcex;
 
     wcex.cbSize = sizeof(WNDCLASSEX);
 
     wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
+    wcex.lpfnWndProc    = MainWndProc;
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GUITEST));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_GUITEST);
+    wcex.lpszMenuName   = MAKEINTRESOURCE(IDC_GUITEST);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
-    return RegisterClassExW(&wcex);
+    return RegisterClassEx(&wcex);
 }
 
-//
-//   函数: InitInstance(HINSTANCE, int)
-//
-//   目标: 保存实例句柄并创建主窗口
-//
-//   注释:
-//
-//        在此函数中，我们在全局变量中保存实例句柄并
-//        创建和显示主程序窗口。
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 将实例句柄存储在全局变量中
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+   HWND hWnd = CreateWindowEx(
+       WS_EX_LAYERED,
+       szWindowClass,
+       szTitle,
+       WS_OVERLAPPEDWINDOW,
+       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
+       nullptr,
+       nullptr,
+       hInstance,
+       nullptr
+   );
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+   if ( !hWnd ) return FALSE;
 
+   //SetLayeredWindowAttributes( hWnd, 0, 255, LWA_ALPHA );
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
    return TRUE;
 }
 
-//
-//  函数: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  目标: 处理主窗口的消息。
-//
-//  WM_COMMAND  - 处理应用程序菜单
-//  WM_PAINT    - 绘制主窗口
-//  WM_DESTROY  - 发送退出消息并返回
-//
-//
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+MemImage g_img;
+MemDC g_memdc;
+
+LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    switch (message)
+
+    cout << message << ", " << wParam << ", " << lParam << "\n";
+
+    switch ( message )
     {
+    case WM_CREATE:
+        {
+            g_img.create("cg_dialog1.png");
+            g_memdc.create( NULL, g_img.width(), g_img.height() );
+
+            {
+                Gdiplus::Graphics g( (HDC)g_memdc );
+                Gdiplus::Status s = g.DrawImage( g_img, 0, 0, g_memdc.width(), g_memdc.height() );
+                //g_img2.Draw( g_memdc, 0, 0, g_img2.GetWidth(), g_img2.GetHeight(), 0, 0, g_img2.GetWidth(), g_img2.GetHeight() );
+                //g_memdc.attachBitmap( g_img.ObtainHBITMAP() );
+
+                //TextOut( g_memdc, 10,30, "Hello", 5 );
+            }
+
+            BLENDFUNCTION blend = { 0 };
+            blend.BlendOp = AC_SRC_OVER;
+            blend.SourceConstantAlpha = 255;
+            blend.AlphaFormat = AC_SRC_ALPHA;
+            POINT ptPos = { 0, 0 };
+            SIZE sizeWnd = { g_memdc.width(), g_memdc.height() };
+
+            HDC hScreenDC = GetDC(hWnd);
+            UpdateLayeredWindow(hWnd, hScreenDC, &ptPos, &sizeWnd, g_memdc, &ptPos, 0, &blend, ULW_ALPHA );
+            ReleaseDC( hWnd, hScreenDC );
+
+            CreateWindowEx( 0, "BUTTON", "OK!!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
+        }
+        break;
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -132,7 +161,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             switch (wmId)
             {
             case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
                 break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
@@ -142,11 +171,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+    case WM_LBUTTONUP:
+        {
+            Gdiplus::Graphics g( (HDC)g_memdc );
+            Gdiplus::Font font{ L"微软雅黑", 120 };
+            Gdiplus::SolidBrush brush{ Gdiplus::Color{255, 255, 255} };
+            g.DrawString( L"Hello", 5, &font, Gdiplus::PointF{30,30}, &brush );
+
+            BLENDFUNCTION blend = { 0 };
+            blend.BlendOp = AC_SRC_OVER;
+            blend.SourceConstantAlpha = 255;
+            blend.AlphaFormat = AC_SRC_ALPHA;
+            POINT ptPos = { 0, 0 };
+            SIZE sizeWnd = { g_memdc.width(), g_memdc.height() };
+
+            HDC hScreenDC = GetDC(hWnd);
+            UpdateLayeredWindow(hWnd, hScreenDC, &ptPos, &sizeWnd, g_memdc, &ptPos, 0, &blend, ULW_ALPHA );
+            ReleaseDC( hWnd, hScreenDC );
+        }
+        break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: 在此处添加使用 hdc 的任何绘图代码...
+            //g_memdc.bitBlt(hdc, 0, 0, g_memdc.width(), g_memdc.height(), 0, 0);
+            //Gdiplus::Graphics g(hdc);
+            //g.DrawString()
+            TextOut( hdc, 10, 10, "Hello", 5 );
+
+            cout << ps.rcPaint.left << ", "
+                << ps.rcPaint.top << ", "
+                << ps.rcPaint.right << ", "
+                << ps.rcPaint.bottom << "\n"
+                ;
+
             EndPaint(hWnd, &ps);
         }
         break;
@@ -160,7 +219,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 // “关于”框的消息处理程序。
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
