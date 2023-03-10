@@ -77,8 +77,7 @@ WINPLUS_FUNC_IMPL(RECT) Window_GetRect( HWND window )
 {
     RECT rc;
     GetWindowRect( window, &rc );
-    HWND parent;
-    parent = GetParent(window);
+    HWND parent = GetParent(window);
     if ( IsWindow(parent) ) // 判断父窗口是否存在，把屏幕坐标换为相对父窗口坐标
     {
         ScreenToClient( parent, (LPPOINT)&rc );

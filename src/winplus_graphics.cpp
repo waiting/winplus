@@ -117,6 +117,22 @@ WINPLUS_FUNC_IMPL(void) FillRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Brus
 
 }
 
+WINPLUS_FUNC_IMPL(SIZE) GetHdcWindowSize( HDC hDC )
+{
+    HWND hWnd = WindowFromDC( hDC );
+    RECT rc;
+    GetWindowRect( hWnd, &rc );
+    return { rc.right - rc.left, rc.bottom - rc.top };
+}
+
+WINPLUS_FUNC_IMPL(SIZE) GetHdcBitmapSize( HDC hDC )
+{
+    HBITMAP hBitmap = (HBITMAP)GetCurrentObject( hDC, OBJ_BITMAP );
+    BITMAP bm;
+    GetObject( hBitmap, sizeof( bm ), &bm );
+    return { bm.bmWidth, bm.bmHeight };
+}
+
 // class MemDC ----------------------------------------------------------------------------
 MemDC::MemDC( void )
 {
@@ -396,10 +412,8 @@ BOOL MemDC::rotate( DOUBLE angle, MemDC * pMemDC )
 
 BOOL MemDC::stretchTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT nMode ) const
 {
-    if ( _hMemDC == NULL )
-    {
-        return FALSE;
-    }
+    if ( _hMemDC == NULL ) return FALSE;
+
     nMode = SetStretchBltMode( hDestDC, nMode );
     BOOL b = ::StretchBlt( hDestDC, xDest, yDest, nDestWidth, nDestHeight, _hMemDC, x, y, width, height, SRCCOPY );
     SetStretchBltMode( hDestDC, nMode );
@@ -411,13 +425,21 @@ BOOL MemDC::stretchEntireTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, 
     return this->stretchTo( hDestDC, xDest, yDest, nDestWidth, nDestHeight, 0, 0, _width, _height, nMode );
 }
 
-BOOL MemDC::copyTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y ) const
+BOOL MemDC::stretchFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nSrcWidth, INT nSrcHeight, INT x, INT y, INT width, INT height, INT nMode ) const
 {
-    if ( _hMemDC == NULL )
-    {
-        return FALSE;
-    }
-    return ::BitBlt( hDestDC, xDest, yDest, nDestWidth, nDestHeight, _hMemDC, x, y, SRCCOPY );
+    if ( _hMemDC == NULL ) return FALSE;
+
+    nMode = SetStretchBltMode( _hMemDC, nMode );
+    BOOL b = ::StretchBlt( _hMemDC, x, y, width, height, hSrcDC, xSrc, ySrc, nSrcWidth, nSrcHeight, SRCCOPY );
+    SetStretchBltMode( _hMemDC, nMode );
+    return b;
+}
+
+BOOL MemDC::copyTo( HDC hDestDC, INT xDest, INT yDest, INT nWidth, INT nHeight, INT x, INT y ) const
+{
+    if ( _hMemDC == NULL ) return FALSE;
+
+    return ::BitBlt( hDestDC, xDest, yDest, nWidth, nHeight, _hMemDC, x, y, SRCCOPY );
 }
 
 BOOL MemDC::copyEntireTo( HDC hDestDC, INT xDest, INT yDest ) const
@@ -425,12 +447,17 @@ BOOL MemDC::copyEntireTo( HDC hDestDC, INT xDest, INT yDest ) const
     return this->copyTo( hDestDC, xDest, yDest, _width, _height, 0, 0 );
 }
 
-BOOL MemDC::transparentTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT nMode /*= HALFTONE */ ) const
+BOOL MemDC::copyFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nWidth, INT nHeight, INT x, INT y ) const
 {
-    if ( _hMemDC == NULL )
-    {
-        return FALSE;
-    }
+    if ( _hMemDC == NULL ) return FALSE;
+
+    return ::BitBlt( _hMemDC, x, y, nWidth, nHeight, hSrcDC, xSrc, ySrc, SRCCOPY );
+}
+
+BOOL MemDC::transparentTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT nMode ) const
+{
+    if ( _hMemDC == NULL ) return FALSE;
+
     nMode = SetStretchBltMode( hDestDC, nMode );
     BOOL b;
     if ( this->isTransparent() )
@@ -445,9 +472,27 @@ BOOL MemDC::transparentTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, IN
     return b;
 }
 
-BOOL MemDC::transparentEntireTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT nMode /*= HALFTONE */ ) const
+BOOL MemDC::transparentEntireTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT nMode ) const
 {
     return this->transparentTo( hDestDC, xDest, yDest, nDestWidth, nDestHeight, 0, 0, _width, _height, nMode );
+}
+
+BOOL MemDC::transparentFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nSrcWidth, INT nSrcHeight, INT x, INT y, INT width, INT height, INT nMode ) const
+{
+    if ( _hMemDC == NULL ) return FALSE;
+
+    nMode = SetStretchBltMode( _hMemDC, nMode );
+    BOOL b;
+    if ( this->isTransparent() )
+    {
+        b = ::TransparentBlt( _hMemDC, x, y, width, height, hSrcDC, xSrc, ySrc, nSrcWidth, nSrcHeight, (UINT)_transparent );
+    }
+    else
+    {
+        b = ::StretchBlt( _hMemDC, x, y, width, height, hSrcDC, xSrc, ySrc, nSrcWidth, nSrcHeight, SRCCOPY );
+    }
+    SetStretchBltMode( _hMemDC, nMode );
+    return b;
 }
 
 #if defined(_GDIPLUS_H)
@@ -625,12 +670,13 @@ HBITMAP MemImage::ObtainHBITMAP() const
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32;
     bmi.bmiHeader.biCompression = BI_RGB;
-    bmi.bmiHeader.biSizeImage = imgRect.Width * imgRect.Height * ( bmi.bmiHeader.biBitCount / 8 );
+    //bmi.bmiHeader.biSizeImage = imgRect.Width * imgRect.Height * ( bmi.bmiHeader.biBitCount / 8 );
+    DWORD dwImageSizeBytes = ( ( imgRect.Width * bmi.bmiHeader.biBitCount + 31 ) / 32 ) * imgRect.Height * ( bmi.bmiHeader.biBitCount / 8 );
 
     hNewBitmap = CreateDIBSection( NULL, &bmi, DIB_RGB_COLORS, &lpBmpBits, NULL, 0 );
     Gdiplus::BitmapData bmpData;
     this->_pBmpImage->LockBits( &imgRect, Gdiplus::ImageLockModeRead, _pBmpImage->GetPixelFormat(), &bmpData );
-    memcpy( lpBmpBits, bmpData.Scan0, bmi.bmiHeader.biSizeImage );
+    memcpy( lpBmpBits, bmpData.Scan0, dwImageSizeBytes );
     this->_pBmpImage->UnlockBits(&bmpData);
 
     return hNewBitmap;

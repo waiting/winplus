@@ -113,9 +113,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 MemImage g_img;
 MemDC g_memdc;
 HWND g_hButtonWnd;
+BLENDFUNCTION g_blend;
 
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    using namespace Gdiplus;
+
     switch ( message )
     {
     case WM_CREATE:
@@ -130,28 +133,23 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
             {
                 Gdiplus::Graphics g( (HDC)g_memdc );
-                //g.SetCompositingQuality(Gdiplus::CompositingQuality::CompositingQualityHighQuality);
-                //g.SetCompositingMode(Gdiplus::CompositingMode::CompositingModeSourceOver);
-                g.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
+                g.SetSmoothingMode(SmoothingModeAntiAlias);
 
                 Gdiplus::Status s = g.DrawImage( g_img, 0, 0, g_memdc.width(), g_memdc.height() );
 
                 FillRoundRectangle(g, Gdiplus::SolidBrush(Gdiplus::Color(255,255,255)), Gdiplus::RectF(50,50,100,30), 8 );
-
-                HDC hBtnDC = GetDC(g_hButtonWnd);
-                BOOL b=BitBlt( g_memdc, 0, 0, 100, 30, hBtnDC, 0, 0, SRCCOPY );
-                ReleaseDC(g_hButtonWnd, hBtnDC);
             }
 
-            BLENDFUNCTION blend = { 0 };
-            blend.BlendOp = AC_SRC_OVER;
-            blend.SourceConstantAlpha = 255;
-            blend.AlphaFormat = AC_SRC_ALPHA;
+            // BLENDFUNCTION
+            g_blend.BlendOp = AC_SRC_OVER;
+            g_blend.SourceConstantAlpha = 255;
+            g_blend.AlphaFormat = AC_SRC_ALPHA;
+
             POINT ptPos = { 0, 0 };
             SIZE sizeWnd = { g_memdc.width(), g_memdc.height() };
 
             HDC hScreenDC = GetDC(hWnd);
-            //UpdateLayeredWindow(hWnd, hScreenDC, NULL, &sizeWnd, g_memdc, &ptPos, 0, &blend, ULW_ALPHA );
+            //UpdateLayeredWindow(hWnd, hScreenDC, NULL, &sizeWnd, g_memdc, &ptPos, 0, &g_blend, ULW_ALPHA );
             ReleaseDC( hWnd, hScreenDC );
 
         }
@@ -177,24 +175,29 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
     case WM_LBUTTONUP:
         cout << message << ", " << wParam << ", " << lParam << "\n";
         {
-            /*Gdiplus::Graphics g( (HDC)g_memdc );
-            Gdiplus::Font font{ L"微软雅黑", 120 };
-            Gdiplus::SolidBrush brush{ Gdiplus::Color{255, 255, 255} };
-            g.DrawString( L"Hello", 5, &font, Gdiplus::PointF{30,30}, &brush );
-
-            BLENDFUNCTION blend = { 0 };
-            blend.BlendOp = AC_SRC_OVER;
-            blend.SourceConstantAlpha = 255;
-            blend.AlphaFormat = AC_SRC_ALPHA;
-            POINT ptPos = { 0, 0 };
-            SIZE sizeWnd = { g_memdc.width(), g_memdc.height() };
-
-            HDC hScreenDC = GetDC(hWnd);
-            UpdateLayeredWindow(hWnd, hScreenDC, &ptPos, &sizeWnd, g_memdc, &ptPos, 0, &blend, ULW_ALPHA );
-            ReleaseDC( hWnd, hScreenDC );*/
             HDC hBtnDC = GetDC(g_hButtonWnd);
-            BOOL b=BitBlt( g_memdc, 0, 0, 100, 30, hBtnDC, 0, 0, SRCCOPY );
+            //BOOL b=BitBlt( g_memdc, 0, 0, 100, 30, hBtnDC, 0, 0, SRCCOPY );
+            //g_memdc.copyFrom(hBtnDC,0,0,100,30,10,10);
+            SIZE bmSize = GetHdcBitmapSize(hBtnDC);
+            SIZE wndSize = GetHdcWindowSize(hBtnDC);
+
+            cout
+                << "BMP(" << bmSize.cx << "," << bmSize.cy << ")" << endl
+                << "HWND(" << wndSize.cx << "," << wndSize.cy << ")" << endl
+            ;
+
+            g_memdc.copyFrom( hBtnDC, 0, 0, wndSize.cx, wndSize.cy, 0, 0 );
             ReleaseDC(g_hButtonWnd, hBtnDC);
+
+            Bitmap gdipBmp{ g_memdc.getMemBitmap(), NULL };
+
+            //Bitmap_SaveFile(g_memdc.getMemBitmap(),"gmemdc.bmp");
+
+            CLSID clsid;
+            ImageEncoderFromExtName("png", &clsid);
+            gdipBmp.Save( L"gdip-gmemdc.png", &clsid );
+
+            Bitmap_SaveFile( g_img.ObtainHBITMAP(), "g_img.bmp");
 
             InvalidateRect(hWnd, NULL, TRUE);
         }
@@ -206,7 +209,9 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             HDC hdc = BeginPaint(hWnd, &ps);
 
             // TODO: 在此处添加使用 hdc 的任何绘图代码...
-            g_memdc.transparentEntireTo( hdc, 0, 0, g_memdc.width(), g_memdc.height() );
+            //g_memdc.transparentEntireTo( hdc, 0, 0, g_memdc.width(), g_memdc.height() );
+
+            AlphaBlend( hdc, 0, 0, g_memdc.width(), g_memdc.height(), g_memdc, 0, 0, g_memdc.width(), g_memdc.height(), g_blend );
 
             //g.DrawImage()
 

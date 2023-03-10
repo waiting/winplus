@@ -138,14 +138,15 @@ inline _RECT RectNormalize( _RECT const & rect )
 }
 
 /** \brief 矩形宽 */
-template < typename _RETVAL, typename _RECT >
-inline _RETVAL RectWidth( _RECT const & rc )
+template < typename _RECT >
+inline auto RectWidth( _RECT const & rc ) -> decltype(rc.left)
 {
     return rc.right - rc.left;
 }
+
 /** \brief 矩形高 */
-template < typename _RETVAL, typename _RECT >
-inline _RETVAL RectHeight( _RECT const & rc )
+template < typename _RECT >
+inline auto RectHeight( _RECT const & rc ) -> decltype(rc.top)
 {
     return rc.bottom - rc.top;
 }
@@ -453,6 +454,12 @@ WINPLUS_FUNC_DECL(void) FillRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Brus
 
 #endif
 
+/** \brief 获取HDC关联的窗口大小 */
+WINPLUS_FUNC_DECL(SIZE) GetHdcWindowSize( HDC hDC );
+
+/** \brief 获取HDC内的位图大小 */
+WINPLUS_FUNC_DECL(SIZE) GetHdcBitmapSize( HDC hDC );
+
 /** \brief 内存DC，管理绘制与位图显示 */
 class WINPLUS_DLL MemDC
 {
@@ -472,10 +479,13 @@ protected:
 
 public:
     operator HDC( void ) const { return _hMemDC; }
-    operator BOOL( void ) const { return _hMemDC != NULL && _hMemBitmap != NULL; }
+    operator BOOL( void ) const { return _hMemDC != NULL; }
 
     INT width( void ) const { return _width; }
     INT height( void ) const { return _height; }
+
+    HBITMAP getMemBitmap() const { return _hMemBitmap; }
+    HBITMAP getBitmap() const { return _hBitmap; }
 
     BOOL isTransparent( void ) const { return _isTransparent; }
     COLORREF getTransparentColor( void ) const { return _transparent; }
@@ -513,16 +523,22 @@ public:
     BOOL stretchTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT nMode = HALFTONE ) const;
     /** \brief 伸缩传输整个内存DC到目标DC */
     BOOL stretchEntireTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT nMode = HALFTONE ) const;
+    /** \brief 从源DC伸缩传输到自身 */
+    BOOL stretchFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nSrcWidth, INT nSrcHeight, INT x, INT y, INT width, INT height, INT nMode = HALFTONE ) const;
 
     /** \brief 传输到目标DC */
-    BOOL copyTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y ) const;
+    BOOL copyTo( HDC hDestDC, INT xDest, INT yDest, INT nWidth, INT nHeight, INT x, INT y ) const;
     /** \brief 传输整个内存DC到目标DC */
     BOOL copyEntireTo( HDC hDestDC, INT xDest, INT yDest ) const;
+    /** \brief 从源DC传输到自身 */
+    BOOL copyFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nWidth, INT nHeight, INT x, INT y ) const;
 
     /** \brief 透明传输到目标DC */
     BOOL transparentTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT nMode = HALFTONE ) const;
     /** \brief 透明传输整个内存DC到目标DC */
     BOOL transparentEntireTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT nMode = HALFTONE ) const;
+    /** \brief 从源DC透明传输到自身 */
+    BOOL transparentFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nSrcWidth, INT nSrcHeight, INT x, INT y, INT width, INT height, INT nMode = HALFTONE ) const;
 
 private:
     INT _width;             // 宽度
@@ -570,12 +586,12 @@ public:
     BOOL stretch( Gdiplus::Graphics & gDest, int xDest, int yDest, int nDestWidth, int nDestHeight, int xSrc, int ySrc, int nSrcWidth, int nSrcHeight ) const;
     BOOL stretchEntire( Gdiplus::Graphics & gDest, int xDest, int yDest, int nDestWidth, int nDestHeight ) const
     {
-        return stretch( gDest, xDest, yDest, nDestWidth, nDestHeight, 0, 0, width(), height() );
+        return this->stretch( gDest, xDest, yDest, nDestWidth, nDestHeight, 0, 0, this->width(), this->height() );
     }
     BOOL output( Gdiplus::Graphics & gDest, int xDest, int yDest, int xSrc, int ySrc, int nSrcWidth, int nSrcHeight ) const;
     BOOL outputEntire( Gdiplus::Graphics & gDest, int xDest, int yDest ) const
     {
-        return output( gDest, xDest, yDest, 0, 0, width(), height() );
+        return this->output( gDest, xDest, yDest, 0, 0, this->width(), this->height() );
     }
     
     BOOL stretch( MemImage & imgDest, int xDest, int yDest, int nDestWidth, int nDestHeight, int xSrc, int ySrc, int nSrcWidth, int nSrcHeight ) const
@@ -583,28 +599,29 @@ public:
         if ( this != &imgDest )
         {
             Gdiplus::Graphics g(imgDest._pBmpImage);
-            return stretch( g, xDest, yDest, nDestWidth, nDestHeight, xSrc, ySrc, nSrcWidth, nSrcHeight );
+            return this->stretch( g, xDest, yDest, nDestWidth, nDestHeight, xSrc, ySrc, nSrcWidth, nSrcHeight );
         }
         return FALSE;
     }
     BOOL stretchEntire( MemImage & imgDest, int xDest, int yDest, int nDestWidth, int nDestHeight ) const
     {
-        return stretch( imgDest, xDest, yDest, nDestWidth, nDestHeight, 0, 0, width(), height() );
+        return this->stretch( imgDest, xDest, yDest, nDestWidth, nDestHeight, 0, 0, this->width(), this->height() );
     }
     BOOL output( MemImage & imgDest, int xDest, int yDest, int xSrc, int ySrc, int nSrcWidth, int nSrcHeight ) const
     {
         if ( this != &imgDest )
         {
             Gdiplus::Graphics g(imgDest._pBmpImage);
-            return output( g, xDest, yDest, xSrc, ySrc, nSrcWidth, nSrcHeight );
+            return this->output( g, xDest, yDest, xSrc, ySrc, nSrcWidth, nSrcHeight );
         }
         return FALSE;
     }
     BOOL outputEntire( MemImage & imgDest, int xDest, int yDest ) const
     {
-        return output( imgDest, xDest, yDest, 0, 0, width(), height() );
+        return this->output( imgDest, xDest, yDest, 0, 0, this->width(), this->height() );
     }
 
+    /** \brief 以当前Bitmap内容创建一张新的HBITMAP位图 */
     HBITMAP ObtainHBITMAP() const;
 protected:
     void _zeroInit();
