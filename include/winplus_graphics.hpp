@@ -137,20 +137,20 @@ inline _RECT RectNormalize( _RECT const & rect )
     return rcResult;
 }
 
-/* 矩形宽 */
+/** \brief 矩形宽 */
 template < typename _RETVAL, typename _RECT >
 inline _RETVAL RectWidth( _RECT const & rc )
 {
     return rc.right - rc.left;
 }
-/* 矩形高 */
+/** \brief 矩形高 */
 template < typename _RETVAL, typename _RECT >
 inline _RETVAL RectHeight( _RECT const & rc )
 {
     return rc.bottom - rc.top;
 }
 
-/* 旋转之后大小 */
+/** \brief 旋转之后大小 */
 inline SIZE SizeAfterRotate( DOUBLE angle, INT width, INT height )
 {
     DOUBLE ang = -angle * acos(0.0f) / 90;
@@ -195,7 +195,7 @@ inline SIZE SizeAfterRotate( DOUBLE angle, SIZE const & si )
     return SizeAfterRotate( angle, si.cx, si.cy );
 }
 
-/* 点 */
+/** \brief 点 */
 struct GdiPoint
 {
     DOUBLE x;
@@ -213,7 +213,7 @@ struct GdiPoint
     }
 };
 
-/* 尺寸 */
+/** \brief 尺寸 */
 struct GdiSize
 {
     DOUBLE cx;
@@ -231,7 +231,7 @@ struct GdiSize
     }
 };
 
-/* 矩形 */
+/** \brief 矩形 */
 struct GdiRect
 {
     DOUBLE left;
@@ -299,7 +299,7 @@ struct GdiRect
     }
 };
 
-/* 固定比例缩放图片到一定范围内,并返回其矩形区域,宽高比,缩放比 */
+/** \brief 固定比例缩放图片到一定范围内，并返回其矩形区域、宽高比、缩放比 */
 template < typename _RECT, typename _Type >
 inline _RECT RectRecalcImage( _Type ImageWidth, _Type ImageHeight, _Type Width, _Type Height, DOUBLE * pRatioWH, DOUBLE * pScale )
 {
@@ -361,14 +361,14 @@ inline _RECT RectRecalcImage( _Type ImageWidth, _Type ImageHeight, _Type Width, 
     return rectClip;
 }
 
-/* GDI设备环境对象选入器，自动恢复先前的对象，以scope为有效期 */
-template < typename _GdiObject >
+/** \brief GDI设备环境对象选入器，自动恢复先前的对象，以scope为有效期 */
 class GdiObjectSelector
 {
 public:
-    GdiObjectSelector( HDC hDC, HGDIOBJ hGdiObject ) : _hDC(hDC), _hGdiObjectOld(NULL)
+    template < typename _GdiObject >
+    GdiObjectSelector( HDC hDC, _GdiObject hGdiObject ) : _hDC(hDC), _hGdiObjectOld(NULL)
     {
-        _hGdiObjectOld = (_GdiObject)SelectObject( _hDC, hGdiObject );
+        _hGdiObjectOld = SelectObject( _hDC, hGdiObject );
     }
     ~GdiObjectSelector()
     {
@@ -376,13 +376,13 @@ public:
     }
 private:
     HDC _hDC;
-    _GdiObject _hGdiObjectOld;
+    HGDIOBJ _hGdiObjectOld;
     DISABLE_OBJECT_COPY(GdiObjectSelector)
 };
 
 // GDI+ -------------------------------------------------------------------
 #if defined(_GDIPLUS_H)
-
+/** \brief GDI+ 初始化 */
 class WINPLUS_DLL GdiplusInit
 {
     Gdiplus::GdiplusStartupInput _gdiplusStartupInput;
@@ -396,14 +396,14 @@ public:
     DISABLE_OBJECT_COPY(GdiplusInit)
 };
 
-/* 旋转后大小 */
+/** \brief 旋转后大小 */
 inline Gdiplus::Size SizeAfterRotate( DOUBLE angle, Gdiplus::Size const & si )
 {
     SIZE siTemp = SizeAfterRotate( angle, si.Width, si.Height );
     return Gdiplus::Size( siTemp.cx, siTemp.cy );
 }
 
-/* 指定点的外切矩形 */
+/** \brief 指定点的外切矩形 */
 inline Gdiplus::RectF RectCircumscribePoints( Gdiplus::PointF const points[4] )
 {
     Gdiplus::PointF ptNewRectLT, ptNewRectRB;
@@ -415,12 +415,13 @@ inline Gdiplus::RectF RectCircumscribePoints( Gdiplus::PointF const points[4] )
     return Gdiplus::RectF( ptNewRectLT, Gdiplus::SizeF( ptNewRectRB.X - ptNewRectLT.X, ptNewRectRB.Y - ptNewRectLT.Y ) );
 }
 
-/* 将一个COLORREF转换为Color */
+/** \brief 将一个COLORREF转换为Color */
 inline Gdiplus::Color COLORREF_to_Color( COLORREF clr, BYTE alpha = 255 )
 {
     return Gdiplus::Color( alpha, GetRValue(clr), GetGValue(clr), GetBValue(clr) );
 }
-/* 将gdi+的矩形转换到gdi矩形 */
+
+/** \brief 将GDI+的矩形转换到GDI矩形 */
 template < typename _RECT, typename _GdipRect >
 inline _RECT RectGdiplusToGdi( _GdipRect const & rect )
 {
@@ -431,7 +432,8 @@ inline _RECT RectGdiplusToGdi( _GdipRect const & rect )
     rc.bottom = rect.GetBottom();
     return rc;
 }
-/* 将gdi的矩形转换到gdi+矩形 */
+
+/** \brief 将GDI的矩形转换到GDI+矩形 */
 template < typename _GdipRect, typename _RECT >
 inline _GdipRect RectGdiToGdiplus( _RECT const & rect )
 {
@@ -442,27 +444,35 @@ inline _GdipRect RectGdiToGdiplus( _RECT const & rect )
     rc.Height = rect.bottom - rect.top;
     return rc;
 }
-/* 绘制圆角矩形 */
+
+/** \brief 绘制圆角矩形 */
 WINPLUS_FUNC_DECL(void) DrawRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Pen const & pen, Gdiplus::RectF const & rect, Gdiplus::REAL round );
-/* 填充圆角矩形 */
+
+/** \brief 填充圆角矩形 */
 WINPLUS_FUNC_DECL(void) FillRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Brush const & brush, Gdiplus::RectF const & rect, Gdiplus::REAL round );
 
 #endif
 
-// 内存DC，管理绘制与位图显示
+/** \brief 内存DC，管理绘制与位图显示 */
 class WINPLUS_DLL MemDC
 {
 public:
     MemDC( void );
     MemDC( HDC hDC );
     MemDC( HDC hDC, INT nWidth, INT nHeight, COLORREF clrBackground = 0xFFFFFF );
-    MemDC( MemDC & other );
+    MemDC( MemDC const & other );
+    MemDC & operator = ( MemDC const & other );
     ~MemDC( void );
 
-    MemDC & operator = ( MemDC const & other );
+    /** \brief 传递管理权，自己放弃管理资源 */
+    BOOL passTo( MemDC & other );
+protected:
+    /** \brief 成员初始化 */
+    void _zeroInit();
+
+public:
     operator HDC( void ) const { return _hMemDC; }
-    operator HBITMAP( void ) const { return _hBitmap; }
-    operator BOOL( void ) const { return _hMemDC != NULL && _hBitmap != NULL; }
+    operator BOOL( void ) const { return _hMemDC != NULL && _hMemBitmap != NULL; }
 
     INT width( void ) const { return _width; }
     INT height( void ) const { return _height; }
@@ -470,43 +480,60 @@ public:
     BOOL isTransparent( void ) const { return _isTransparent; }
     COLORREF getTransparentColor( void ) const { return _transparent; }
 
+    /** \brief 以设备场景hDC为准创建一个内存兼容DC。如果hDC==NULL，则会用桌面设备场景。 */
     BOOL create( HDC hDC );
+    /** \brief 以设备场景hDC为准创建一个内存兼容DC，并创建一个兼容位图选入内存兼容DC。如果hDC==NULL，则会用桌面设备场景。 */
     BOOL create( HDC hDC, INT nWidth, INT nHeight );
+    /** \brief 以设备场景hDC为准创建一个内存兼容DC，并创建一个兼容位图选入内存兼容DC，并设置背景颜色。如果hDC==NULL，则会用桌面设备场景。 */
     BOOL create( HDC hDC, INT nWidth, INT nHeight, COLORREF clrBackground );
+    /** \brief 以设备场景hDC为准创建一个内存兼容DC，并创建一个兼容位图选入内存兼容DC，并设置背景颜色，并设置透明色。如果hDC==NULL，则会用桌面设备场景。 */
     BOOL create( HDC hDC, INT nWidth, INT nHeight, COLORREF clrBackground, COLORREF clrTransparent );
-    BOOL copy( MemDC const & other );
+
+    /** \brief 销毁管理的所有资源 */
     void destroy( void );
 
+    /** \brief 使能关键色透明 */
     void enableTransparent( BOOL bIsTransparent, COLORREF clrTransparent = 0 );
+
+    /** \brief 设置一个背景色，并填充这个颜色到内存兼容DC */
     void setBackground( COLORREF clrBackground, BOOL bFill = FALSE );
-    /* 管理一副位图，如果只是输出现有位图，则完毕后应该调用DetachBitmap()脱离管理 */
+
+    /** \brief 管理一副位图，并选入内存兼容DC */
     HBITMAP attachBitmap( HBITMAP hBitmap );
-    /* 位图脱离管理 */
+
+    /** \brief 位图脱离管理 */
     HBITMAP detachBitmap( void );
-    /* 传递管理权,自己放弃管理资源 */
-    BOOL passTo( MemDC & other );
-    /* 旋转 */
+
 #if defined(_GDIPLUS_H)
+    /** \brief 旋转 */
     BOOL rotate( DOUBLE angle, MemDC * pMemDC );
 #endif
 
-    BOOL stretchBlt( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT nMode = HALFTONE ) const;
-    BOOL stretchToDC( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT nMode = HALFTONE ) const;
-    BOOL bitBlt( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y ) const;
-    BOOL copyToDC( HDC hDestDC, INT xDest, INT yDest ) const;
-    BOOL transparentBlt( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT nMode = HALFTONE ) const;
-    BOOL transparentToDC( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT nMode = HALFTONE ) const;
-protected:
-    void _construct();
+    /** \brief 伸缩传输到目标DC */
+    BOOL stretchTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT nMode = HALFTONE ) const;
+    /** \brief 伸缩传输整个内存DC到目标DC */
+    BOOL stretchEntireTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT nMode = HALFTONE ) const;
+
+    /** \brief 传输到目标DC */
+    BOOL copyTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y ) const;
+    /** \brief 传输整个内存DC到目标DC */
+    BOOL copyEntireTo( HDC hDestDC, INT xDest, INT yDest ) const;
+
+    /** \brief 透明传输到目标DC */
+    BOOL transparentTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT nMode = HALFTONE ) const;
+    /** \brief 透明传输整个内存DC到目标DC */
+    BOOL transparentEntireTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT nMode = HALFTONE ) const;
 
 private:
-    INT _width, _height;
-    HDC _hMemDC; // 内存DC
-    HBITMAP _hBitmap; // 内存位图
-    HBITMAP _hOldBitmap; // 从DC中选出的位图
-    COLORREF _background; // 背景色
-    COLORREF _transparent; // 透明色
-    BOOL _isTransparent; // 是否透明
+    INT _width;             // 宽度
+    INT _height;            // 高度
+    HDC _hMemDC;            // 内存DC
+    HBITMAP _hMemBitmap;    // 内存位图
+    HBITMAP _hBitmap;       // 图片位图
+    HBITMAP _hOldBitmap;    // 从DC中选出的位图
+    COLORREF _background;   // 背景色
+    COLORREF _transparent;  // 透明色
+    BOOL _isTransparent;    // 是否透明
 };
 
 #if defined(_GDIPLUS_H)
@@ -580,7 +607,7 @@ public:
 
     HBITMAP ObtainHBITMAP() const;
 protected:
-    void _construct();
+    void _zeroInit();
 
 private:
     Gdiplus::Bitmap * _pBmpImage;

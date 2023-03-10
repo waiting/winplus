@@ -64,12 +64,6 @@ int APIENTRY _tWinMain(
     return (int)msg.wParam;
 }
 
-
-//
-//  函数: MyRegisterClass()
-//
-//  目标: 注册窗口类。
-//
 ATOM MyRegisterClass( HINSTANCE hInstance )
 {
     WNDCLASSEX wcex;
@@ -109,7 +103,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    if ( !hWnd ) return FALSE;
 
-   //SetLayeredWindowAttributes( hWnd, 0, 255, LWA_ALPHA );
+   SetLayeredWindowAttributes( hWnd, 0, 255, LWA_ALPHA );
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
@@ -118,26 +112,35 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 MemImage g_img;
 MemDC g_memdc;
+HWND g_hButtonWnd;
 
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-
-    cout << message << ", " << wParam << ", " << lParam << "\n";
-
     switch ( message )
     {
     case WM_CREATE:
+        cout << "WM_CREATE" << ", " << wParam << ", " << lParam << "\n";
         {
+            // 创建按钮
+            g_hButtonWnd = CreateWindowEx( 0, "BUTTON", "OK!!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
+            UpdateWindow(g_hButtonWnd);
+
             g_img.create("cg_dialog1.png");
             g_memdc.create( NULL, g_img.width(), g_img.height() );
 
             {
                 Gdiplus::Graphics g( (HDC)g_memdc );
-                Gdiplus::Status s = g.DrawImage( g_img, 0, 0, g_memdc.width(), g_memdc.height() );
-                //g_img2.Draw( g_memdc, 0, 0, g_img2.GetWidth(), g_img2.GetHeight(), 0, 0, g_img2.GetWidth(), g_img2.GetHeight() );
-                //g_memdc.attachBitmap( g_img.ObtainHBITMAP() );
+                //g.SetCompositingQuality(Gdiplus::CompositingQuality::CompositingQualityHighQuality);
+                //g.SetCompositingMode(Gdiplus::CompositingMode::CompositingModeSourceOver);
+                g.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 
-                //TextOut( g_memdc, 10,30, "Hello", 5 );
+                Gdiplus::Status s = g.DrawImage( g_img, 0, 0, g_memdc.width(), g_memdc.height() );
+
+                FillRoundRectangle(g, Gdiplus::SolidBrush(Gdiplus::Color(255,255,255)), Gdiplus::RectF(50,50,100,30), 8 );
+
+                HDC hBtnDC = GetDC(g_hButtonWnd);
+                BOOL b=BitBlt( g_memdc, 0, 0, 100, 30, hBtnDC, 0, 0, SRCCOPY );
+                ReleaseDC(g_hButtonWnd, hBtnDC);
             }
 
             BLENDFUNCTION blend = { 0 };
@@ -148,13 +151,13 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             SIZE sizeWnd = { g_memdc.width(), g_memdc.height() };
 
             HDC hScreenDC = GetDC(hWnd);
-            UpdateLayeredWindow(hWnd, hScreenDC, &ptPos, &sizeWnd, g_memdc, &ptPos, 0, &blend, ULW_ALPHA );
+            //UpdateLayeredWindow(hWnd, hScreenDC, NULL, &sizeWnd, g_memdc, &ptPos, 0, &blend, ULW_ALPHA );
             ReleaseDC( hWnd, hScreenDC );
 
-            CreateWindowEx( 0, "BUTTON", "OK!!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
         }
         break;
     case WM_COMMAND:
+        cout << "WM_COMMAND" << ", " << wParam << ", " << lParam << "\n";
         {
             int wmId = LOWORD(wParam);
             // 分析菜单选择:
@@ -172,8 +175,9 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         break;
     case WM_LBUTTONUP:
+        cout << message << ", " << wParam << ", " << lParam << "\n";
         {
-            Gdiplus::Graphics g( (HDC)g_memdc );
+            /*Gdiplus::Graphics g( (HDC)g_memdc );
             Gdiplus::Font font{ L"微软雅黑", 120 };
             Gdiplus::SolidBrush brush{ Gdiplus::Color{255, 255, 255} };
             g.DrawString( L"Hello", 5, &font, Gdiplus::PointF{30,30}, &brush );
@@ -187,20 +191,27 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
             HDC hScreenDC = GetDC(hWnd);
             UpdateLayeredWindow(hWnd, hScreenDC, &ptPos, &sizeWnd, g_memdc, &ptPos, 0, &blend, ULW_ALPHA );
-            ReleaseDC( hWnd, hScreenDC );
+            ReleaseDC( hWnd, hScreenDC );*/
+            HDC hBtnDC = GetDC(g_hButtonWnd);
+            BOOL b=BitBlt( g_memdc, 0, 0, 100, 30, hBtnDC, 0, 0, SRCCOPY );
+            ReleaseDC(g_hButtonWnd, hBtnDC);
+
+            InvalidateRect(hWnd, NULL, TRUE);
         }
         break;
     case WM_PAINT:
+        cout << "WM_PAINT" << ", " << wParam << ", " << lParam << "\n";
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 在此处添加使用 hdc 的任何绘图代码...
-            //g_memdc.bitBlt(hdc, 0, 0, g_memdc.width(), g_memdc.height(), 0, 0);
-            //Gdiplus::Graphics g(hdc);
-            //g.DrawString()
-            TextOut( hdc, 10, 10, "Hello", 5 );
 
-            cout << ps.rcPaint.left << ", "
+            // TODO: 在此处添加使用 hdc 的任何绘图代码...
+            g_memdc.transparentEntireTo( hdc, 0, 0, g_memdc.width(), g_memdc.height() );
+
+            //g.DrawImage()
+
+
+            cout << "wm_paint: " << ps.rcPaint.left << ", "
                 << ps.rcPaint.top << ", "
                 << ps.rcPaint.right << ", "
                 << ps.rcPaint.bottom << "\n"
@@ -210,6 +221,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         break;
     case WM_DESTROY:
+        cout << "WM_DESTROY" << ", " << wParam << ", " << lParam << "\n";
         PostQuitMessage(0);
         break;
     default:
