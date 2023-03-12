@@ -10,6 +10,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "winux.hpp"
+
 #include "winplus_definitions.hpp"
 #include "winplus_resource.hpp"
 #include "winplus_strings.hpp"

@@ -16,7 +16,7 @@ namespace winplus
 // 图片相关 -----------------------------------------------------------
 
 /* 保存位图到指定文件 */
-WINPLUS_FUNC_DECL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename );
+WINPLUS_FUNC_DECL(bool) Bitmap_SaveFile( HBITMAP hBitmap, String const & filename );
 
 // IPicturePtr
 

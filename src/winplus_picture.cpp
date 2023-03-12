@@ -1,6 +1,7 @@
 ﻿#include "winplus_definitions.hpp"
 #include "winplus_picture.hpp"
 #include "winplus_compoundfile.hpp"
+#include "smartptr.hpp"
 #include "winplus_graphics.hpp"
 #include "strings.hpp"
 #include <tchar.h>
@@ -8,17 +9,21 @@
 namespace winplus
 {
 
-WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename )
+WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP hBitmap, String const & filename )
 {
     HDC hDC; // 设备描述表
     INT nBits; // 当前显示分辨率下每个像素所占位数
     WORD wBitCount = 0; // 位图中每个像素所占位数
-    DWORD dwPaletteSize = 0, dwBmBitsSize, dwDIBSize, dwWritten; // 调色板大小，位图中像素字节大小，位图文件大小，写入文件字节数
-    BITMAP bmpObj; // 位图对象结构
+    DWORD dwPaletteSize = 0; // 调色板大小
+    DWORD dwBmBitsSize; // 位图中像素字节大小
+    DWORD dwDIBSize; // 位图文件大小
+    DWORD dwWritten; // 写入文件字节数
+    BITMAP bm; // 位图对象结构
     BITMAPFILEHEADER bmfHdr; // 位图文件头
-    BITMAPINFOHEADER bi; // 位图信息头
-    LPBITMAPINFOHEADER lpbi; // 指向位图信息头
-    HANDLE hFile, hDibData; // 文件句柄，分配内存句柄
+    BITMAPINFOHEADER bmih; // 位图信息头
+    LPBITMAPINFOHEADER lpbmih; // 指向位图信息头
+    HANDLE hFile; // 文件句柄
+    HANDLE hMemDibData; // 分配内存句柄
     HPALETTE hPal, hOldPal = NULL; // 调色板句柄
     // 计算位图文件每个像素所占位数
     hDC = CreateDC( TEXT("DISPLAY"), NULL, NULL, NULL );
@@ -39,24 +44,24 @@ WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename
         dwPaletteSize = ( 1 << wBitCount ) * (DWORD)sizeof(RGBQUAD);
 
     // 设置位图信息头
-    GetObject( bitmap, sizeof(BITMAP), &bmpObj );
-    bi.biSize = sizeof(BITMAPINFOHEADER);
-    bi.biWidth = bmpObj.bmWidth;
-    bi.biHeight = bmpObj.bmHeight;
-    bi.biPlanes = 1;
-    bi.biBitCount = wBitCount;
-    bi.biCompression = BI_RGB;
-    bi.biSizeImage = 0;
-    bi.biXPelsPerMeter = 0;
-    bi.biYPelsPerMeter = 0;
-    bi.biClrUsed = 0;
-    bi.biClrImportant = 0;
+    GetObject( hBitmap, sizeof(BITMAP), &bm );
+    bmih.biSize = sizeof(BITMAPINFOHEADER);
+    bmih.biWidth = bm.bmWidth;
+    bmih.biHeight = bm.bmHeight;
+    bmih.biPlanes = 1;
+    bmih.biBitCount = wBitCount;
+    bmih.biCompression = BI_RGB;
+    bmih.biSizeImage = 0;
+    bmih.biXPelsPerMeter = 0;
+    bmih.biYPelsPerMeter = 0;
+    bmih.biClrUsed = 0;
+    bmih.biClrImportant = 0;
     // 计算像素数据字节数
-    dwBmBitsSize = ( ( bmpObj.bmWidth * wBitCount + 31 ) / 32 ) * 4 * bmpObj.bmHeight;
+    dwBmBitsSize = ( ( bm.bmWidth * wBitCount + 31 ) / 32 ) * 4 * bm.bmHeight;
     // 为位图内容分配内存
-    hDibData = GlobalAlloc( GHND, dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER) );
-    lpbi = (LPBITMAPINFOHEADER)GlobalLock( hDibData );
-    *lpbi = bi;
+    hMemDibData = GlobalAlloc( GHND, dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER) );
+    lpbmih = (LPBITMAPINFOHEADER)GlobalLock(hMemDibData);
+    *lpbmih = bmih;
     // 处理调色板
     hPal = (HPALETTE)GetStockObject(DEFAULT_PALETTE);
     if ( hPal )
@@ -66,7 +71,7 @@ WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename
         RealizePalette(hDC);
     }
     // 获取该调色板下新的像素值
-    GetDIBits( hDC, bitmap, 0, (UINT)bmpObj.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) + dwPaletteSize, (LPBITMAPINFO)lpbi, DIB_RGB_COLORS );
+    GetDIBits( hDC, hBitmap, 0, (UINT)bm.bmHeight, (LPSTR)lpbmih + sizeof(BITMAPINFOHEADER) + dwPaletteSize, (LPBITMAPINFO)lpbmih, DIB_RGB_COLORS );
     // 恢复调色板
     if (hOldPal)
     {
@@ -88,10 +93,10 @@ WINPLUS_FUNC_IMPL(bool) Bitmap_SaveFile( HBITMAP bitmap, String const & filename
     // 写入位图文件头
     WriteFile(hFile, &bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL);
     // 写入位图文件其余内容
-    WriteFile(hFile, lpbi, dwDIBSize, &dwWritten, NULL);
+    WriteFile(hFile, lpbmih, dwDIBSize, &dwWritten, NULL);
     // 清除
-    GlobalUnlock(hDibData);
-    GlobalFree(hDibData);
+    GlobalUnlock(hMemDibData);
+    GlobalFree(hMemDibData);
     CloseHandle(hFile);
     return true;
 }

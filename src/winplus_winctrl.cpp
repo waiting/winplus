@@ -51,19 +51,19 @@ void WindowTimer::destroy( void )
 }
 
 // 窗口相关 ---------------------------------------------------------------
-WINPLUS_FUNC_IMPL(int) MsgBox( String const & msg, String const & title )
+WINPLUS_FUNC_IMPL(int) MsgBox( String const & msg, String const & title, HWND hWnd )
 {
-    return MessageBox( GetForegroundWindow(), msg.c_str(), title.c_str(), MB_ICONINFORMATION );
+    return MessageBox( hWnd ? hWnd : GetForegroundWindow(), msg.c_str(), title.c_str(), MB_ICONINFORMATION );
 }
 
-WINPLUS_FUNC_IMPL(int) ErrBox( String const & msg, String const & title )
+WINPLUS_FUNC_IMPL(int) ErrBox( String const & msg, String const & title, HWND hWnd )
 {
-    return MessageBox( GetForegroundWindow(), msg.c_str(), title.c_str(), MB_ICONERROR );
+    return MessageBox( hWnd ? hWnd : GetForegroundWindow(), msg.c_str(), title.c_str(), MB_ICONERROR );
 }
 
-WINPLUS_FUNC_IMPL(int) WarnBox( String const & msg, String const & title )
+WINPLUS_FUNC_IMPL(int) WarnBox( String const & msg, String const & title, HWND hWnd )
 {
-    return MessageBox( GetForegroundWindow(), msg.c_str(), title.c_str(), MB_ICONEXCLAMATION );
+    return MessageBox( hWnd ? hWnd : GetForegroundWindow(), msg.c_str(), title.c_str(), MB_ICONEXCLAMATION );
 }
 
 WINPLUS_FUNC_IMPL(RECT) Window_GetClient( HWND window )
@@ -143,9 +143,9 @@ WINPLUS_FUNC_IMPL(String) Window_GetText( HWND window )
 {
     String res;
     INT len = GetWindowTextLength(window);
-    res.resize(len);
-    GetWindowText( window, &res[0], len + 1 );
-    return res.c_str();
+    res.resize( len + 1 );
+    int n = GetWindowText( window, &res[0], len + 1 );
+    return String( res.c_str(), n );
 }
 
 WINPLUS_FUNC_IMPL(void) Window_SetText( HWND window, String const & text )

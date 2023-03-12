@@ -134,9 +134,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             {
                 Gdiplus::Graphics g( (HDC)g_memdc );
                 g.SetSmoothingMode(SmoothingModeAntiAlias);
-
                 Gdiplus::Status s = g.DrawImage( g_img, 0, 0, g_memdc.width(), g_memdc.height() );
-
                 FillRoundRectangle(g, Gdiplus::SolidBrush(Gdiplus::Color(255,255,255)), Gdiplus::RectF(50,50,100,30), 8 );
             }
 
@@ -167,6 +165,16 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
+            case IDOK:
+                switch ( HIWORD(wParam) )
+                {
+                case BN_CLICKED:
+                    MsgBox( Window_GetText((HWND)lParam), "MyButton", hWnd);
+                    break;
+                default:
+                    break;
+                }
+                break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -186,41 +194,57 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 << "HWND(" << wndSize.cx << "," << wndSize.cy << ")" << endl
             ;
 
-            g_memdc.copyFrom( hBtnDC, 0, 0, wndSize.cx, wndSize.cy, 0, 0 );
+            //g_memdc.copyFrom( hBtnDC, 0, 0, wndSize.cx, wndSize.cy, 0, 0 );
             ReleaseDC(g_hButtonWnd, hBtnDC);
 
-            Bitmap gdipBmp{ g_memdc.getMemBitmap(), NULL };
-
-            //Bitmap_SaveFile(g_memdc.getMemBitmap(),"gmemdc.bmp");
-
+            //Bitmap gdipBmp{ g_memdc.getMemBitmap(), NULL };
+            ////Bitmap_SaveFile(g_memdc.getMemBitmap(),"gmemdc.bmp");
             CLSID clsid;
             ImageEncoderFromExtName("png", &clsid);
-            gdipBmp.Save( L"gdip-gmemdc.png", &clsid );
+            //gdipBmp.Save( L"gdip-gmemdc.png", &clsid );
+            //((Bitmap*)g_img)->Save( L"g_img.png", &clsid );
+            ////Bitmap_SaveFile( g_img.obtainHBITMAP(), "g_img.bmp");
 
-            Bitmap_SaveFile( g_img.ObtainHBITMAP(), "g_img.bmp");
+
+            BITMAP bm = { 0 };
+            GetObject( g_memdc.getBitmap(), sizeof(BITMAP), &bm );
+
+            BITMAPINFO bmi = { 0 };
+            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmi.bmiHeader.biWidth = bm.bmWidth;
+            bmi.bmiHeader.biHeight = -bm.bmHeight;
+            bmi.bmiHeader.biPlanes = bm.bmPlanes;
+            bmi.bmiHeader.biBitCount = bm.bmBitsPixel;
+            bmi.bmiHeader.biCompression = BI_RGB;
+            bmi.bmiHeader.biSizeImage = 0;
+
+            Buffer bitsData;
+            bitsData.alloc( bm.bmWidthBytes * bm.bmHeight );
+            int nLines = GetDIBits( g_memdc, g_memdc.getBitmap(), 0, bm.bmHeight, bitsData.get(), &bmi, DIB_RGB_COLORS );
+
+            //Bitmap gdipbmp( &bmi, bitsData.get() );
+            //cout << "GetPixelFormat: " << (gdipbmp.GetPixelFormat()==PixelFormat32bppRGB) << endl;
+            Bitmap gdipbmp( bm.bmWidth, bm.bmHeight, bm.bmWidthBytes, PixelFormat32bppPARGB, bitsData.get<BYTE>() );
+            //bitsData.free();
+            gdipbmp.Save( L"gdip-gmemdc1.png", &clsid );
+
+            //auto pbmp = g_memdc.obtainGdiplusBitmap();
+            //pbmp->Save(L"gdip-gmemdc2.png", &clsid );
+
 
             InvalidateRect(hWnd, NULL, TRUE);
         }
         break;
     case WM_PAINT:
-        cout << "WM_PAINT" << ", " << wParam << ", " << lParam << "\n";
+        cout << "WM_PAINT" << ", " << wParam << ", " << lParam << ", ";
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
 
             // TODO: 在此处添加使用 hdc 的任何绘图代码...
-            //g_memdc.transparentEntireTo( hdc, 0, 0, g_memdc.width(), g_memdc.height() );
+            g_memdc.alphaEntireTo( hdc, 0, 0, g_memdc.width(), g_memdc.height() );
 
-            AlphaBlend( hdc, 0, 0, g_memdc.width(), g_memdc.height(), g_memdc, 0, 0, g_memdc.width(), g_memdc.height(), g_blend );
-
-            //g.DrawImage()
-
-
-            cout << "wm_paint: " << ps.rcPaint.left << ", "
-                << ps.rcPaint.top << ", "
-                << ps.rcPaint.right << ", "
-                << ps.rcPaint.bottom << "\n"
-                ;
+            cout << "PAINTSTRUCT: " << ps.rcPaint.left << ", " << ps.rcPaint.top << ", " << ps.rcPaint.right << ", " << ps.rcPaint.bottom << "\n";
 
             EndPaint(hWnd, &ps);
         }

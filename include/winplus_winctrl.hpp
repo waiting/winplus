@@ -36,11 +36,11 @@ private:
 // 窗口相关 --------------------------------------------------------------
 
 /* 弹出一个消息框 */
-WINPLUS_FUNC_DECL(int) MsgBox( String const & msg, String const & title = TEXT("WinPlus") );
+WINPLUS_FUNC_DECL(int) MsgBox( String const & msg, String const & title = TEXT("WinPlus"), HWND hWnd = NULL );
 /* 弹出一个错误框 */
-WINPLUS_FUNC_DECL(int) ErrBox( String const & msg, String const & title = TEXT("WinPlus Error") );
+WINPLUS_FUNC_DECL(int) ErrBox( String const & msg, String const & title = TEXT("WinPlus Error"), HWND hWnd = NULL );
 /* 弹出一个警告框 */
-WINPLUS_FUNC_DECL(int) WarnBox( String const & msg, String const & title = TEXT("WinPlus Warning") );
+WINPLUS_FUNC_DECL(int) WarnBox( String const & msg, String const & title = TEXT("WinPlus Warning"), HWND hWnd = NULL );
 
 /* 获取客户区矩形 */
 WINPLUS_FUNC_DECL(RECT) Window_GetClient( HWND window );

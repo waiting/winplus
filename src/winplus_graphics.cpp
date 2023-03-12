@@ -1,4 +1,6 @@
-﻿#include "winplus_definitions.hpp"
+﻿
+#include "winplus_definitions.hpp"
+#include "smartptr.hpp"
 #include "winplus_graphics.hpp"
 #include "strings.hpp"
 
@@ -495,6 +497,60 @@ BOOL MemDC::transparentFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nSrcWidth, INT 
     return b;
 }
 
+BOOL MemDC::alphaTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT alpha ) const
+{
+    BLENDFUNCTION blend = { 0 };
+    blend.BlendOp = AC_SRC_OVER;
+    blend.BlendFlags = 0;
+    blend.SourceConstantAlpha = alpha;
+    blend.AlphaFormat = AC_SRC_ALPHA;
+    return AlphaBlend( hDestDC, xDest, yDest, nDestWidth, nDestHeight, _hMemDC, x, y, width, height, blend );
+}
+
+BOOL MemDC::alphaEntireTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT alpha ) const
+{
+    return this->alphaTo( hDestDC, xDest, yDest, nDestWidth, nDestHeight, 0, 0, _width, _height, alpha );
+}
+
+BOOL MemDC::alphaFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nSrcWidth, INT nSrcHeight, INT x, INT y, INT width, INT height, INT alpha ) const
+{
+    BLENDFUNCTION blend = { 0 };
+    blend.BlendOp = AC_SRC_OVER;
+    blend.BlendFlags = 0;
+    blend.SourceConstantAlpha = alpha;
+    blend.AlphaFormat = AC_SRC_ALPHA;
+    return AlphaBlend( _hMemDC, x, y, width, height, hSrcDC, xSrc, ySrc, nSrcWidth, nSrcHeight, blend );
+}
+
+SimplePointer<Gdiplus::Bitmap> MemDC::obtainGdiplusBitmap( void ) const
+{
+    HBITMAP hBitmap = this->getBitmap();
+    BITMAP bm = { 0 };
+    GetObject( hBitmap, sizeof(BITMAP), &bm );
+
+    if ( bm.bmBitsPixel != 32 )
+    {
+        return MakeSimple( new Gdiplus::Bitmap( hBitmap, NULL ) );
+    }
+    else
+    {
+        BITMAPINFO bmi = { 0 };
+        bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        bmi.bmiHeader.biWidth = bm.bmWidth;
+        bmi.bmiHeader.biHeight = -bm.bmHeight;
+        bmi.bmiHeader.biPlanes = bm.bmPlanes;
+        bmi.bmiHeader.biBitCount = bm.bmBitsPixel;
+        bmi.bmiHeader.biCompression = BI_RGB;
+        bmi.bmiHeader.biSizeImage = 0;
+
+        Buffer bitsData;
+        bitsData.alloc( bm.bmWidthBytes * bm.bmHeight );
+        int nLines = GetDIBits( _hMemDC, hBitmap, 0, bm.bmHeight, bitsData.get(), &bmi, DIB_RGB_COLORS );
+
+        return MakeSimple( new Gdiplus::Bitmap( bm.bmWidth, bm.bmHeight, bm.bmWidthBytes, PixelFormat32bppPARGB, bitsData.get<BYTE>() ) );
+    }
+}
+
 #if defined(_GDIPLUS_H)
 // class MemImage -------------------------------------------------------------------------
 MemImage::MemImage( void )
@@ -658,7 +714,7 @@ BOOL MemImage::output( Gdiplus::Graphics & gDest, int xDest, int yDest, int xSrc
     return Gdiplus::Ok == gDest.DrawImage( _pBmpImage, Gdiplus::Rect(xDest, yDest, nSrcWidth, nSrcHeight), xSrc, ySrc, nSrcWidth, nSrcHeight, Gdiplus::UnitPixel );
 }
 
-HBITMAP MemImage::ObtainHBITMAP() const
+SimpleHandle<HBITMAP> MemImage::obtainHBITMAP() const
 {
     Gdiplus::Rect imgRect( 0, 0, this->width(), this->height() );
     HBITMAP hNewBitmap = NULL;
@@ -679,7 +735,7 @@ HBITMAP MemImage::ObtainHBITMAP() const
     memcpy( lpBmpBits, bmpData.Scan0, dwImageSizeBytes );
     this->_pBmpImage->UnlockBits(&bmpData);
 
-    return hNewBitmap;
+    return SimpleHandle<HBITMAP>( hNewBitmap, NULL, DeleteObject );
 }
 
 void MemImage::_zeroInit()

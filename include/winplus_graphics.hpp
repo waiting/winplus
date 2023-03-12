@@ -478,16 +478,26 @@ protected:
     void _zeroInit();
 
 public:
+    /** \brief 取得HDC */
     operator HDC( void ) const { return _hMemDC; }
-    operator BOOL( void ) const { return _hMemDC != NULL; }
+    /** \brief 判断是否有效 */
+    operator bool( void ) const { return _hMemDC != NULL; }
 
+    /** \brief 宽度 */
     INT width( void ) const { return _width; }
+    /** \brief 高度 */
     INT height( void ) const { return _height; }
 
+    /** \brief 取得内存位图 */
     HBITMAP getMemBitmap() const { return _hMemBitmap; }
-    HBITMAP getBitmap() const { return _hBitmap; }
+    /** \brief 取得管理的外部位图 */
+    HBITMAP getAttachBitmap() const { return _hBitmap; }
+    /** \brief 取得内存DC选入的位图 */
+    HBITMAP getBitmap() const { return (HBITMAP)GetCurrentObject( _hMemDC, OBJ_BITMAP ); }
 
+    /** \brief 是否关键色透明 */
     BOOL isTransparent( void ) const { return _isTransparent; }
+    /** \brief 取得关键透明色 */
     COLORREF getTransparentColor( void ) const { return _transparent; }
 
     /** \brief 以设备场景hDC为准创建一个内存兼容DC。如果hDC==NULL，则会用桌面设备场景。 */
@@ -540,6 +550,15 @@ public:
     /** \brief 从源DC透明传输到自身 */
     BOOL transparentFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nSrcWidth, INT nSrcHeight, INT x, INT y, INT width, INT height, INT nMode = HALFTONE ) const;
 
+    /** \brief alpha透明传输到目标DC */
+    BOOL alphaTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT x, INT y, INT width, INT height, INT alpha = 255 ) const;
+    /** \brief alpha透明传输整个内存DC到目标DC */
+    BOOL alphaEntireTo( HDC hDestDC, INT xDest, INT yDest, INT nDestWidth, INT nDestHeight, INT alpha = 255 ) const;
+    /** \brief alpha从源DC透明传输到自身 */
+    BOOL alphaFrom( HDC hSrcDC, INT xSrc, INT ySrc, INT nSrcWidth, INT nSrcHeight, INT x, INT y, INT width, INT height, INT alpha = 255 ) const;
+
+    /** \brief 以内存DC选入的位图内容创建一个新的GDI+位图 */
+    SimplePointer<Gdiplus::Bitmap> obtainGdiplusBitmap( void ) const;
 private:
     INT _width;             // 宽度
     INT _height;            // 高度
@@ -565,7 +584,7 @@ public:
     ~MemImage( void );
     
     MemImage & operator = ( MemImage const & other );
-    operator BOOL() const { return _pBmpImage != NULL; }
+    operator bool() const { return _pBmpImage != NULL; }
     operator Gdiplus::Bitmap * () const { return _pBmpImage; }
 
     int width( void ) const { return _pBmpImage ? _pBmpImage->GetWidth() : 0; }
@@ -578,11 +597,11 @@ public:
     void destroy( void );
     BOOL clone( MemImage const & other );
     BOOL copy( Gdiplus::Image * pImage );
-    /* 传递管理权,自己放弃管理资源 */
+    /** 传递管理权，自己放弃管理资源 */
     BOOL passTo( MemImage & other );
-    /* 以中心点旋转angle角度 */
+    /** 以中心点旋转angle角度 */
     BOOL rotate( double angle, MemImage * pMemImage );
-    
+
     BOOL stretch( Gdiplus::Graphics & gDest, int xDest, int yDest, int nDestWidth, int nDestHeight, int xSrc, int ySrc, int nSrcWidth, int nSrcHeight ) const;
     BOOL stretchEntire( Gdiplus::Graphics & gDest, int xDest, int yDest, int nDestWidth, int nDestHeight ) const
     {
@@ -621,8 +640,8 @@ public:
         return this->output( imgDest, xDest, yDest, 0, 0, this->width(), this->height() );
     }
 
-    /** \brief 以当前Bitmap内容创建一张新的HBITMAP位图 */
-    HBITMAP ObtainHBITMAP() const;
+    /** \brief 以当前Bitmap内容创建一张新32bit的位图 */
+    SimpleHandle<HBITMAP> obtainHBITMAP() const;
 protected:
     void _zeroInit();
 
