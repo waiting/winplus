@@ -569,6 +569,7 @@ private:
     COLORREF _background;   // 背景色
     COLORREF _transparent;  // 透明色
     BOOL _isTransparent;    // 是否透明
+    mutable Buffer _bmBitsData;     // 转换成Gdiplus::Bitmap的位数据
 };
 
 #if defined(_GDIPLUS_H)

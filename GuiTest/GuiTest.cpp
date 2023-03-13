@@ -11,15 +11,22 @@ using namespace std;
 #define MAX_LOADSTRING 100
 
 // 全局变量:
-HINSTANCE hInst;                                // 当前实例
-TCHAR szTitle[MAX_LOADSTRING];                  // 标题栏文本
-TCHAR szWindowClass[MAX_LOADSTRING];            // 主窗口类名
+HINSTANCE g_hInst; // 当前实例
+String g_strMainWndTitle; // 标题栏文本
+String g_strMainWndClass; // 主窗口类名
+
+HWND g_hMainWnd;
+HWND g_hMainControlsWnd;
+MemImage g_imgMainWnd;
+MemDC g_memdc;
+BLENDFUNCTION g_blend;
 
 // 此代码模块中包含的函数的前向声明:
-ATOM MyRegisterClass( HINSTANCE );
-BOOL InitInstance( HINSTANCE, int );
-LRESULT CALLBACK MainWndProc( HWND, UINT, WPARAM, LPARAM );
-INT_PTR CALLBACK AboutDlgProc( HWND, UINT, WPARAM, LPARAM );
+BOOL AppRegisterClass( HINSTANCE hInstance );
+BOOL InitInstance( HINSTANCE hInstance, int nCmdShow );
+LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+INT_PTR CALLBACK AboutDlgProc( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam );
 
 int APIENTRY _tWinMain(
     HINSTANCE hInstance,
@@ -37,9 +44,8 @@ int APIENTRY _tWinMain(
     Win32GUI_ShowConsole();
 
     // 初始化全局字符串
-    LoadString( hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING );
-    LoadString( hInstance, IDC_GUITEST, szWindowClass, MAX_LOADSTRING );
-    MyRegisterClass(hInstance);
+    g_strMainWndTitle = LoadStringEx( hInstance, IDS_APP_TITLE );
+    g_strMainWndClass = LoadStringEx( hInstance, IDC_GUITEST );
 
     // 执行应用程序初始化:
     if ( !InitInstance( hInstance, nCmdShow ) )
@@ -64,56 +70,64 @@ int APIENTRY _tWinMain(
     return (int)msg.wParam;
 }
 
-ATOM MyRegisterClass( HINSTANCE hInstance )
+BOOL AppRegisterClass( HINSTANCE hInstance )
 {
+    ATOM atom;
     WNDCLASSEX wcex;
-
     wcex.cbSize = sizeof(WNDCLASSEX);
-
     wcex.style          = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc    = MainWndProc;
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GUITEST));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+    wcex.hIcon          = LoadIcon( hInstance, MAKEINTRESOURCE(IDI_GUITEST) );
+    wcex.hCursor        = LoadCursor( NULL, IDC_ARROW );
+    wcex.hbrBackground  = (HBRUSH)( COLOR_BTNFACE + 1 );
     wcex.lpszMenuName   = MAKEINTRESOURCE(IDC_GUITEST);
-    wcex.lpszClassName  = szWindowClass;
+    wcex.lpszClassName  = g_strMainWndClass.c_str();
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
-    return RegisterClassEx(&wcex);
+    atom = RegisterClassEx(&wcex);
+    if ( !atom ) return FALSE;
+
+    String strMainControlsWndClass = g_strMainWndClass + "_Controls";
+
+    wcex.lpfnWndProc = MainControlsWndProc;
+    wcex.lpszMenuName = NULL;
+    wcex.hbrBackground  = (HBRUSH)( COLOR_WINDOW + 1 );
+    wcex.lpszClassName = strMainControlsWndClass.c_str();
+
+    atom = RegisterClassEx(&wcex);
+    if ( !atom ) return FALSE;
+    return TRUE;
 }
 
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 {
-   hInst = hInstance; // 将实例句柄存储在全局变量中
+    g_hInst = hInstance; // 将实例句柄存储在全局变量中
 
-   HWND hWnd = CreateWindowEx(
-       WS_EX_LAYERED,
-       szWindowClass,
-       szTitle,
-       WS_OVERLAPPEDWINDOW,
-       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
-       nullptr,
-       nullptr,
-       hInstance,
-       nullptr
-   );
+    if ( !AppRegisterClass(hInstance) ) return FALSE;
 
-   if ( !hWnd ) return FALSE;
+    g_hMainWnd = CreateWindowEx(
+        WS_EX_LAYERED,
+        g_strMainWndClass.c_str(),
+        g_strMainWndTitle.c_str(),
+        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
+        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
+        nullptr,
+        nullptr,
+        hInstance,
+        nullptr
+    );
+    if ( !g_hMainWnd ) return FALSE;
 
-   SetLayeredWindowAttributes( hWnd, 0, 255, LWA_ALPHA );
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    //SetLayeredWindowAttributes( hWnd, 0, 255, LWA_ALPHA );
+    ShowWindow( g_hMainWnd, nCmdShow );
+    UpdateWindow(g_hMainWnd);
 
-   return TRUE;
+
+    return TRUE;
 }
-
-MemImage g_img;
-MemDC g_memdc;
-HWND g_hButtonWnd;
-BLENDFUNCTION g_blend;
 
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -125,17 +139,16 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         cout << "WM_CREATE" << ", " << wParam << ", " << lParam << "\n";
         {
             // 创建按钮
-            g_hButtonWnd = CreateWindowEx( 0, "BUTTON", "OK!!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
-            UpdateWindow(g_hButtonWnd);
+            //CreateWindowEx( 0, "BUTTON", "Start!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
 
-            g_img.create("cg_dialog1.png");
-            g_memdc.create( NULL, g_img.width(), g_img.height() );
+            g_imgMainWnd.create("cg_dialog1.png");
+            g_memdc.create( NULL, g_imgMainWnd.width(), g_imgMainWnd.height() );
 
             {
                 Gdiplus::Graphics g( (HDC)g_memdc );
                 g.SetSmoothingMode(SmoothingModeAntiAlias);
-                Gdiplus::Status s = g.DrawImage( g_img, 0, 0, g_memdc.width(), g_memdc.height() );
-                FillRoundRectangle(g, Gdiplus::SolidBrush(Gdiplus::Color(255,255,255)), Gdiplus::RectF(50,50,100,30), 8 );
+                Gdiplus::Status s = g.DrawImage( g_imgMainWnd, 0, 0, g_memdc.width(), g_memdc.height() );
+                //FillRoundRectangle(g, Gdiplus::SolidBrush(Gdiplus::Color(255,255,255)), Gdiplus::RectF(50,50,100,30), 8 );
             }
 
             // BLENDFUNCTION
@@ -147,9 +160,23 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             SIZE sizeWnd = { g_memdc.width(), g_memdc.height() };
 
             HDC hScreenDC = GetDC(hWnd);
-            //UpdateLayeredWindow(hWnd, hScreenDC, NULL, &sizeWnd, g_memdc, &ptPos, 0, &g_blend, ULW_ALPHA );
+            UpdateLayeredWindow( hWnd, hScreenDC, NULL, &sizeWnd, g_memdc, &ptPos, 0, &g_blend, ULW_ALPHA );
             ReleaseDC( hWnd, hScreenDC );
 
+            String strMainControlsWndClass = g_strMainWndClass + "_Controls";
+            g_hMainControlsWnd = CreateWindowEx(
+                0,
+                strMainControlsWndClass.c_str(),
+                g_strMainWndTitle.c_str(),
+                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
+                CW_USEDEFAULT, CW_USEDEFAULT, g_memdc.width(), g_memdc.height(),
+                hWnd,
+                nullptr,
+                g_hInst,
+                nullptr
+            );
+            ShowWindow( g_hMainControlsWnd, SW_SHOW );
+            UpdateWindow(g_hMainControlsWnd);
         }
         break;
     case WM_COMMAND:
@@ -160,7 +187,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             switch (wmId)
             {
             case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
+                DialogBox(g_hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
                 break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
@@ -183,53 +210,45 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
     case WM_LBUTTONUP:
         cout << message << ", " << wParam << ", " << lParam << "\n";
         {
-            HDC hBtnDC = GetDC(g_hButtonWnd);
-            //BOOL b=BitBlt( g_memdc, 0, 0, 100, 30, hBtnDC, 0, 0, SRCCOPY );
-            //g_memdc.copyFrom(hBtnDC,0,0,100,30,10,10);
-            SIZE bmSize = GetHdcBitmapSize(hBtnDC);
-            SIZE wndSize = GetHdcWindowSize(hBtnDC);
-
-            cout
-                << "BMP(" << bmSize.cx << "," << bmSize.cy << ")" << endl
-                << "HWND(" << wndSize.cx << "," << wndSize.cy << ")" << endl
-            ;
-
-            //g_memdc.copyFrom( hBtnDC, 0, 0, wndSize.cx, wndSize.cy, 0, 0 );
-            ReleaseDC(g_hButtonWnd, hBtnDC);
-
-            //Bitmap gdipBmp{ g_memdc.getMemBitmap(), NULL };
-            ////Bitmap_SaveFile(g_memdc.getMemBitmap(),"gmemdc.bmp");
             CLSID clsid;
             ImageEncoderFromExtName("png", &clsid);
-            //gdipBmp.Save( L"gdip-gmemdc.png", &clsid );
-            //((Bitmap*)g_img)->Save( L"g_img.png", &clsid );
-            ////Bitmap_SaveFile( g_img.obtainHBITMAP(), "g_img.bmp");
+
+            Bitmap gdipbmp1( g_memdc.getBitmap(), NULL );
+            gdipbmp1.Save( L"gdip-gmemdc1.png", &clsid );
 
 
             BITMAP bm = { 0 };
             GetObject( g_memdc.getBitmap(), sizeof(BITMAP), &bm );
 
-            BITMAPINFO bmi = { 0 };
-            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-            bmi.bmiHeader.biWidth = bm.bmWidth;
-            bmi.bmiHeader.biHeight = -bm.bmHeight;
-            bmi.bmiHeader.biPlanes = bm.bmPlanes;
-            bmi.bmiHeader.biBitCount = bm.bmBitsPixel;
-            bmi.bmiHeader.biCompression = BI_RGB;
-            bmi.bmiHeader.biSizeImage = 0;
+            BITMAPV5HEADER bmiHeader = { 0 };
+            bmiHeader.bV5Size = sizeof(BITMAPV5HEADER);
+            bmiHeader.bV5Width = bm.bmWidth;
+            bmiHeader.bV5Height = -bm.bmHeight;
+            bmiHeader.bV5Planes = bm.bmPlanes;
+            bmiHeader.bV5BitCount = bm.bmBitsPixel;
+            bmiHeader.bV5Compression = BI_RGB;
+            bmiHeader.bV5SizeImage = 0;
+            bmiHeader.bV5RedMask = 0x00FF0000;
+            bmiHeader.bV5GreenMask = 0x0000FF00;
+            bmiHeader.bV5BlueMask = 0x000000FF;
+            bmiHeader.bV5AlphaMask = 0xFF000000;
 
             Buffer bitsData;
             bitsData.alloc( bm.bmWidthBytes * bm.bmHeight );
-            int nLines = GetDIBits( g_memdc, g_memdc.getBitmap(), 0, bm.bmHeight, bitsData.get(), &bmi, DIB_RGB_COLORS );
+            int nLines = GetDIBits( g_memdc, g_memdc.getBitmap(), 0, bm.bmHeight, bitsData.get(), (LPBITMAPINFO)&bmiHeader, DIB_RGB_COLORS );
 
-            //Bitmap gdipbmp( &bmi, bitsData.get() );
+            CLSID clsid1;
+            ImageEncoderFromExtName( "bmp", &clsid1 );
+
+            Bitmap gdipbmp2( (LPBITMAPINFO)&bmiHeader, bitsData.get() );
             //cout << "GetPixelFormat: " << (gdipbmp.GetPixelFormat()==PixelFormat32bppRGB) << endl;
-            Bitmap gdipbmp( bm.bmWidth, bm.bmHeight, bm.bmWidthBytes, PixelFormat32bppPARGB, bitsData.get<BYTE>() );
-            //bitsData.free();
-            gdipbmp.Save( L"gdip-gmemdc1.png", &clsid );
+            gdipbmp2.Save( L"gdip-gmemdc2.bmp", &clsid1 );
 
-            //auto pbmp = g_memdc.obtainGdiplusBitmap();
-            //pbmp->Save(L"gdip-gmemdc2.png", &clsid );
+            Bitmap gdipbmp3( bm.bmWidth, bm.bmHeight, bm.bmWidthBytes, PixelFormat32bppARGB, bitsData.get<BYTE>() );
+            gdipbmp3.Save( L"gdip-gmemdc3.png", &clsid );
+
+            auto gdipbmp4 = g_memdc.obtainGdiplusBitmap();
+            gdipbmp4->Save(L"gdip-gmemdc4.png", &clsid );
 
 
             InvalidateRect(hWnd, NULL, TRUE);
@@ -255,6 +274,109 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
+}
+
+//LRESULT CALLBACK CBTProc( int nCode, WPARAM wParam, LPARAM lParam )
+//{
+//    if ( nCode < 0 )
+//    {
+//        return CallNextHookEx( nullptr, nCode, wParam, lParam );
+//    }
+//
+//    switch ( nCode )
+//    {
+//    case HCBT_CREATEWND:
+//        {
+//            HWND hWnd = (HWND)wParam;
+//            CBT_CREATEWND & cw = *(CBT_CREATEWND*)lParam;
+//            cout << hWnd << ": " << cw.lpcs->x << ", " << cw.lpcs->y << ", " << cw.lpcs->cx << ", " << cw.lpcs->cy << "" << "\n";
+//
+//            HWND hParent = GetParent(hWnd);
+//            if ( !hParent )
+//            {
+//                hParent = GetForegroundWindow();
+//                cout << Window_GetText(hParent) << endl;
+//                RECT rc;
+//                GetWindowRect( hParent, &rc );
+//                cw.lpcs->x = rc.left + ( ( rc.right-rc.left ) - cw.lpcs->cx ) / 2;
+//                cw.lpcs->y = rc.top + ( ( rc.bottom-rc.top ) - cw.lpcs->cy ) / 2;
+//            }
+//        }
+//        break;
+//    default:
+//        break;
+//    }
+//
+//    return 0;
+//}
+
+LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+{
+    using namespace Gdiplus;
+
+    switch ( message )
+    {
+    case WM_CREATE:
+        cout << "ControlsWnd: WM_CREATE" << ", " << wParam << ", " << lParam << "\n";
+        {
+            // 创建按钮
+            CreateWindowEx( 0, "BUTTON", "Start!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
+
+        }
+        break;
+    case WM_COMMAND:
+        cout << "ControlsWnd: WM_COMMAND" << ", " << wParam << ", " << lParam << "\n";
+        {
+            int wmId = LOWORD(wParam);
+            // 分析菜单选择:
+            switch (wmId)
+            {
+            case IDM_ABOUT:
+                DialogBox(g_hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
+                break;
+            case IDM_EXIT:
+                DestroyWindow(hWnd);
+                break;
+            case IDOK:
+                switch ( HIWORD(wParam) )
+                {
+                case BN_CLICKED:
+                    {
+                        //HHOOK hhk = SetWindowsHookEx( WH_CBT, CBTProc, NULL, GetCurrentThreadId() );
+                        //String err = GetErrorStr( GetLastError() );
+                        //MessageBox( g_hMainControlsWnd, err.c_str(), "Controls", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND );
+                        //UnhookWindowsHookEx(hhk);
+                    }
+                    MsgBox( Window_GetText((HWND)lParam), "MyButton", hWnd);
+                    break;
+                default:
+                    break;
+                }
+                break;
+            default:
+                return DefWindowProc(hWnd, message, wParam, lParam);
+            }
+        }
+        break;
+    case WM_PAINT:
+        cout << "ControlsWnd: WM_PAINT" << ", " << wParam << ", " << lParam << ". ";
+        {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hWnd, &ps);
+
+            cout << "PAINTSTRUCT: " << ps.rcPaint.left << ", " << ps.rcPaint.top << ", " << ps.rcPaint.right << ", " << ps.rcPaint.bottom << "\n";
+
+            EndPaint(hWnd, &ps);
+        }
+        break;
+    case WM_DESTROY:
+        cout << "ControlsWnd: WM_DESTROY" << ", " << wParam << ", " << lParam << "\n";
+        PostQuitMessage(0);
+        break;
+    default:
+        return DefWindowProc( hWnd, message, wParam, lParam );
     }
     return 0;
 }

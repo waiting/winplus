@@ -543,11 +543,10 @@ SimplePointer<Gdiplus::Bitmap> MemDC::obtainGdiplusBitmap( void ) const
         bmi.bmiHeader.biCompression = BI_RGB;
         bmi.bmiHeader.biSizeImage = 0;
 
-        Buffer bitsData;
-        bitsData.alloc( bm.bmWidthBytes * bm.bmHeight );
-        int nLines = GetDIBits( _hMemDC, hBitmap, 0, bm.bmHeight, bitsData.get(), &bmi, DIB_RGB_COLORS );
+        _bmBitsData.alloc( bm.bmWidthBytes * bm.bmHeight );
+        int nLines = GetDIBits( _hMemDC, hBitmap, 0, bm.bmHeight, _bmBitsData.get(), &bmi, DIB_RGB_COLORS );
 
-        return MakeSimple( new Gdiplus::Bitmap( bm.bmWidth, bm.bmHeight, bm.bmWidthBytes, PixelFormat32bppPARGB, bitsData.get<BYTE>() ) );
+        return MakeSimple( new Gdiplus::Bitmap( bm.bmWidth, bm.bmHeight, bm.bmWidthBytes, PixelFormat32bppPARGB, _bmBitsData.get<BYTE>() ) );
     }
 }
 
@@ -590,7 +589,7 @@ MemImage & MemImage::operator = ( MemImage const & other )
 BOOL MemImage::create( int nWidth, int nHeight )
 {
     this->destroy();
-    _pBmpImage = new Gdiplus::Bitmap( nWidth, nHeight, PixelFormat32bppARGB );
+    _pBmpImage = new Gdiplus::Bitmap( nWidth, nHeight, PixelFormat32bppPARGB );
     return _pBmpImage != NULL;
 }
 

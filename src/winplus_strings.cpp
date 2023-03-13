@@ -73,16 +73,16 @@ StringArray StrSplitSemicolon(String const & str)
     return arr;
 }
 
-WINPLUS_FUNC_IMPL(UnicodeString) LoadStringExW( HMODULE module, UINT id )
+WINPLUS_FUNC_IMPL(UnicodeString) LoadStringExW( HMODULE hModule, UINT id )
 {
     UnicodeString result;
     WORD blockId = ( id >> 4 ) + 1;
     WORD strResIndex = id % 16;
-    HRSRC resource = FindResource( module, MAKEINTRESOURCE(blockId), RT_STRING );
+    HRSRC resource = FindResource( hModule, MAKEINTRESOURCE(blockId), RT_STRING );
     if ( resource != NULL )
     {
-        DWORD size = SizeofResource( module, resource );
-        HGLOBAL loadedRes = LoadResource( module, resource );
+        DWORD size = SizeofResource( hModule, resource );
+        HGLOBAL loadedRes = LoadResource( hModule, resource );
         LPBYTE data = (LPBYTE)LockResource(loadedRes);
         DWORD offset = 0;
         INT index = 0;
@@ -94,10 +94,10 @@ WINPLUS_FUNC_IMPL(UnicodeString) LoadStringExW( HMODULE module, UINT id )
             {
                 if ( index == strResIndex )
                 {
-                    UnicodeString str;
-                    str.resize(w+1);
-                    CopyMemory( &str[0], data + offset, w * sizeof(WCHAR) );
-                    result = str.c_str();
+                    UnicodeString sz;
+                    sz.resize( w + 1 );
+                    CopyMemory( &sz[0], data + offset, w * sizeof(WCHAR) );
+                    result = decltype(result)( sz.c_str(), w );
                     break;
                 }
                 offset += w * sizeof(WCHAR);
@@ -106,12 +106,12 @@ WINPLUS_FUNC_IMPL(UnicodeString) LoadStringExW( HMODULE module, UINT id )
         }
         FreeResource(loadedRes);
     }
-    return result.c_str();
+    return result;
 }
 
-WINPLUS_FUNC_IMPL(String) LoadStringEx( HMODULE module, UINT id )
+WINPLUS_FUNC_IMPL(String) LoadStringEx( HMODULE hModule, UINT id )
 {
-    return UnicodeToString( LoadStringExW( module, id ) );
+    return UnicodeToString( LoadStringExW( hModule, id ) );
 }
 
 WINPLUS_FUNC_IMPL(String) LoadString( UINT id )
