@@ -87,6 +87,7 @@ BOOL AppRegisterClass( HINSTANCE hInstance )
     wcex.lpszClassName  = g_strMainWndClass.c_str();
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
+    // Register first Class.
     atom = RegisterClassEx(&wcex);
     if ( !atom ) return FALSE;
 
@@ -94,9 +95,11 @@ BOOL AppRegisterClass( HINSTANCE hInstance )
 
     wcex.lpfnWndProc = MainControlsWndProc;
     wcex.lpszMenuName = NULL;
-    wcex.hbrBackground  = (HBRUSH)( COLOR_WINDOW + 1 );
+    wcex.hbrBackground  = NULL;
+    //wcex.hbrBackground  = (HBRUSH)( COLOR_WINDOW + 1 );
     wcex.lpszClassName = strMainControlsWndClass.c_str();
 
+    // Register second Class.
     atom = RegisterClassEx(&wcex);
     if ( !atom ) return FALSE;
     return TRUE;
@@ -121,7 +124,7 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
     );
     if ( !g_hMainWnd ) return FALSE;
 
-    //SetLayeredWindowAttributes( hWnd, 0, 255, LWA_ALPHA );
+    //SetLayeredWindowAttributes( g_hMainWnd, 0, 255, LWA_ALPHA );
     ShowWindow( g_hMainWnd, nCmdShow );
     UpdateWindow(g_hMainWnd);
 
@@ -163,13 +166,19 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             UpdateLayeredWindow( hWnd, hScreenDC, NULL, &sizeWnd, g_memdc, &ptPos, 0, &g_blend, ULW_ALPHA );
             ReleaseDC( hWnd, hScreenDC );
 
+            // 创建控件窗口
+            RECT rcMainWnd;
+            GetClientRect( hWnd, &rcMainWnd );
+            ClientToScreen(hWnd, (LPPOINT)&rcMainWnd);
+            ClientToScreen(hWnd, (LPPOINT)&rcMainWnd + 1);
+
             String strMainControlsWndClass = g_strMainWndClass + "_Controls";
             g_hMainControlsWnd = CreateWindowEx(
                 0,
                 strMainControlsWndClass.c_str(),
                 g_strMainWndTitle.c_str(),
-                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
-                CW_USEDEFAULT, CW_USEDEFAULT, g_memdc.width(), g_memdc.height(),
+                WS_POPUP,
+                rcMainWnd.left, rcMainWnd.top, g_memdc.width(), g_memdc.height(),
                 hWnd,
                 nullptr,
                 g_hInst,
@@ -177,6 +186,19 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             );
             ShowWindow( g_hMainControlsWnd, SW_SHOW );
             UpdateWindow(g_hMainControlsWnd);
+        }
+        break;
+    case WM_MOVING:
+        {
+            RECT rcMainWnd;
+            GetClientRect( hWnd, &rcMainWnd );
+            LONG dx = rcMainWnd.left, dy = rcMainWnd.top;
+            ClientToScreen(hWnd, (LPPOINT)&rcMainWnd);
+            dx = rcMainWnd.left - dx, dy = rcMainWnd.top - dy;
+            rcMainWnd.right += dx;
+            rcMainWnd.bottom += dy;
+
+            SetWindowPos( g_hMainControlsWnd, nullptr, rcMainWnd.left, rcMainWnd.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOACTIVATE );
         }
         break;
     case WM_COMMAND:
@@ -207,7 +229,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
         }
         break;
-    case WM_LBUTTONUP:
+    /*case WM_LBUTTONUP:
         cout << message << ", " << wParam << ", " << lParam << "\n";
         {
             CLSID clsid;
@@ -253,7 +275,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
             InvalidateRect(hWnd, NULL, TRUE);
         }
-        break;
+        break;*/
     case WM_PAINT:
         cout << "WM_PAINT" << ", " << wParam << ", " << lParam << ", ";
         {
@@ -278,39 +300,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
     return 0;
 }
 
-//LRESULT CALLBACK CBTProc( int nCode, WPARAM wParam, LPARAM lParam )
-//{
-//    if ( nCode < 0 )
-//    {
-//        return CallNextHookEx( nullptr, nCode, wParam, lParam );
-//    }
-//
-//    switch ( nCode )
-//    {
-//    case HCBT_CREATEWND:
-//        {
-//            HWND hWnd = (HWND)wParam;
-//            CBT_CREATEWND & cw = *(CBT_CREATEWND*)lParam;
-//            cout << hWnd << ": " << cw.lpcs->x << ", " << cw.lpcs->y << ", " << cw.lpcs->cx << ", " << cw.lpcs->cy << "" << "\n";
-//
-//            HWND hParent = GetParent(hWnd);
-//            if ( !hParent )
-//            {
-//                hParent = GetForegroundWindow();
-//                cout << Window_GetText(hParent) << endl;
-//                RECT rc;
-//                GetWindowRect( hParent, &rc );
-//                cw.lpcs->x = rc.left + ( ( rc.right-rc.left ) - cw.lpcs->cx ) / 2;
-//                cw.lpcs->y = rc.top + ( ( rc.bottom-rc.top ) - cw.lpcs->cy ) / 2;
-//            }
-//        }
-//        break;
-//    default:
-//        break;
-//    }
-//
-//    return 0;
-//}
+HRGN g_hControlsWndRgn;
 
 LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
@@ -322,7 +312,33 @@ LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LP
         cout << "ControlsWnd: WM_CREATE" << ", " << wParam << ", " << lParam << "\n";
         {
             // 创建按钮
-            CreateWindowEx( 0, "BUTTON", "Start!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
+            HWND hBtnWnd = CreateWindowEx( 0, "BUTTON", "Start!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
+            RECT rcWnd;
+            GetWindowRect( hWnd, &rcWnd );
+            RECT rcBtn;
+            GetWindowRect( hBtnWnd, &rcBtn );
+
+            rcBtn.left = rcBtn.left - rcWnd.left;
+            rcBtn.top = rcBtn.top - rcWnd.top;
+            rcBtn.right = rcBtn.right - rcWnd.left;
+            rcBtn.bottom = rcBtn.bottom - rcWnd.top;
+
+            g_hControlsWndRgn = CreateRectRgn(0,0,0,0);
+
+            //HRGN hrgn = CreateRectRgn(0,0,0,0);
+            //int regionType = GetWindowRgn(hBtnWnd, hrgn);
+            //if (regionType != ERROR) 
+            //{ 
+            //}
+            //DeleteObject(hrgn);
+            //GetWindowClient();
+
+
+            HRGN hRgn = CreateRectRgnIndirect(&rcBtn);
+            CombineRgn( g_hControlsWndRgn, g_hControlsWndRgn, hRgn, RGN_OR );
+
+            DeleteObject(hRgn);
+            SetWindowRgn( hWnd, g_hControlsWndRgn, TRUE );
 
         }
         break;
@@ -343,20 +359,14 @@ LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LP
                 switch ( HIWORD(wParam) )
                 {
                 case BN_CLICKED:
-                    {
-                        //HHOOK hhk = SetWindowsHookEx( WH_CBT, CBTProc, NULL, GetCurrentThreadId() );
-                        //String err = GetErrorStr( GetLastError() );
-                        //MessageBox( g_hMainControlsWnd, err.c_str(), "Controls", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND );
-                        //UnhookWindowsHookEx(hhk);
-                    }
-                    MsgBox( Window_GetText((HWND)lParam), "MyButton", hWnd);
+                    WarnBox( Window_GetText( (HWND)lParam), "MyButton", g_hMainWnd );
                     break;
                 default:
                     break;
                 }
                 break;
             default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
+                return DefWindowProc( hWnd, message, wParam, lParam );
             }
         }
         break;
@@ -364,11 +374,11 @@ LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LP
         cout << "ControlsWnd: WM_PAINT" << ", " << wParam << ", " << lParam << ". ";
         {
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
+            HDC hdc = BeginPaint( hWnd, &ps );
 
             cout << "PAINTSTRUCT: " << ps.rcPaint.left << ", " << ps.rcPaint.top << ", " << ps.rcPaint.right << ", " << ps.rcPaint.bottom << "\n";
 
-            EndPaint(hWnd, &ps);
+            EndPaint( hWnd, &ps );
         }
         break;
     case WM_DESTROY:

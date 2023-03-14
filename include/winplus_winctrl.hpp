@@ -16,7 +16,7 @@ namespace winplus
 {
 // UI相关 ----------------------------------------------------------------
 
-/* 窗口定时器 */
+/** \brief 窗口定时器 */
 class WINPLUS_DLL WindowTimer
 {
 public:
@@ -35,18 +35,38 @@ private:
 
 // 窗口相关 --------------------------------------------------------------
 
-/* 弹出一个消息框 */
-WINPLUS_FUNC_DECL(int) MsgBox( String const & msg, String const & title = TEXT("WinPlus"), HWND hWnd = NULL );
-/* 弹出一个错误框 */
-WINPLUS_FUNC_DECL(int) ErrBox( String const & msg, String const & title = TEXT("WinPlus Error"), HWND hWnd = NULL );
-/* 弹出一个警告框 */
-WINPLUS_FUNC_DECL(int) WarnBox( String const & msg, String const & title = TEXT("WinPlus Warning"), HWND hWnd = NULL );
+/** \brief 弹出一个信息框
+ *
+ *  \param msg 消息内容
+ *  \param title 消息框标题
+ *  \param hParentWnd 父窗口
+ *  \param uType 额外的旗标
+ *  \return 返回选择按钮的ID */
+WINPLUS_FUNC_DECL(int) MsgBox( String const & msg, String const & title = TEXT("WinPlus"), HWND hwndParent = NULL, UINT uType = 0 );
+
+/** \brief 弹出一个错误框
+ *
+ *  \param msg 消息内容
+ *  \param title 消息框标题
+ *  \param hParentWnd 父窗口
+ *  \param uType 额外的旗标
+ *  \return 返回选择按钮的ID */
+WINPLUS_FUNC_DECL(int) ErrBox( String const & msg, String const & title = TEXT("WinPlus Error"), HWND hwndParent = NULL, UINT uType = 0 );
+
+/** \brief 弹出一个警告框
+ *
+ *  \param msg 消息内容
+ *  \param title 消息框标题
+ *  \param hParentWnd 父窗口
+ *  \param uType 额外的旗标
+ *  \return 返回选择按钮的ID */
+WINPLUS_FUNC_DECL(int) WarnBox( String const & msg, String const & title = TEXT("WinPlus Warning"), HWND hwndParent = NULL, UINT uType = 0 );
 
 /* 获取客户区矩形 */
 WINPLUS_FUNC_DECL(RECT) Window_GetClient( HWND window );
-/* 获取窗口矩形,相对于父窗口 */
+/* 获取窗口矩形，相对于父窗口 */
 WINPLUS_FUNC_DECL(RECT) Window_GetRect( HWND window );
-/* 设置窗口矩形,相对于父窗口 */
+/* 设置窗口矩形，相对于父窗口 */
 WINPLUS_FUNC_DECL(void) Window_SetRect( HWND window, LPCRECT rect, bool is_redraw = true );
 /* 膨胀窗口 */
 WINPLUS_FUNC_DECL(void) Window_Inflate( HWND window, INT dx, INT dy );

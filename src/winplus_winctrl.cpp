@@ -51,7 +51,7 @@ void WindowTimer::destroy( void )
 }
 
 // 窗口相关 ---------------------------------------------------------------
-static LRESULT CALLBACK __MessageBoxCbtProc( int nCode, WPARAM wParam, LPARAM lParam )
+inline static LRESULT CALLBACK __MessageBoxCbtHookProc( HWND hwndParent, int nCode, WPARAM wParam, LPARAM lParam )
 {
     if ( nCode < 0 ) return CallNextHookEx( nullptr, nCode, wParam, lParam );
 
@@ -60,37 +60,11 @@ static LRESULT CALLBACK __MessageBoxCbtProc( int nCode, WPARAM wParam, LPARAM lP
     case HCBT_CREATEWND:
         {
             HWND hWnd = (HWND)wParam;
-            CBT_CREATEWND & cw = *(CBT_CREATEWND*)lParam;
-            HWND hParent = GetParent(hWnd);
-            if ( !hParent )
-            {
-                hParent = GetForegroundWindow();
-                RECT rc;
-                GetWindowRect( hParent, &rc );
-                cw.lpcs->x = rc.left + ( ( rc.right-rc.left ) - cw.lpcs->cx ) / 2;
-                cw.lpcs->y = rc.top + ( ( rc.bottom-rc.top ) - cw.lpcs->cy ) / 2;
-            }
-        }
-        break;
-    }
-
-    return 0;
-}
-
-static LRESULT CALLBACK __MessageBoxCbtProc2( HWND hParent, int nCode, WPARAM wParam, LPARAM lParam )
-{
-    if ( nCode < 0 ) return CallNextHookEx( nullptr, nCode, wParam, lParam );
-
-    switch ( nCode )
-    {
-    case HCBT_CREATEWND:
-        {
-            HWND hWnd = (HWND)wParam;
-            CBT_CREATEWND & cw = *(CBT_CREATEWND*)lParam;
             if ( !GetParent(hWnd) )
             {
                 RECT rc;
-                GetWindowRect( hParent, &rc );
+                GetWindowRect( hwndParent, &rc );
+                CBT_CREATEWND & cw = *(CBT_CREATEWND*)lParam;
                 cw.lpcs->x = rc.left + ( ( rc.right-rc.left ) - cw.lpcs->cx ) / 2;
                 cw.lpcs->y = rc.top + ( ( rc.bottom-rc.top ) - cw.lpcs->cy ) / 2;
             }
@@ -101,29 +75,50 @@ static LRESULT CALLBACK __MessageBoxCbtProc2( HWND hParent, int nCode, WPARAM wP
     return 0;
 }
 
-WINPLUS_FUNC_IMPL(int) MsgBox( String const & msg, String const & title, HWND hWnd )
+thread_local static HWND __tl_hMsgBoxParent;
+static LRESULT CALLBACK __MsgBoxCbtProc( int nCode, WPARAM wParam, LPARAM lParam )
 {
-    if ( !hWnd ) hWnd = GetForegroundWindow();
-    HHOOK hhk = SetWindowsHookEx( WH_CBT, __MessageBoxCbtProc, NULL, GetCurrentThreadId() );
-    int nRet = MessageBox( hWnd, msg.c_str(), title.c_str(), MB_ICONINFORMATION );
+    return __MessageBoxCbtHookProc( __tl_hMsgBoxParent, nCode, wParam, lParam );
+}
+
+thread_local static HWND __tl_hErrBoxParent;
+static LRESULT CALLBACK __ErrBoxCbtProc( int nCode, WPARAM wParam, LPARAM lParam )
+{
+    return __MessageBoxCbtHookProc( __tl_hErrBoxParent, nCode, wParam, lParam );
+}
+
+thread_local static HWND __tl_hWarnBoxParent;
+static LRESULT CALLBACK __WarnBoxCbtProc( int nCode, WPARAM wParam, LPARAM lParam )
+{
+    return __MessageBoxCbtHookProc( __tl_hWarnBoxParent, nCode, wParam, lParam );
+}
+
+WINPLUS_FUNC_IMPL(int) MsgBox( String const & msg, String const & title, HWND hwndParent, UINT uType )
+{
+    if ( !hwndParent ) hwndParent = GetForegroundWindow();
+    __tl_hMsgBoxParent = hwndParent;
+    HHOOK hhk = SetWindowsHookEx( WH_CBT, __MsgBoxCbtProc, NULL, GetCurrentThreadId() );
+    int nRet = MessageBox( hwndParent, msg.c_str(), title.c_str(), MB_ICONINFORMATION | uType );
     UnhookWindowsHookEx(hhk);
     return nRet;
 }
 
-WINPLUS_FUNC_IMPL(int) ErrBox( String const & msg, String const & title, HWND hWnd )
+WINPLUS_FUNC_IMPL(int) ErrBox( String const & msg, String const & title, HWND hwndParent, UINT uType )
 {
-    if ( !hWnd ) hWnd = GetForegroundWindow();
-    HHOOK hhk = SetWindowsHookEx( WH_CBT, __MessageBoxCbtProc, NULL, GetCurrentThreadId() );
-    int nRet = MessageBox( hWnd, msg.c_str(), title.c_str(), MB_ICONERROR );
+    if ( !hwndParent ) hwndParent = GetForegroundWindow();
+    __tl_hErrBoxParent = hwndParent;
+    HHOOK hhk = SetWindowsHookEx( WH_CBT, __ErrBoxCbtProc, NULL, GetCurrentThreadId() );
+    int nRet = MessageBox( hwndParent, msg.c_str(), title.c_str(), MB_ICONERROR | uType );
     UnhookWindowsHookEx(hhk);
     return nRet;
 }
 
-WINPLUS_FUNC_IMPL(int) WarnBox( String const & msg, String const & title, HWND hWnd )
+WINPLUS_FUNC_IMPL(int) WarnBox( String const & msg, String const & title, HWND hwndParent, UINT uType )
 {
-    if ( !hWnd ) hWnd = GetForegroundWindow();
-    HHOOK hhk = SetWindowsHookEx( WH_CBT, __MessageBoxCbtProc, NULL, GetCurrentThreadId() );
-    int nRet = MessageBox( hWnd, msg.c_str(), title.c_str(), MB_ICONEXCLAMATION );
+    if ( !hwndParent ) hwndParent = GetForegroundWindow();
+    __tl_hWarnBoxParent = hwndParent;
+    HHOOK hhk = SetWindowsHookEx( WH_CBT, __WarnBoxCbtProc, NULL, GetCurrentThreadId() );
+    int nRet = MessageBox( hwndParent, msg.c_str(), title.c_str(), MB_ICONEXCLAMATION | uType );
     UnhookWindowsHookEx(hhk);
     return nRet;
 }
