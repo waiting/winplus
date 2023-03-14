@@ -8,24 +8,32 @@ using namespace std;
 #include "framework.h"
 #include "GuiTest.h"
 
+
+ostream & OutputRect( RECT const & rc )
+{
+    return cout << "Rect( LT(" << rc.left << ", " << rc.top << "), RB(" << rc.right << ", " << rc.bottom << "), SIZE(" << RectWidth(rc) << ", " << RectHeight(rc) << ") )\n";
+}
+
+
 #define MAX_LOADSTRING 100
 
-// 全局变量:
 HINSTANCE g_hInst; // 当前实例
 String g_strMainWndTitle; // 标题栏文本
 String g_strMainWndClass; // 主窗口类名
 
-HWND g_hMainWnd;
-HWND g_hMainControlsWnd;
+HWND g_hwndMain; // 主窗口
+HWND g_hwndControls; // 控件窗口
 MemImage g_imgMainWnd;
 MemDC g_memdc;
-BLENDFUNCTION g_blend;
+
+// 主窗口客户区位置偏移
+POINT g_ptMainWndClientOffset;
 
 // 此代码模块中包含的函数的前向声明:
 BOOL AppRegisterClass( HINSTANCE hInstance );
 BOOL InitInstance( HINSTANCE hInstance, int nCmdShow );
 LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
-LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+LRESULT CALLBACK ControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 INT_PTR CALLBACK AboutDlgProc( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam );
 
 int APIENTRY _tWinMain(
@@ -83,7 +91,8 @@ BOOL AppRegisterClass( HINSTANCE hInstance )
     wcex.hIcon          = LoadIcon( hInstance, MAKEINTRESOURCE(IDI_GUITEST) );
     wcex.hCursor        = LoadCursor( NULL, IDC_ARROW );
     wcex.hbrBackground  = (HBRUSH)( COLOR_BTNFACE + 1 );
-    wcex.lpszMenuName   = MAKEINTRESOURCE(IDC_GUITEST);
+    wcex.lpszMenuName   = NULL;
+    //wcex.lpszMenuName   = MAKEINTRESOURCE(IDC_GUITEST);
     wcex.lpszClassName  = g_strMainWndClass.c_str();
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -93,10 +102,10 @@ BOOL AppRegisterClass( HINSTANCE hInstance )
 
     String strMainControlsWndClass = g_strMainWndClass + "_Controls";
 
-    wcex.lpfnWndProc = MainControlsWndProc;
+    wcex.lpfnWndProc = ControlsWndProc;
     wcex.lpszMenuName = NULL;
     wcex.hbrBackground  = NULL;
-    //wcex.hbrBackground  = (HBRUSH)( COLOR_WINDOW + 1 );
+    wcex.hbrBackground  = (HBRUSH)( COLOR_WINDOW + 1 );
     wcex.lpszClassName = strMainControlsWndClass.c_str();
 
     // Register second Class.
@@ -111,7 +120,7 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
 
     if ( !AppRegisterClass(hInstance) ) return FALSE;
 
-    g_hMainWnd = CreateWindowEx(
+    g_hwndMain = CreateWindowEx(
         WS_EX_LAYERED,
         g_strMainWndClass.c_str(),
         g_strMainWndTitle.c_str(),
@@ -122,22 +131,44 @@ BOOL InitInstance( HINSTANCE hInstance, int nCmdShow )
         hInstance,
         nullptr
     );
-    if ( !g_hMainWnd ) return FALSE;
+    if ( !g_hwndMain ) return FALSE;
 
-    //SetLayeredWindowAttributes( g_hMainWnd, 0, 255, LWA_ALPHA );
-    ShowWindow( g_hMainWnd, nCmdShow );
-    UpdateWindow(g_hMainWnd);
-
+    //SetLayeredWindowAttributes( g_hwndMain, 0, 255, LWA_ALPHA );
+    ShowWindow( g_hwndMain, nCmdShow );
+    UpdateWindow(g_hwndMain);
 
     return TRUE;
 }
 
-LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
     using namespace Gdiplus;
 
     switch ( message )
     {
+    case WM_NCCALCSIZE:
+        cout << "WM_NCCALCSIZE " << wParam << endl;
+        if ( wParam )
+        {
+            NCCALCSIZE_PARAMS & params = *(LPNCCALCSIZE_PARAMS)lParam;
+            OutputRect(params.rgrc[0]);
+            OutputRect(params.rgrc[1]);
+            OutputRect(params.rgrc[2]);
+
+            //InflateRect( params.rgrc + 2, -10, 0 );
+
+            return DefWindowProc( hWnd, message, wParam, lParam );
+        }
+        else
+        {
+            RECT & rect = *(LPRECT)lParam;
+            OutputRect(rect);
+
+            return DefWindowProc( hWnd, message, wParam, lParam );
+        }
+
+        //return DefWindowProc( hWnd, message, wParam, lParam );
+        break;
     case WM_CREATE:
         cout << "WM_CREATE" << ", " << wParam << ", " << lParam << "\n";
         {
@@ -154,51 +185,49 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 //FillRoundRectangle(g, Gdiplus::SolidBrush(Gdiplus::Color(255,255,255)), Gdiplus::RectF(50,50,100,30), 8 );
             }
 
-            // BLENDFUNCTION
-            g_blend.BlendOp = AC_SRC_OVER;
-            g_blend.SourceConstantAlpha = 255;
-            g_blend.AlphaFormat = AC_SRC_ALPHA;
+            BLENDFUNCTION blend;
+            blend.BlendOp = AC_SRC_OVER;
+            blend.SourceConstantAlpha = 255;
+            blend.AlphaFormat = AC_SRC_ALPHA;
 
             POINT ptPos = { 0, 0 };
             SIZE sizeWnd = { g_memdc.width(), g_memdc.height() };
 
             HDC hScreenDC = GetDC(hWnd);
-            UpdateLayeredWindow( hWnd, hScreenDC, NULL, &sizeWnd, g_memdc, &ptPos, 0, &g_blend, ULW_ALPHA );
+            UpdateLayeredWindow( hWnd, hScreenDC, NULL, &sizeWnd, g_memdc, &ptPos, 0, &blend, ULW_ALPHA );
             ReleaseDC( hWnd, hScreenDC );
 
             // 创建控件窗口
-            RECT rcMainWnd;
-            GetClientRect( hWnd, &rcMainWnd );
-            ClientToScreen(hWnd, (LPPOINT)&rcMainWnd);
-            ClientToScreen(hWnd, (LPPOINT)&rcMainWnd + 1);
+            RECT rcMainWndClient, rcMainWndRect;
+            GetClientRect( hWnd, &rcMainWndClient );
+            ClientToScreen( hWnd, &rcMainWndClient );
+
+            // 计算客户区相对于窗口的偏移量
+            GetWindowRect( hWnd, &rcMainWndRect );
+            g_ptMainWndClientOffset.x = rcMainWndClient.left - rcMainWndRect.left;
+            g_ptMainWndClientOffset.y = rcMainWndClient.top - rcMainWndRect.top;
 
             String strMainControlsWndClass = g_strMainWndClass + "_Controls";
-            g_hMainControlsWnd = CreateWindowEx(
+            g_hwndControls = CreateWindowEx(
                 0,
                 strMainControlsWndClass.c_str(),
                 g_strMainWndTitle.c_str(),
                 WS_POPUP,
-                rcMainWnd.left, rcMainWnd.top, g_memdc.width(), g_memdc.height(),
+                rcMainWndClient.left, rcMainWndClient.top, RectWidth(rcMainWndClient), RectHeight(rcMainWndClient),
                 hWnd,
                 nullptr,
                 g_hInst,
                 nullptr
             );
-            ShowWindow( g_hMainControlsWnd, SW_SHOW );
-            UpdateWindow(g_hMainControlsWnd);
+            ShowWindow( g_hwndControls, SW_SHOW );
+            UpdateWindow(g_hwndControls);
         }
         break;
     case WM_MOVING:
         {
-            RECT rcMainWnd;
-            GetClientRect( hWnd, &rcMainWnd );
-            LONG dx = rcMainWnd.left, dy = rcMainWnd.top;
-            ClientToScreen(hWnd, (LPPOINT)&rcMainWnd);
-            dx = rcMainWnd.left - dx, dy = rcMainWnd.top - dy;
-            rcMainWnd.right += dx;
-            rcMainWnd.bottom += dy;
+            RECT & rcMainWnd = *(LPRECT)lParam;
 
-            SetWindowPos( g_hMainControlsWnd, nullptr, rcMainWnd.left, rcMainWnd.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOACTIVATE );
+            SetWindowPos( g_hwndControls, nullptr, rcMainWnd.left + g_ptMainWndClientOffset.x, rcMainWnd.top + g_ptMainWndClientOffset.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOACTIVATE );
         }
         break;
     case WM_COMMAND:
@@ -277,7 +306,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         break;*/
     case WM_PAINT:
-        cout << "WM_PAINT" << ", " << wParam << ", " << lParam << ", ";
+        cout << "WM_PAINT" << ", " << wParam << ", " << lParam << "\n";
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
@@ -302,7 +331,7 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
 HRGN g_hControlsWndRgn;
 
-LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CALLBACK ControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
     using namespace Gdiplus;
 
@@ -311,34 +340,27 @@ LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LP
     case WM_CREATE:
         cout << "ControlsWnd: WM_CREATE" << ", " << wParam << ", " << lParam << "\n";
         {
-            // 创建按钮
-            HWND hBtnWnd = CreateWindowEx( 0, "BUTTON", "Start!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
             RECT rcWnd;
             GetWindowRect( hWnd, &rcWnd );
+
+            // 创建按钮
+            HWND hBtnWnd = CreateWindowEx( 0, "BUTTON", "Start!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 30, 100, 30, hWnd, (HMENU)1, NULL, NULL );
             RECT rcBtn;
             GetWindowRect( hBtnWnd, &rcBtn );
-
             rcBtn.left = rcBtn.left - rcWnd.left;
             rcBtn.top = rcBtn.top - rcWnd.top;
             rcBtn.right = rcBtn.right - rcWnd.left;
             rcBtn.bottom = rcBtn.bottom - rcWnd.top;
 
+            InflateRect( &rcBtn, -1, -1 );
+
             g_hControlsWndRgn = CreateRectRgn(0,0,0,0);
-
-            //HRGN hrgn = CreateRectRgn(0,0,0,0);
-            //int regionType = GetWindowRgn(hBtnWnd, hrgn);
-            //if (regionType != ERROR) 
-            //{ 
-            //}
-            //DeleteObject(hrgn);
-            //GetWindowClient();
-
 
             HRGN hRgn = CreateRectRgnIndirect(&rcBtn);
             CombineRgn( g_hControlsWndRgn, g_hControlsWndRgn, hRgn, RGN_OR );
-
             DeleteObject(hRgn);
-            SetWindowRgn( hWnd, g_hControlsWndRgn, TRUE );
+
+            //SetWindowRgn( hWnd, g_hControlsWndRgn, TRUE );
 
         }
         break;
@@ -359,7 +381,12 @@ LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LP
                 switch ( HIWORD(wParam) )
                 {
                 case BN_CLICKED:
-                    WarnBox( Window_GetText( (HWND)lParam), "MyButton", g_hMainWnd );
+                    {
+                        RECT rc = Window_GetRect((HWND)lParam);
+                        RECT rc1 = Window_GetClient((HWND)lParam);
+                        WarnBox( Window_GetText((HWND)lParam), "MyButton", g_hwndMain, MB_TASKMODAL );
+                        //MessageBox( NULL, "No", "Error", MB_ICONHAND | MB_TASKMODAL );
+                    }
                     break;
                 default:
                     break;
@@ -371,12 +398,19 @@ LRESULT CALLBACK MainControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LP
         }
         break;
     case WM_PAINT:
-        cout << "ControlsWnd: WM_PAINT" << ", " << wParam << ", " << lParam << ". ";
+        cout << "ControlsWnd: WM_PAINT" << ", " << wParam << ", " << lParam << "\n";
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint( hWnd, &ps );
+            /*SimpleHandle<HPEN> pen( CreatePen( PS_SOLID, 1, RGB(255,0,0) ), NULL, DeleteObject );
+            GdiObjectSelector selPen( hdc, pen.get() );
+            GdiObjectSelector selBrush( hdc, GetStockObject(NULL_BRUSH) );
 
             cout << "PAINTSTRUCT: " << ps.rcPaint.left << ", " << ps.rcPaint.top << ", " << ps.rcPaint.right << ", " << ps.rcPaint.bottom << "\n";
+            RECT rcClient;
+            GetClientRect( hWnd, &rcClient );
+            MoveToEx( hdc, 0, 0, nullptr );
+            LineTo(hdc, rcClient.right-1, rcClient.bottom-1);*/
 
             EndPaint( hWnd, &ps );
         }
