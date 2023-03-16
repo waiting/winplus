@@ -90,7 +90,7 @@ BOOL AppRegisterClass( HINSTANCE hInstance )
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon( hInstance, MAKEINTRESOURCE(IDI_GUITEST) );
     wcex.hCursor        = LoadCursor( NULL, IDC_ARROW );
-    wcex.hbrBackground  = (HBRUSH)( COLOR_BTNFACE + 1 );
+    wcex.hbrBackground  = (HBRUSH)( COLOR_3DFACE + 1 );
     wcex.lpszMenuName   = NULL;
     //wcex.lpszMenuName   = MAKEINTRESOURCE(IDC_GUITEST);
     wcex.lpszClassName  = g_strMainWndClass.c_str();
@@ -147,35 +147,61 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
     switch ( message )
     {
     case WM_NCCALCSIZE:
-        cout << "WM_NCCALCSIZE " << wParam << endl;
+        cout << "MainWnd WM_NCCALCSIZE " << wParam << endl;
         if ( wParam )
         {
             NCCALCSIZE_PARAMS & params = *(LPNCCALCSIZE_PARAMS)lParam;
+            // rgrc[0] Dest, rgrc[1] Src, rgrc[2] Src-client
             OutputRect(params.rgrc[0]);
             OutputRect(params.rgrc[1]);
             OutputRect(params.rgrc[2]);
+ 
+            // rgrc[0] Dest-client, rgrc[1] Dest, rgrc[2] Src
+            swap( params.rgrc[0], params.rgrc[1] );
+            swap( params.rgrc[0], params.rgrc[2] );
 
-            //InflateRect( params.rgrc + 2, -10, 0 );
-
-            return DefWindowProc( hWnd, message, wParam, lParam );
+            OutputRect(params.rgrc[0]);
+            return 0; //DefWindowProc( hWnd, message, wParam, lParam );
         }
         else
         {
+            // 窗口第一次创建时，客户区大小别去管它，直接修改四边边距即可。
             RECT & rect = *(LPRECT)lParam;
+            RECT rcOrigin = rect;
+            OutputRect(rcOrigin);
+
+            rect.left = rcOrigin.left + 15;
+            rect.top = rcOrigin.top + 27;
+            rect.right = rcOrigin.right - 28;
+            rect.bottom = rcOrigin.bottom - 12;
             OutputRect(rect);
 
-            return DefWindowProc( hWnd, message, wParam, lParam );
+            return 0; //DefWindowProc( hWnd, message, wParam, lParam );
         }
-
-        //return DefWindowProc( hWnd, message, wParam, lParam );
+        break;
+    case WM_NCHITTEST:
+        {
+            POINT pt = { LOWORD(lParam), HIWORD(lParam) };
+            ScreenToClient( hWnd, &pt );
+            cout << "MainWnd WM_NCHITTEST " << pt.x << ", " << pt.y << "\n";
+            RECT rcClient;
+            GetClientRect(hWnd,&rcClient);
+            OutputRect(rcClient);
+            
+            return HTCAPTION;
+        }
         break;
     case WM_CREATE:
-        cout << "WM_CREATE" << ", " << wParam << ", " << lParam << "\n";
+        cout << "MainWnd WM_CREATE" << ", " << wParam << ", " << lParam << "\n";
         {
             // 创建按钮
             //CreateWindowEx( 0, "BUTTON", "Start!", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 50, 50, 100, 30, hWnd, (HMENU)1, NULL, NULL );
 
-            g_imgMainWnd.create("cg_dialog1.png");
+            g_imgMainWnd.create("cg_dialog1.bmp");
+            if ( g_imgMainWnd )
+            {
+                cout << "image create ok:" << g_imgMainWnd.width() << ", " << g_imgMainWnd.height() << endl;
+            }
             g_memdc.create( NULL, g_imgMainWnd.width(), g_imgMainWnd.height() );
 
             {
@@ -227,11 +253,11 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         {
             RECT & rcMainWnd = *(LPRECT)lParam;
 
-            SetWindowPos( g_hwndControls, nullptr, rcMainWnd.left + g_ptMainWndClientOffset.x, rcMainWnd.top + g_ptMainWndClientOffset.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOACTIVATE );
+            SetWindowPos( g_hwndControls, nullptr, rcMainWnd.left + g_ptMainWndClientOffset.x, rcMainWnd.top + g_ptMainWndClientOffset.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE );
         }
         break;
     case WM_COMMAND:
-        cout << "WM_COMMAND" << ", " << wParam << ", " << lParam << "\n";
+        cout << "MainWnd WM_COMMAND" << ", " << wParam << ", " << lParam << "\n";
         {
             int wmId = LOWORD(wParam);
             // 分析菜单选择:
@@ -306,7 +332,7 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         }
         break;*/
     case WM_PAINT:
-        cout << "WM_PAINT" << ", " << wParam << ", " << lParam << "\n";
+        cout << "MainWnd WM_PAINT" << ", " << wParam << ", " << lParam << "\n";
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
@@ -320,7 +346,7 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         }
         break;
     case WM_DESTROY:
-        cout << "WM_DESTROY" << ", " << wParam << ", " << lParam << "\n";
+        cout << "MainWnd WM_DESTROY" << ", " << wParam << ", " << lParam << "\n";
         PostQuitMessage(0);
         break;
     default:
