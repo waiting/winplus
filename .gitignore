@@ -14,6 +14,7 @@ cache/
 autom4te.cache/
 build-aux/
 thirdparties/
+GuiTest/images/
 Makefile
 libtool
 *.opt
