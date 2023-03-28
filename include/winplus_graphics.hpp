@@ -597,7 +597,7 @@ public:
 
     void destroy( void );
     BOOL clone( MemImage const & other );
-    BOOL copy( Gdiplus::Image * pImage );
+    BOOL copyFrom( Gdiplus::Image * pImage );
     /** 传递管理权，自己放弃管理资源 */
     BOOL passTo( MemImage & other );
     /** 以中心点旋转angle角度 */

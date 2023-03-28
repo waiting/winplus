@@ -143,7 +143,7 @@ WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & picFile, MemImage * mem_img
 {
     Gdiplus::Bitmap bmp( StringToUnicode(picFile).c_str() );
     mem_img->create( bmp.GetWidth(), bmp.GetHeight() );
-    mem_img->copy(&bmp);
+    mem_img->copyFrom(&bmp);
     return true;
 }
 

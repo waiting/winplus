@@ -121,7 +121,7 @@ WINPLUS_FUNC_IMPL(void) FillRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Brus
 
 WINPLUS_FUNC_IMPL(SIZE) GetHdcWindowSize( HDC hDC )
 {
-    HWND hWnd = WindowFromDC( hDC );
+    HWND hWnd = WindowFromDC(hDC);
     RECT rc;
     GetWindowRect( hWnd, &rc );
     return { rc.right - rc.left, rc.bottom - rc.top };
@@ -611,7 +611,7 @@ BOOL MemImage::clone( MemImage const & other )
     return FALSE;
 }
 
-BOOL MemImage::copy( Gdiplus::Image * pImage )
+BOOL MemImage::copyFrom( Gdiplus::Image * pImage )
 {
     if ( _pBmpImage != pImage )
     {
@@ -621,6 +621,7 @@ BOOL MemImage::copy( Gdiplus::Image * pImage )
     }
     return FALSE;
 }
+
 void MemImage::destroy( void )
 {
     if ( _pBmpImage )

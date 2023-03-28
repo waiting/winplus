@@ -301,20 +301,20 @@ int WordsLib::splitWords( String const & text, StringArray * arrWords ) const
     int first, last;
     int cch = 0, i = 0;
     first = 0;
-    last = wordscount - 1;
-    while ( p && *p )
+    last = this->wordscount - 1;
+    while ( *p )
     {
         TCHAR ch[4] = {0};
         ch[0] = *p;
         cch = 1;
-#ifndef UNICODE
+    #ifndef UNICODE
         if ( ch[0] & 0x80 )
         {
             p++;
             ch[1] = *p;
             cch = 2;
         }
-#endif
+    #endif
         str += ch;
 
         int pos = -1, count = 0;
@@ -353,7 +353,7 @@ int WordsLib::splitWords( String const & text, StringArray * arrWords ) const
                     arrWords->push_back(ansiStr);
             }
             first = 0;
-            last = wordscount - 1;
+            last = this->wordscount - 1;
             str = TEXT("");
         }
         i++;
