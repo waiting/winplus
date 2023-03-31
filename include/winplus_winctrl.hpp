@@ -86,6 +86,8 @@ WINPLUS_FUNC_DECL(void) Window_SetText( HWND hWnd, String const & text );
 WINPLUS_FUNC_DECL(bool) Window_IsShow( HWND hWnd );
 /** \brief 让窗口可见 */
 WINPLUS_FUNC_DECL(void) Window_Show( HWND hWnd, bool show = true );
+/** \brief 判断是否是顶层窗口 */
+WINPLUS_FUNC_DECL(bool) Window_IsTopLevel( HWND hWnd );
 
 // ListCtrl - Report操作 -------------------------------------------------
 WINPLUS_FUNC_DECL(INT) Report_AddStrings( HWND report, StringArray const & cols );

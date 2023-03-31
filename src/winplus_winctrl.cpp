@@ -249,6 +249,11 @@ WINPLUS_FUNC_IMPL(void) Window_Show( HWND hWnd, bool show )
     }
 }
 
+WINPLUS_FUNC_IMPL(bool) Window_IsTopLevel( HWND hWnd )
+{
+    LONG exStyle = GetWindowLong( hWnd, GWL_EXSTYLE );
+    return (exStyle & WS_EX_TOPMOST) || (!(exStyle & WS_EX_APPWINDOW) && (GetWindow(hWnd, GW_OWNER) == NULL));
+}
 
 // ListCtrl - Report操作---------------------------------------------------
 WINPLUS_FUNC_IMPL(INT) Report_AddStrings( HWND report, StringArray const & cols )
