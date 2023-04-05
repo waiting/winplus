@@ -222,10 +222,12 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
             g_memdc.create( NULL, g_imgMainWnd.width(), g_imgMainWnd.height() );
 
             {
-                Gdiplus::Graphics g( (HDC)g_memdc );
+                winplus::Graphics g( (HDC)g_memdc );
                 g.SetSmoothingMode(SmoothingModeAntiAlias);
+                //SolidBrush brush( Color( 128, 255,255,0 ) );
+                //g.DrawBackground( RectF(0,0,g_memdc.width(), g_memdc.height()), &brush, 14 );
                 Gdiplus::Status s = g.DrawImage( g_imgMainWnd, 0, 0, g_memdc.width(), g_memdc.height() );
-                //FillRoundRectangle(g, Gdiplus::SolidBrush(Gdiplus::Color(125,255,255,255)), Gdiplus::RectF(50,50,100,30), 8 );
+                //g.FillRoundRectangle( &Gdiplus::SolidBrush(Gdiplus::Color(125,255,255,255)), Gdiplus::RectF(50,50,100,30), 8 );
             }
 
             BLENDFUNCTION blend;
@@ -488,7 +490,7 @@ LRESULT CALLBACK MyStaticWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM
             HDC hdc = BeginPaint( hWnd, &ps );
 
             //TextOut( hdc, 0, 0, "Hello world", 11 );
-            Graphics g(hdc);
+            winplus::Graphics g(hdc);
             Gdiplus::Font font(L"宋体", 36);
             SolidBrush brush( Color(125, 255,0,0) );
             StringFormat sf;

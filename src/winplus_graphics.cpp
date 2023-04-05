@@ -17,7 +17,7 @@
 namespace winplus
 {
 
-// GDI+ Init
+// GDI+ Init ------------------------------------------------------------------------------
 GdiplusInit::GdiplusInit() : _gdiplusToken(0), _canShutdown(true)
 {
     // Initialize GDI+.
@@ -30,6 +30,152 @@ GdiplusInit::~GdiplusInit()
     {
         Gdiplus::GdiplusShutdown(_gdiplusToken);
     }
+}
+
+// class Graphics -------------------------------------------------------------------------
+void Graphics::DrawRoundRectangle( Gdiplus::Pen const * pen, Gdiplus::RectF const & rect, Gdiplus::REAL round )
+{
+    Gdiplus::GraphicsPath path;
+    path.StartFigure();
+
+    Gdiplus::REAL width = rect.Width/* - 1.5*/;
+    Gdiplus::REAL height = rect.Height/* - 1.0*/;
+    Gdiplus::RectF r ( rect.X, rect.Y, width, height );
+    Gdiplus::REAL dia = round;
+    // diameter can't exceed width or height
+    if ( dia > r.Width ) dia = r.Width;
+    if ( dia > r.Height ) dia = r.Height;
+
+    // define a corner 
+    Gdiplus::RectF Corner( r.X, r.Y, dia, dia );
+    // top left
+    path.AddArc( Corner, 180, 90 );
+    // tweak needed for radius of 10 (dia of 20)
+    if ( dia == 20 )
+    {
+        Corner.Width += 1; 
+        Corner.Height += 1; 
+        r.Width -=1;
+        r.Height -= 1;
+    }
+
+    // top right
+    Corner.X += (r.Width - dia - 1);
+    path.AddArc(Corner, 270, 90);    
+
+    // bottom right
+    Corner.Y += (r.Height - dia - 1);
+    path.AddArc(Corner,   0, 90);    
+
+    // bottom left
+    Corner.X -= (r.Width - dia - 1);
+    path.AddArc(Corner, 90, 90);
+
+    path.CloseFigure();
+
+    // 绘制边线
+    if ( pen ) this->DrawPath( pen, &path );
+}
+
+void Graphics::FillRoundRectangle( Gdiplus::Brush const * brush, Gdiplus::RectF const & rect, Gdiplus::REAL round )
+{
+    Gdiplus::GraphicsPath path;
+    path.StartFigure();
+
+    Gdiplus::REAL width = rect.Width;
+    Gdiplus::REAL height = rect.Height;
+    Gdiplus::RectF r ( rect.X, rect.Y, width, height );
+    Gdiplus::REAL dia = round;
+    // diameter can't exceed width or height
+    if ( dia > r.Width ) dia = r.Width;
+    if ( dia > r.Height ) dia = r.Height;
+
+    // define a corner 
+    Gdiplus::RectF Corner( r.X, r.Y, dia, dia );
+    // top left
+    path.AddArc( Corner, 180, 90 );
+    // tweak needed for radius of 10 (dia of 20)
+    if ( dia == 20 )
+    {
+        Corner.Width += 1; 
+        Corner.Height += 1; 
+        r.Width -=1;
+        r.Height -= 1;
+    }
+
+    // top right
+    Corner.X += (r.Width - dia - 1);
+    path.AddArc(Corner, 270, 90);    
+
+    // bottom right
+    Corner.Y += (r.Height - dia - 1);
+    path.AddArc(Corner,   0, 90);    
+
+    // bottom left
+    Corner.X -= (r.Width - dia - 1);
+    path.AddArc(Corner, 90, 90);
+
+    path.CloseFigure();
+
+    if ( brush ) this->FillPath( brush, &path );
+}
+
+void Graphics::FillRectangle( Gdiplus::Brush const * brush, Gdiplus::RectF const & rect )
+{
+    Gdiplus::PointF points[5] = {
+        { rect.GetLeft(), rect.GetTop() },
+        { rect.GetLeft(), rect.GetTop() },
+        { rect.GetRight(), rect.GetTop() },
+        { rect.GetRight(), rect.GetBottom() },
+        { rect.GetLeft(), rect.GetBottom() },
+    };
+    this->FillPolygon( brush, points, 5 );
+}
+
+void Graphics::DrawShadowString( winplus::String const & str, Gdiplus::Font const & font, Gdiplus::Brush const * brushLight, Gdiplus::Brush const * brushDark, Gdiplus::RectF const & layoutRect, Gdiplus::StringFormat const & fmt, Gdiplus::RectF * boundingRect )
+{
+    winplus::UnicodeString sU = winplus::StringToUnicode(str);
+    if ( boundingRect )
+    {
+        this->MeasureString(
+            sU.c_str(),
+            (INT)sU.length(),
+            &font,
+            layoutRect,
+            &fmt,
+            boundingRect
+        );
+    }
+
+    if ( brushDark )
+    {
+        this->DrawString(
+            sU.c_str(),
+            (INT)sU.length(),
+            &font,
+            Gdiplus::RectF( layoutRect.X + 1, layoutRect.Y + 1, layoutRect.Width, layoutRect.Height ),
+            &fmt,
+            brushDark
+        );
+    }
+
+    if ( brushLight )
+    {
+        this->DrawString(
+            sU.c_str(),
+            (INT)sU.length(),
+            &font,
+            layoutRect,
+            &fmt,
+            brushLight
+        );
+    }
+}
+
+void Graphics::DrawShadowFrame( Gdiplus::RectF const & rect, Gdiplus::Pen const * penLight, Gdiplus::Pen const * penDark, float round )
+{
+    if ( penDark ) this->DrawRoundRectangle( penDark, Gdiplus::RectF( rect.X + 1, rect.Y + 1, rect.Width, rect.Height ), round );
+    if ( penLight ) this->DrawRoundRectangle( penLight, rect, round );
 }
 
 WINPLUS_FUNC_IMPL(void) DrawRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Pen const & pen, Gdiplus::RectF const & rect, Gdiplus::REAL round )
@@ -69,7 +215,7 @@ WINPLUS_FUNC_IMPL(void) DrawRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Pen 
     Corner.X -= (r.Width - dia - 1);
     path.AddArc(Corner, 90, 90);
     
-    path.CloseFigure();                
+    path.CloseFigure();
 
     //绘制边线
     g.DrawPath( &pen, &path );
@@ -112,11 +258,10 @@ WINPLUS_FUNC_IMPL(void) FillRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Brus
     Corner.X -= (r.Width - dia - 1);
     path.AddArc(Corner, 90, 90);
     
-    path.CloseFigure();                
+    path.CloseFigure();
 
     //g.FillRectangle( &brush, r );
     g.FillPath( &brush, &path );
-
 }
 
 WINPLUS_FUNC_IMPL(SIZE) GetHdcWindowSize( HDC hDC )

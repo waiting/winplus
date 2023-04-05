@@ -446,6 +446,29 @@ inline _GdipRect RectGdiToGdiplus( _RECT const & rect )
     return rc;
 }
 
+/** \brief 绘制类，扩展一些绘制方法 */
+class WINPLUS_DLL Graphics : public Gdiplus::Graphics
+{
+public:
+    using Gdiplus::Graphics::Graphics;
+
+    /** \brief 绘制圆角矩形 */
+    void DrawRoundRectangle( Gdiplus::Pen const * pen, Gdiplus::RectF const & rect, Gdiplus::REAL round );
+
+    /** \brief 填充圆角矩形 */
+    void FillRoundRectangle( Gdiplus::Brush const * brush, Gdiplus::RectF const & rect, Gdiplus::REAL round );
+
+    /** \brief 填充矩形 */
+    void FillRectangle( Gdiplus::Brush const * brush, Gdiplus::RectF const & rect );
+
+    /** \brief 绘制一个有阴影的文字 */
+    void DrawShadowString( winplus::String const & str, Gdiplus::Font const & font, Gdiplus::Brush const * brushLight, Gdiplus::Brush const * brushDark, Gdiplus::RectF const & layoutRect, Gdiplus::StringFormat const & fmt, Gdiplus::RectF * boundingRect );
+
+    /** \brief 绘制一个阴影圆角的框架 */
+    void DrawShadowFrame( Gdiplus::RectF const & rect, Gdiplus::Pen const * penLight, Gdiplus::Pen const * penDark, float round );
+
+};
+
 /** \brief 绘制圆角矩形 */
 WINPLUS_FUNC_DECL(void) DrawRoundRectangle( Gdiplus::Graphics & g, Gdiplus::Pen const & pen, Gdiplus::RectF const & rect, Gdiplus::REAL round );
 
