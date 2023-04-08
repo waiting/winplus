@@ -891,3 +891,18 @@ void MemImage::_zeroInit()
 #endif
 
 } // namespace winplus
+
+std::ostream & operator << ( std::ostream & out, RECT const & rc )
+{
+    return out << "RECT( LT(" << rc.left << ", " << rc.top << "), RB(" << rc.right << ", " << rc.bottom << "), SIZE(" << winplus::RectWidth(rc) << ", " << winplus::RectHeight(rc) << ") )";
+}
+
+std::ostream & operator << ( std::ostream & out, Gdiplus::Rect const & rc )
+{
+    return out << "Rect( LT(" << rc.GetLeft() << ", " << rc.GetTop() << "), RB(" << rc.GetRight() << ", " << rc.GetBottom() << "), SIZE(" << rc.Width << ", " << rc.Height << ") )";
+}
+
+std::ostream & operator << ( std::ostream & out, Gdiplus::RectF const & rc )
+{
+    return out << "RectF( LT(" << rc.GetLeft() << ", " << rc.GetTop() << "), RB(" << rc.GetRight() << ", " << rc.GetBottom() << "), SIZE(" << rc.Width << ", " << rc.Height << ") )";
+}

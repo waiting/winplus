@@ -59,37 +59,34 @@ WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamExistingFile( String const & fileName 
     return stream;
 }
 
-WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromBuffer( LPCVOID buffer, DWORD size )
+WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromBuffer( LPCVOID lpBuffer, size_t size )
 {
     HRESULT hr;
-    IStreamPtr stream;
-    HGLOBAL block = GlobalAlloc( GMEM_MOVEABLE, size );
-    if ( block == NULL )
-    {
-        return NULL;
-    }
+    IStreamPtr streamPtr;
+    HGLOBAL hMemBlock = GlobalAlloc( GMEM_MOVEABLE, size );
+    if ( hMemBlock == NULL ) return NULL;
     
-    LPVOID data = GlobalLock(block);
-    CopyMemory( data, buffer, size );
-    GlobalUnlock(block);
+    LPVOID data = GlobalLock(hMemBlock);
+    CopyMemory( data, lpBuffer, size );
+    GlobalUnlock(hMemBlock);
 
-    hr = CreateStreamOnHGlobal( block, TRUE, &stream ); // 创建 IStream
+    hr = CreateStreamOnHGlobal( hMemBlock, TRUE, &streamPtr ); // 创建 IStream
     if ( FAILED(hr) )
     {
-        GlobalFree(block);
+        GlobalFree(hMemBlock);
         return NULL;
     }
-    return stream;
+    return streamPtr;
 }
 
-WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromResourceEx( HMODULE module, UINT resourceId, LPCTSTR type )
+WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromResourceEx( HMODULE hModule, UINT uResourceId, LPCTSTR lpszType )
 {
     IStreamPtr stream;
-    HRSRC resource = FindResource( module, MAKEINTRESOURCE(resourceId), type);
+    HRSRC resource = FindResource( hModule, MAKEINTRESOURCE(uResourceId), lpszType);
     if ( resource != NULL )
     {
-        DWORD size = SizeofResource( module, resource );
-        HGLOBAL resBlock = LoadResource( module, resource );
+        DWORD size = SizeofResource( hModule, resource );
+        HGLOBAL resBlock = LoadResource( hModule, resource );
         LPVOID data = LockResource(resBlock);
         stream = CreateStreamFromBuffer( data, size );
         UnlockResource(resBlock);
@@ -99,9 +96,9 @@ WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromResourceEx( HMODULE module, UINT r
     return stream;
 }
 
-WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromResource( UINT resourceId, LPCTSTR type )
+WINPLUS_FUNC_IMPL(IStreamPtr) CreateStreamFromResource( UINT uResourceId, LPCTSTR lpszType )
 {
-    return CreateStreamFromResourceEx( GetModuleHandle(NULL), resourceId, type );
+    return CreateStreamFromResourceEx( GetModuleHandle(NULL), uResourceId, lpszType );
 }
 
 } // namespace winplus

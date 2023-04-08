@@ -677,4 +677,9 @@ private:
 
 } // namespace winplus
 
+std::ostream & operator << ( std::ostream & out, RECT const & rc );
+std::ostream & operator << ( std::ostream & out, Gdiplus::Rect const & rc );
+std::ostream & operator << ( std::ostream & out, Gdiplus::RectF const & rc );
+
+
 #endif // !defined(__WINPLUS_GRAPHICS_HPP__)

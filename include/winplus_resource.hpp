@@ -16,42 +16,68 @@ namespace winplus
 class WINPLUS_DLL Resource
 {
 public:
+    /** \brief 构造函数0 */
     Resource()
     {
-        _construct();
+        _zeroInit();
     }
-    Resource( HMODULE hModule, UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
-    {
-        _construct( hModule, MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
-    }
+
+    /** \brief 构造函数1-1 */
     Resource( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
     {
-        _construct( hModule, lpszName, lpType, wLanguage );
+        _zeroInit();
+        this->load( hModule, lpszName, lpType, wLanguage );
     }
-    Resource( UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
+
+    /** \brief 构造函数1-2 */
+    Resource( HMODULE hModule, UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
     {
-        _construct( GetModuleHandle(NULL), MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
+        _zeroInit();
+        this->load( hModule, MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
     }
+
+    /** \brief 构造函数2-1 */
     Resource( LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
     {
-        _construct( GetModuleHandle(NULL), lpszName, lpType, wLanguage );
+        _zeroInit();
+        this->load( GetModuleHandle(NULL), lpszName, lpType, wLanguage );
     }
-    ~Resource();
 
+    /** \brief 构造函数2-2 */
+    Resource( UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
+    {
+        _zeroInit();
+        this->load( GetModuleHandle(NULL), MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
+    }
+
+    virtual ~Resource();
+
+    /** \brief 释放 */
+    void free();
+
+    /** \brief 加载资源1-1 */
     bool load( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) );
+
+    /** \brief 加载资源1-2 */
     bool load( HMODULE hModule, UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
     {
         return this->load( hModule, MAKEINTRESOURCE(nResourceId), lpType, wLanguage );
     }
+
+    /** \brief 加载资源2-1 */
     bool load( LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
     {
         return this->load( GetModuleHandle(NULL), lpszName, lpType, wLanguage );
     }
+
+    /** \brief 加载资源2-2 */
     bool load( UINT nResourceId, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) )
     {
         return this->load( GetModuleHandle(NULL), nResourceId, lpType, wLanguage );
     }
-    void free();
+
+    /** \brief 用加载到的资源创建一个IStream* */
+    IStreamPtr createStream() const;
 
     /** \brief 拷贝到目标缓冲区，返回目标缓冲区与资源的大小差
      *
@@ -65,8 +91,7 @@ public:
 
     operator bool() const { return _lpData != NULL; }
 protected:
-    void _construct();
-    void _construct( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage = MAKELANGID( LANG_NEUTRAL, SUBLANG_NEUTRAL ) );
+    void _zeroInit();
 private:
     //HRSRC _hRSRC;
     HGLOBAL _hResMemBlock;

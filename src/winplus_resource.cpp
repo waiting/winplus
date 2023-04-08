@@ -6,7 +6,7 @@ namespace winplus
 
 Resource::~Resource()
 {
-    free();
+    this->free();
 }
 
 void Resource::free()
@@ -38,6 +38,20 @@ bool Resource::load( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLa
     return true;
 }
 
+IStreamPtr Resource::createStream() const
+{
+    IStreamPtr streamPtr;
+    if ( _lpData != nullptr && _uSize != 0 )
+    {
+        HRESULT hr = CreateStreamOnHGlobal( nullptr, TRUE, &streamPtr );
+        if ( SUCCEEDED(hr) )
+        {
+            streamPtr->Write( _lpData, (ULONG)_uSize, nullptr );
+        }
+    }
+    return streamPtr;
+}
+
 ssize_t Resource::copyTo( LPVOID lpDestination, size_t uDestinationSize ) const
 {
     size_t uSize = uDestinationSize < this->getSize() ? uDestinationSize : this->getSize();
@@ -46,13 +60,7 @@ ssize_t Resource::copyTo( LPVOID lpDestination, size_t uDestinationSize ) const
     return (ssize_t)( uDestinationSize - this->getSize() );
 }
 
-void Resource::_construct( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpType, WORD wLanguage )
-{
-    _construct();
-    this->load( hModule, lpszName, lpType, wLanguage );
-}
-
-void Resource::_construct()
+void Resource::_zeroInit()
 {
     //_hModule = NULL;
     _hResMemBlock = NULL;
