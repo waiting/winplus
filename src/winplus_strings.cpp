@@ -96,11 +96,11 @@ WINPLUS_FUNC_IMPL(UnicodeString) LoadStringExW( HMODULE hModule, UINT id )
                 {
                     UnicodeString sz;
                     sz.resize( w + 1 );
-                    CopyMemory( &sz[0], data + offset, w * sizeof(WCHAR) );
-                    result = decltype(result)( sz.c_str(), w );
+                    CopyMemory( &sz[0], data + offset, w * sizeof(UnicodeString::value_type) );
+                    result = UnicodeString( sz.c_str(), w );
                     break;
                 }
-                offset += w * sizeof(WCHAR);
+                offset += w * sizeof(UnicodeString::value_type);
             }
             index++;
         }

@@ -139,14 +139,6 @@ WINPLUS_FUNC_IMPL(SIZE) Picture_GetDimensions( IPicturePtr pic )
     return dimensions;
 }
 
-WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & picFile, MemImage * mem_img )
-{
-    Gdiplus::Bitmap bmp( StringToUnicode(picFile).c_str() );
-    mem_img->create( bmp.GetWidth(), bmp.GetHeight() );
-    mem_img->copyFrom(&bmp);
-    return true;
-}
-
 WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & picFile, MemDC * memDC )
 {
     IPicturePtr pic;
@@ -161,7 +153,15 @@ WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & picFile, MemDC * memDC )
     }
     return false;
 }
-//
+
+WINPLUS_FUNC_IMPL(bool) Picture_Load( String const & picFile, MemImage * memImg )
+{
+    Gdiplus::Bitmap bmp( StringToUnicode(picFile).c_str() );
+    memImg->create( bmp.GetWidth(), bmp.GetHeight() );
+    memImg->copyFrom(&bmp);
+    return true;
+}
+
 WINPLUS_FUNC_IMPL(void) HIMETRIC_to_DP( HDC dc, LPPOINT point )
 {
     INT mapMode;

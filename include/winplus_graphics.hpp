@@ -680,6 +680,12 @@ private:
 std::ostream & operator << ( std::ostream & out, RECT const & rc );
 std::ostream & operator << ( std::ostream & out, Gdiplus::Rect const & rc );
 std::ostream & operator << ( std::ostream & out, Gdiplus::RectF const & rc );
+std::ostream & operator << ( std::ostream & out, POINT const & pt );
+std::ostream & operator << ( std::ostream & out, Gdiplus::Point const & pt );
+std::ostream & operator << ( std::ostream & out, Gdiplus::PointF const & pt );
+std::ostream & operator << ( std::ostream & out, SIZE const & si );
+std::ostream & operator << ( std::ostream & out, Gdiplus::Size const & si );
+std::ostream & operator << ( std::ostream & out, Gdiplus::SizeF const & si );
 
 
 #endif // !defined(__WINPLUS_GRAPHICS_HPP__)

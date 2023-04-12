@@ -906,3 +906,33 @@ std::ostream & operator << ( std::ostream & out, Gdiplus::RectF const & rc )
 {
     return out << "RectF( LT(" << rc.GetLeft() << ", " << rc.GetTop() << "), RB(" << rc.GetRight() << ", " << rc.GetBottom() << "), SIZE(" << rc.Width << ", " << rc.Height << ") )";
 }
+
+std::ostream & operator << ( std::ostream & out, POINT const & pt )
+{
+    return out << "POINT(" << pt.x << ", " << pt.y << ")";
+}
+
+std::ostream & operator << ( std::ostream & out, Gdiplus::Point const & pt )
+{
+    return out << "Point(" << pt.X << ", " << pt.Y << ")";
+}
+
+std::ostream & operator << ( std::ostream & out, Gdiplus::PointF const & pt )
+{
+    return out << "PointF(" << pt.X << ", " << pt.Y << ")";
+}
+
+std::ostream & operator << ( std::ostream & out, SIZE const & si )
+{
+    return out << "SIZE(" << si.cx << ", " << si.cy << ")";
+}
+
+std::ostream & operator << ( std::ostream & out, Gdiplus::Size const & si )
+{
+    return out << "Size(" << si.Width << ", " << si.Height << ")";
+}
+
+std::ostream & operator << ( std::ostream & out, Gdiplus::SizeF const & si )
+{
+    return out << "SizeF(" << si.Width << ", " << si.Height << ")";
+}

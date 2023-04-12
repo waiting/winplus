@@ -247,18 +247,29 @@ WINPLUS_FUNC_IMPL(String) ModulePath( HMODULE mod, String * fileName )
     return FilePath( String( sz.c_str(), dwGet ), fileName );
 }
 
-WINPLUS_FUNC_IMPL(INT) CommandArguments( StringArray * arr )
+WINPLUS_FUNC_IMPL(UINT) CommandArgumentArray( StringArray * argArr )
 {
     // 命令行参数处理
     LPWSTR cmdLine = GetCommandLineW();
     INT numArgs, i;
-    LPWSTR * argsArr = CommandLineToArgvW( cmdLine, &numArgs );
+    LPWSTR * argsArr = ::CommandLineToArgvW( cmdLine, &numArgs );
     for ( i = 0; i < numArgs; ++i )
     {
-        arr->push_back( UnicodeToString(argsArr[i]) );
+        argArr->push_back( UnicodeToString(argsArr[i]) );
     }
     GlobalFree( (HGLOBAL)argsArr );
     return numArgs;
+}
+
+WINPLUS_FUNC_IMPL(std::vector<String::value_type const *>) CommandArgs( StringArray * argArr )
+{
+    std::vector<String::value_type const *> args;
+    for ( auto && arg : *argArr )
+    {
+        args.push_back( arg.c_str() );
+    }
+    args.push_back(nullptr);
+    return args;
 }
 
 WINPLUS_FUNC_IMPL(bool) ShutdownPrivilege( bool enable )

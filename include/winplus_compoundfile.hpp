@@ -23,6 +23,10 @@ WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamExistingFile( String const & fileName 
 WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamFromBuffer( LPCVOID lpBuffer, size_t size );
 
 /** \brief 从资源创建一个IStream */
+WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamFromResourceEx( HMODULE hModule, LPCTSTR lpszName, LPCTSTR lpszType );
+/** \brief 从资源创建一个IStream */
+WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamFromResource( LPCTSTR lpszName, LPCTSTR lpszType );
+/** \brief 从资源创建一个IStream */
 WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamFromResourceEx( HMODULE hModule, UINT uResourceId, LPCTSTR lpszType );
 /** \brief 从资源创建一个IStream */
 WINPLUS_FUNC_DECL(IStreamPtr) CreateStreamFromResource( UINT uResourceId, LPCTSTR lpszType );

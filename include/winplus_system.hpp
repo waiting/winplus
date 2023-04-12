@@ -29,67 +29,95 @@ extern WINPLUS_DLL String const lineSepUnix;// = TEXT("\n");
 /* mac行分割符 */
 extern WINPLUS_DLL String const lineSepMac;// = TEXT("\r");
 
-/* 判断一个字符串是否可展开，即是否包含%varname% */
+/** \brief 判断一个字符串是否可展开，即是否包含%varname% */
 WINPLUS_FUNC_DECL(bool) IsExpandString( String const & str );
-/* 展开字符串中存在的'%变量%' */
+/** \brief 展开字符串中存在的'%变量%' */
 WINPLUS_FUNC_DECL(String) ExpandVars( String const & str );
 
-/* 通过HWND获得程序路径和进程ID */
+/** \brief 通过HWND获得程序路径和进程ID */
 WINPLUS_FUNC_DECL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId = NULL );
 
-/* 返回模块路径(末尾不含目录分隔符)，输出模块文件名 */
+/** \brief 返回模块路径(末尾不含目录分隔符)，输出模块文件名 */
 WINPLUS_FUNC_DECL(String) ModulePath( HMODULE mod = NULL, String * fileName = NULL );
 
-/* 获得程序的命令行参数 */
-WINPLUS_FUNC_DECL(INT) CommandArguments( StringArray * arr );
-/* 使能关机 */
+/** \brief 获得程序的命令行参数 */
+WINPLUS_FUNC_DECL(UINT) CommandArgumentArray( StringArray * argArr );
+/** \brief 构造一个const char*[]，以vector<const char*>返回
+ *
+ *  不要用返回的vector的元素个数作为命令行参数个数，因为它始终多一个nullptr元素
+ *  \param argArr 由CommandArgumentArray()取得的命令行参数数组，并且请保持其有效，如果其被摧毁，那么本函数返回的参数列表也就无效了 */
+WINPLUS_FUNC_DECL(std::vector<String::value_type const *>) CommandArgs( StringArray * argArr );
+/** \brief 使能关机 */
 WINPLUS_FUNC_DECL(bool) ShutdownPrivilege( bool enable );
 
 /** \brief Windows错误号转成错误字符串 */
 WINPLUS_FUNC_DECL(String) GetErrorStr( DWORD err );
 
-/* 获得描述NT版本的字符串 */
+/** \brief 获得描述NT版本的字符串 */
 WINPLUS_FUNC_DECL(String) GetNtVersion( void );
-/* 获得描述系统版本的字符串 */
+/** \brief 获得描述系统版本的字符串 */
 WINPLUS_FUNC_DECL(String) GetOsVersion( void );
-/* 获得自身模块版本号 */
+/** \brief 获得自身模块版本号 */
 WINPLUS_FUNC_DECL(String) GetSelfModuleVersion( void );
-/* 获得模块版本号 */
+/** \brief 获得模块版本号 */
 WINPLUS_FUNC_DECL(String) GetModuleVersion( String const & moduleFile );
 
 
 //////////////////////////////////////////////////////////////////////////
 
-/* 共享内存(基于FileMapping)
-   共享内存属于Windows内核对象，故可以跨进程访问
-   常用于进程间通讯 */
+/** \brief 共享内存(基于FileMapping)
+ *
+ *  共享内存属于Windows内核对象，故可以跨进程访问。常用于进程间通讯 */
 template < typename _Ty > class SharedMemory
 {
 public:
     SharedMemory() : _data(NULL), _hShared(NULL) {}
-    SharedMemory( String const & name, int size )
-    : _data(NULL), _hShared(NULL)
+    SharedMemory( String const & name, size_t size ) : _data(NULL), _hShared(NULL)
     {
         this->create( name, size );
     }
+    SharedMemory( String const & name ) : _data(NULL), _hShared(NULL)
+    {
+        this->create(name);
+    }
+
     ~SharedMemory()
     {
         this->free();
     }
 
-
-    bool create( String const & name, int size )
+    bool create( String const & name, size_t size )
     {
         this->free();
-        _hShared = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, name.c_str() );
+        union
+        {
+            struct
+            {
+                DWORD dwLow;
+                DWORD dwHigh;
+            };
+            size_t size;
+        } v;
+        ZeroMemory( &v, sizeof(v) );
+        _size = v.size = size;
+
+        _hShared = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, v.dwHigh, v.dwLow, name.c_str() );
         return _hShared != NULL;
     }
-    bool open( String const & name )
+
+    bool create( String const & name )
+    {
+        return this->create( name, sizeof(_Ty) );
+    }
+
+    bool open( String const & name, size_t size = (size_t)-1 )
     {
         this->free();
+        _size = size == (size_t)-1 ? sizeof(_Ty) : size;
         _hShared = OpenFileMapping( FILE_MAP_ALL_ACCESS, FALSE, name.c_str() );
         return _hShared != NULL;
     }
+
     void free()
     {
         this->unlock();
@@ -97,6 +125,7 @@ public:
         {
             CloseHandle(_hShared);
             _hShared = NULL;
+            _size = 0;
         }
     }
 
@@ -108,7 +137,7 @@ public:
 
     _Ty * operator -> ()
     {
-        return _data ? _data : lock();
+        return _data ? _data : this->lock();
     }
 
     void unlock()
@@ -122,6 +151,7 @@ public:
 
 private:
     _Ty * _data;
+    size_t _size;
     HANDLE _hShared;
 
     SharedMemory( SharedMemory const & );
