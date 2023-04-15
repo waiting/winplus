@@ -39,8 +39,8 @@ private:
  *
  *  \param msg 消息内容
  *  \param title 消息框标题
- *  \param hParentWnd 父窗口
- *  \param uType 额外的旗标
+ *  \param hParentWnd 父窗口。如果是NULL则使用当前前台窗口。
+ *  \param uType 额外的旗标、如果有MB_TASKMODAL则hParentWnd仅仅用作布局，传递给MessageBox的是(NULL,...)
  *  \return 返回选择按钮的ID */
 WINPLUS_FUNC_DECL(int) MsgBox( String const & msg, String const & title = TEXT("WinPlus"), HWND hwndParent = NULL, UINT uType = 0 );
 
@@ -48,8 +48,8 @@ WINPLUS_FUNC_DECL(int) MsgBox( String const & msg, String const & title = TEXT("
  *
  *  \param msg 消息内容
  *  \param title 消息框标题
- *  \param hParentWnd 父窗口
- *  \param uType 额外的旗标
+ *  \param hParentWnd 父窗口。如果是NULL则使用当前前台窗口。
+ *  \param uType 额外的旗标、如果有MB_TASKMODAL则hParentWnd仅仅用作布局，传递给MessageBox的是(NULL,...)
  *  \return 返回选择按钮的ID */
 WINPLUS_FUNC_DECL(int) ErrBox( String const & msg, String const & title = TEXT("WinPlus Error"), HWND hwndParent = NULL, UINT uType = 0 );
 
@@ -57,8 +57,8 @@ WINPLUS_FUNC_DECL(int) ErrBox( String const & msg, String const & title = TEXT("
  *
  *  \param msg 消息内容
  *  \param title 消息框标题
- *  \param hParentWnd 父窗口
- *  \param uType 额外的旗标
+ *  \param hParentWnd 父窗口。如果是NULL则使用当前前台窗口。
+ *  \param uType 额外的旗标、如果有MB_TASKMODAL则hParentWnd仅仅用作布局，传递给MessageBox的是(NULL,...)
  *  \return 返回选择按钮的ID */
 WINPLUS_FUNC_DECL(int) WarnBox( String const & msg, String const & title = TEXT("WinPlus Warning"), HWND hwndParent = NULL, UINT uType = 0 );
 

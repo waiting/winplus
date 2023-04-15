@@ -3,10 +3,13 @@
 #define _WIN32_IE 0x0501
 #endif
 
-#define _WIN32_WINNT 0x0501
+//#define _WIN32_WINNT 0x0501
 
 #include "winplus_definitions.hpp"
+#include "winplus_picture.hpp"
+#include "winplus_winctrl.hpp"
 #include "winplus_system.hpp"
+
 #include "strings.hpp"
 #include "smartptr.hpp"
 #include "filesys.hpp"
@@ -208,11 +211,14 @@ WINPLUS_FUNC_IMPL(String) ExpandVars( String const & str )
 
 }
 
-WINPLUS_FUNC_IMPL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId )
+WINPLUS_FUNC_IMPL(String) GetAppPathByHwnd( HWND hwnd, DWORD * pProcessId, DWORD * pThreadId )
 {
-    DWORD dwProcessId;
-    GetWindowThreadProcessId( hWnd, &dwProcessId );
-    ASSIGN_PTR(processId) = dwProcessId;
+    DWORD dwProcessId, dwThreadId;
+    dwThreadId = GetWindowThreadProcessId( hwnd, &dwProcessId );
+    ASSIGN_PTR(pProcessId) = dwProcessId;
+    ASSIGN_PTR(pThreadId) = dwThreadId;
+
+    // 打开进程句柄
     HANDLE hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, dwProcessId );
     if ( !hProcess )
     {
@@ -230,7 +236,57 @@ WINPLUS_FUNC_IMPL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId )
         func && func.call( hProcess, 0, &fullName[0], &dw );
     }
     CloseHandle(hProcess);
-    return fullName.c_str();
+    return String( fullName.c_str(), dw );
+}
+
+WINPLUS_FUNC_IMPL(HWND) GetMainWindowByProcessId( DWORD dwProcessId )
+{
+    struct MyParam
+    {
+        HWND hwnd;
+        DWORD dwProcessId;
+    } param = { NULL, dwProcessId };
+
+    EnumWindows( [] ( HWND hwnd, LPARAM lParam ) -> BOOL {
+        if ( Window_IsTopLevel(hwnd) && !GetParent(hwnd) )
+        {
+            MyParam & param = *(MyParam *)lParam;
+            DWORD dwProcessId;
+            GetWindowThreadProcessId( hwnd, &dwProcessId );
+            if ( param.dwProcessId == dwProcessId )
+            {
+                param.hwnd = hwnd;
+                return FALSE;
+            }
+        }
+        return TRUE;
+    }, (LPARAM)&param );
+    return param.hwnd;
+}
+
+WINPLUS_FUNC_IMPL(HWND) GetMainWindowByThreadId( DWORD dwThreadId )
+{
+    struct MyParam
+    {
+        HWND hwnd;
+        DWORD dwThreadId;
+    } param = { NULL, dwThreadId };
+
+    EnumWindows( [] ( HWND hwnd, LPARAM lParam ) -> BOOL {
+        if ( Window_IsTopLevel(hwnd) && !GetParent(hwnd) )
+        {
+            MyParam & param = *(MyParam *)lParam;
+            DWORD dwProcessId, dwThreadId;
+            dwThreadId = GetWindowThreadProcessId( hwnd, &dwProcessId );
+            if ( param.dwThreadId == dwThreadId )
+            {
+                param.hwnd = hwnd;
+                return FALSE;
+            }
+        }
+        return TRUE;
+        }, (LPARAM)&param );
+    return param.hwnd;
 }
 
 WINPLUS_FUNC_IMPL(String) ModulePath( HMODULE mod, String * fileName )

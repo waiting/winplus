@@ -34,8 +34,14 @@ WINPLUS_FUNC_DECL(bool) IsExpandString( String const & str );
 /** \brief 展开字符串中存在的'%变量%' */
 WINPLUS_FUNC_DECL(String) ExpandVars( String const & str );
 
-/** \brief 通过HWND获得程序路径和进程ID */
-WINPLUS_FUNC_DECL(String) GetAppPathFromHWND( HWND hWnd, DWORD * processId = NULL );
+/** \brief 通过HWND获得程序路径和进程ID以及线程ID */
+WINPLUS_FUNC_DECL(String) GetAppPathByHwnd( HWND hwnd, DWORD * pProcessId = NULL, DWORD * pThreadId = NULL );
+
+/** \brief 通过进程ID获得主窗口HWND */
+WINPLUS_FUNC_DECL(HWND) GetMainWindowByProcessId( DWORD dwProcessId );
+
+/** \brief 通过线程ID获得主窗口HWND */
+WINPLUS_FUNC_DECL(HWND) GetMainWindowByThreadId( DWORD dwThreadId );
 
 /** \brief 返回模块路径(末尾不含目录分隔符)，输出模块文件名 */
 WINPLUS_FUNC_DECL(String) ModulePath( HMODULE mod = NULL, String * fileName = NULL );

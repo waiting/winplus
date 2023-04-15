@@ -353,8 +353,8 @@ WINPLUS_FUNC_IMPL(int) ImageList_AddAlphaImage( HIMAGELIST hImageList, Gdiplus::
     bmi.bmiHeader.biBitCount = 32;
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biWidth = bm.GetWidth();
-    bmi.bmiHeader.biHeight = bm.GetHeight();
-    bm.RotateFlip( RotateNoneFlipY );
+    bmi.bmiHeader.biHeight = -(LONG)bm.GetHeight();
+    //bm.RotateFlip( RotateNoneFlipY );
     hBitmap = CreateDIBSection( NULL, &bmi, DIB_RGB_COLORS, &pvBits, NULL, 0 );
     BitmapData bitmapData;
     bm.LockBits( &Rect( 0, 0, bm.GetWidth(), bm.GetHeight() ), ImageLockModeRead, PixelFormat32bppARGB, &bitmapData );

@@ -9,17 +9,6 @@ using namespace std;
 #include <windowsx.h>
 #include "GuiTest.h"
 
-ostream & operator << ( ostream & out, RECT const & rc )
-{
-    return out << "Rect( LT(" << rc.left << ", " << rc.top << "), RB(" << rc.right << ", " << rc.bottom << "), SIZE(" << RectWidth(rc) << ", " << RectHeight(rc) << ") )";
-}
-
-// ostream & OutputRect( RECT const & rc )
-// {
-//     return cout << "Rect( LT(" << rc.left << ", " << rc.top << "), RB(" << rc.right << ", " << rc.bottom << "), SIZE(" << RectWidth(rc) << ", " << RectHeight(rc) << ") )\n";
-// }
-
-
 #define MAX_LOADSTRING 100
 
 HINSTANCE g_hInst; // 当前实例
@@ -205,10 +194,10 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         {
             POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
             ScreenToClient( hWnd, &pt );
-            cout << "MainWnd WM_NCHITTEST " << pt.x << ", " << pt.y << "\n";
+            //cout << "MainWnd WM_NCHITTEST " << pt.x << ", " << pt.y << "\n";
             RECT rcClient;
             GetClientRect(hWnd,&rcClient);
-            cout << "client: " << rcClient << endl;
+            //cout << "client: " << rcClient << endl;
             
             return HTCAPTION;
         }
@@ -435,8 +424,11 @@ LRESULT CALLBACK ControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM
                     {
                         RECT rc = Window_GetRect((HWND)lParam);
                         RECT rc1 = Window_GetClient((HWND)lParam);
-                        WarnBox( Window_GetText((HWND)lParam), "MyButton", hWnd, MB_TASKMODAL );
+                        //WarnBox( Window_GetText((HWND)lParam), "MyButton", hWnd, MB_TASKMODAL );
+                        //MsgBox( GetAppPathByHwnd((HWND)lParam), "MyButton", hWnd, MB_TASKMODAL );
                         //MessageBox( NULL, "No", "Error", MB_ICONHAND | MB_TASKMODAL );
+                        std::cout << Window_GetText( GetMainWindowByProcessId( GetCurrentProcessId() ) ) << "\n";
+                        std::cout << Window_GetText( GetMainWindowByThreadId( GetCurrentThreadId() ) ) << "\n";
                     }
                     break;
                 default:
