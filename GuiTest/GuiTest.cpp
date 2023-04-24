@@ -422,13 +422,18 @@ LRESULT CALLBACK ControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM
                 {
                 case BN_CLICKED:
                     {
-                        RECT rc = Window_GetRect((HWND)lParam);
-                        RECT rc1 = Window_GetClient((HWND)lParam);
+                        //RECT rc = Window_GetRect((HWND)lParam);
+                        //RECT rc1 = Window_GetClient((HWND)lParam);
                         //WarnBox( Window_GetText((HWND)lParam), "MyButton", hWnd, MB_TASKMODAL );
                         //MsgBox( GetAppPathByHwnd((HWND)lParam), "MyButton", hWnd, MB_TASKMODAL );
                         //MessageBox( NULL, "No", "Error", MB_ICONHAND | MB_TASKMODAL );
-                        std::cout << Window_GetText( GetMainWindowByProcessId( GetCurrentProcessId() ) ) << "\n";
-                        std::cout << Window_GetText( GetMainWindowByThreadId( GetCurrentThreadId() ) ) << "\n";
+                        //std::cout << Window_GetText( GetMainWindowByProcessId( GetCurrentProcessId() ) ) << "\n";
+                        //std::cout << Window_GetText( GetMainWindowByThreadId( GetCurrentThreadId() ) ) << "\n";
+                        DirIterator dir{"."};
+                        while ( dir.next() )
+                        {
+                            cout << dir.getFullPath() << endl;
+                        }
                     }
                     break;
                 default:

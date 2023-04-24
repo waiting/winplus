@@ -53,8 +53,12 @@ WINPLUS_FUNC_DECL(UINT) CommandArgumentArray( StringArray * argArr );
  *  不要用返回的vector的元素个数作为命令行参数个数，因为它始终多一个nullptr元素
  *  \param argArr 由CommandArgumentArray()取得的命令行参数数组，并且请保持其有效，如果其被摧毁，那么本函数返回的参数列表也就无效了 */
 WINPLUS_FUNC_DECL(std::vector<String::value_type const *>) CommandArgs( StringArray * argArr );
+
 /** \brief 使能关机 */
 WINPLUS_FUNC_DECL(bool) ShutdownPrivilege( bool enable );
+
+/** \brief 设置文件/目录时间，如果想设置当前时间请传递-1，如果不想设置某个时间请传递0 */
+WINUX_FUNC_DECL(bool) SetFileTime( String const & filename, time_t ctime, time_t mtime, time_t atime );
 
 /** \brief Windows错误号转成错误字符串 */
 WINPLUS_FUNC_DECL(String) GetErrorStr( DWORD err );

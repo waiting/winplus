@@ -14,6 +14,7 @@
 #include "smartptr.hpp"
 #include "filesys.hpp"
 #include "system.hpp"
+#include "time.hpp"
 #include <tchar.h>
 #include <direct.h>
 #include <algorithm>
@@ -341,6 +342,69 @@ WINPLUS_FUNC_IMPL(bool) ShutdownPrivilege( bool enable )
     ret = ( GetLastError() == ERROR_SUCCESS );
     CloseHandle(token);
     return ret;
+}
+
+// 1970-01-01 00:00:00的ULARGE_INTEGER描述
+static ULARGE_INTEGER __Time1970( void )
+{
+    SYSTEMTIME st1970 = {0};
+    st1970.wYear = 1970;
+    st1970.wMonth = 1;
+    st1970.wDay = 1;
+    st1970.wHour = 0;
+    st1970.wMinute = 0;
+    st1970.wSecond = 0;
+
+    FILETIME ft1970;
+    ULARGE_INTEGER time1970;
+    SystemTimeToFileTime( &st1970, &ft1970 );
+    CopyMemory( &time1970, &ft1970, sizeof(time1970) );
+    return time1970;
+}
+
+WINUX_FUNC_IMPL(bool) SetFileTime( String const & filename, time_t ctime, time_t mtime, time_t atime )
+{
+    FILETIME cft = { 0 }, mft = { 0 }, aft = { 0 };
+    ULARGE_INTEGER uli;
+    if ( ctime )
+    {
+        uli.QuadPart = static_cast<ULONGLONG>( ctime == -1 ? GetUtcTime() : ctime ) * 10000000ULL;
+        uli.QuadPart += __Time1970().QuadPart;
+        cft.dwHighDateTime = uli.HighPart;
+        cft.dwLowDateTime = uli.LowPart;
+    }
+
+    if ( mtime )
+    {
+        uli.QuadPart = static_cast<ULONGLONG>( mtime == -1 ? GetUtcTime() : mtime ) * 10000000ULL;
+        uli.QuadPart += __Time1970().QuadPart;
+        mft.dwHighDateTime = uli.HighPart;
+        mft.dwLowDateTime = uli.LowPart;
+    }
+
+    if ( atime )
+    {
+        uli.QuadPart = static_cast<ULONGLONG>( atime == -1 ? GetUtcTime() : atime ) * 10000000ULL;
+        uli.QuadPart += __Time1970().QuadPart;
+        aft.dwHighDateTime = uli.HighPart;
+        aft.dwLowDateTime = uli.LowPart;
+    }
+
+    if ( ctime || mtime || atime )
+    {
+        HANDLE hFile = CreateFile( filename.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL );
+        if ( hFile == INVALID_HANDLE_VALUE )
+        {
+            //std::cout << GetErrorStr( GetLastError() );
+            return false;
+        }
+
+        BOOL b = ::SetFileTime( hFile, &cft, &aft, &mft );
+        CloseHandle(hFile);
+        return b != FALSE;
+    }
+
+    return false;
 }
 
 WINPLUS_FUNC_IMPL(String) GetErrorStr( DWORD err )
