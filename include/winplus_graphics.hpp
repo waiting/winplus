@@ -617,6 +617,7 @@ public:
     BOOL create( int nWidth, int nHeight );
     BOOL create( Gdiplus::Size const & size ) { return this->create( size.Width, size.Height ); };
     BOOL create( String const & imgFile );
+    BOOL create( IStreamPtr streamPtr );
 
     void destroy( void );
     BOOL clone( MemImage const & other );

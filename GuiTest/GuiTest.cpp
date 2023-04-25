@@ -8,6 +8,7 @@ using namespace std;
 #include "framework.h"
 #include <windowsx.h>
 #include "GuiTest.h"
+#include "resource.h"
 
 #define MAX_LOADSTRING 100
 
@@ -206,7 +207,10 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
         cout << "MainWnd WM_CREATE" << ", " << wParam << ", " << lParam << "\n";
         {
             // 创建图片
-            g_imgMainWnd.create("cg_dialog1.png");
+            //g_imgMainWnd.create("cg_dialog1.png");
+            g_imgMainWnd.create( CreateStreamFromResource(IDR_PNG1, "PNG") );
+            //Picture_Load();
+
             if ( g_imgMainWnd ) cout << "image create ok:" << g_imgMainWnd.width() << ", " << g_imgMainWnd.height() << endl;
             g_memdc.create( NULL, g_imgMainWnd.width(), g_imgMainWnd.height() );
 
@@ -429,10 +433,40 @@ LRESULT CALLBACK ControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM
                         //MessageBox( NULL, "No", "Error", MB_ICONHAND | MB_TASKMODAL );
                         //std::cout << Window_GetText( GetMainWindowByProcessId( GetCurrentProcessId() ) ) << "\n";
                         //std::cout << Window_GetText( GetMainWindowByThreadId( GetCurrentThreadId() ) ) << "\n";
-                        DirIterator dir{"."};
+                        DirIterator dir{""};
+                        int no = 0;
                         while ( dir.next() )
                         {
-                            cout << dir.getFullPath() << endl;
+                            //cout << dir.getName() << endl;
+                            //cout << dir.getPath() << endl;
+                            //cout << dir.getFullPath() << endl;
+                            if ( dir.isDir() && !( dir.getName() == "." || dir.getName() == ".." ) )
+                            {
+                                time_t t[2];
+                                FileTime( dir.getFullPath(), t+0, t+1, nullptr );
+                                String arr[2];
+                                transform( t, t + countof(t), arr, [] ( time_t tt ) -> String { return DateTimeL( DateTimeL::Second(tt) ).toString(); } );
+                                cout << ++no << ", " << dir.getName() << " ";// << "\t" << Mixed(arr) << endl;
+                                time_t tMinTime = 0x7fffffff;
+                                if ( t[0] > 0 && t[0] < tMinTime ) tMinTime = t[0];
+                                if ( t[1] > 0 && t[1] < tMinTime ) tMinTime = t[1];
+                                StringArray arrFiles, arrDirs;
+                                FolderData( dir.getFullPath(), &arrFiles, &arrDirs );
+                                for ( auto && file : arrFiles )
+                                {
+                                    String filepath = CombinePath( dir.getFullPath(), file );
+                                    //ColorOutputLine( fgYellow, filepath );
+                                    time_t t[2];
+                                    FileTime( filepath, t+0, t+1, nullptr );
+                                    //transform( t, t + countof(t), arr, [] ( time_t tt ) -> String { return DateTimeL( DateTimeL::Second(tt) ).toString(); } );
+                                    //ColorOutputLine( fgFuchsia, filepath, " ", Mixed(arr) );
+                                    if ( t[0] > 0 && t[0] < tMinTime ) tMinTime = t[0];
+                                    if ( t[1] > 0 && t[1] < tMinTime ) tMinTime = t[1];
+                                }
+
+                                ColorOutputLine( fgYellow, DateTimeL( DateTimeL::Second(tMinTime) ).toString() );
+                                SetFileTime( dir.getFullPath(), tMinTime, tMinTime, 0 );
+                            }
                         }
                     }
                     break;

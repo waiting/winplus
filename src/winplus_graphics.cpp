@@ -745,6 +745,13 @@ BOOL MemImage::create( String const & imgFile )
     return _pBmpImage != NULL;
 }
 
+BOOL MemImage::create( IStreamPtr streamPtr )
+{
+    this->destroy();
+    _pBmpImage = new Gdiplus::Bitmap( streamPtr, FALSE );
+    return _pBmpImage != NULL;
+}
+
 BOOL MemImage::clone( MemImage const & other )
 {
     if ( this != &other )

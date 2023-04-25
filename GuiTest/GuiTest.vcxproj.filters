@@ -45,6 +45,9 @@
     <Image Include="res\GuiTest.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\cg_dialog1.png">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="res\GuiTest.manifest">

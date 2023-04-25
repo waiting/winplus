@@ -341,6 +341,7 @@
     <ResourceCompile Include="GuiTest.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\cg_dialog1.png" />
     <Image Include="res\GuiTest.ico" />
     <Image Include="res\small.ico" />
   </ItemGroup>
