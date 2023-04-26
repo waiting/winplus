@@ -426,48 +426,24 @@ LRESULT CALLBACK ControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM
                 {
                 case BN_CLICKED:
                     {
-                        //RECT rc = Window_GetRect((HWND)lParam);
-                        //RECT rc1 = Window_GetClient((HWND)lParam);
-                        //WarnBox( Window_GetText((HWND)lParam), "MyButton", hWnd, MB_TASKMODAL );
-                        //MsgBox( GetAppPathByHwnd((HWND)lParam), "MyButton", hWnd, MB_TASKMODAL );
-                        //MessageBox( NULL, "No", "Error", MB_ICONHAND | MB_TASKMODAL );
-                        //std::cout << Window_GetText( GetMainWindowByProcessId( GetCurrentProcessId() ) ) << "\n";
-                        //std::cout << Window_GetText( GetMainWindowByThreadId( GetCurrentThreadId() ) ) << "\n";
-                        DirIterator dir{""};
-                        int no = 0;
-                        while ( dir.next() )
+                        //while (1)
                         {
-                            //cout << dir.getName() << endl;
-                            //cout << dir.getPath() << endl;
-                            //cout << dir.getFullPath() << endl;
-                            if ( dir.isDir() && !( dir.getName() == "." || dir.getName() == ".." ) )
-                            {
-                                time_t t[2];
-                                FileTime( dir.getFullPath(), t+0, t+1, nullptr );
-                                String arr[2];
-                                transform( t, t + countof(t), arr, [] ( time_t tt ) -> String { return DateTimeL( DateTimeL::Second(tt) ).toString(); } );
-                                cout << ++no << ", " << dir.getName() << " ";// << "\t" << Mixed(arr) << endl;
-                                time_t tMinTime = 0x7fffffff;
-                                if ( t[0] > 0 && t[0] < tMinTime ) tMinTime = t[0];
-                                if ( t[1] > 0 && t[1] < tMinTime ) tMinTime = t[1];
-                                StringArray arrFiles, arrDirs;
-                                FolderData( dir.getFullPath(), &arrFiles, &arrDirs );
-                                for ( auto && file : arrFiles )
-                                {
-                                    String filepath = CombinePath( dir.getFullPath(), file );
-                                    //ColorOutputLine( fgYellow, filepath );
-                                    time_t t[2];
-                                    FileTime( filepath, t+0, t+1, nullptr );
-                                    //transform( t, t + countof(t), arr, [] ( time_t tt ) -> String { return DateTimeL( DateTimeL::Second(tt) ).toString(); } );
-                                    //ColorOutputLine( fgFuchsia, filepath, " ", Mixed(arr) );
-                                    if ( t[0] > 0 && t[0] < tMinTime ) tMinTime = t[0];
-                                    if ( t[1] > 0 && t[1] < tMinTime ) tMinTime = t[1];
-                                }
-
-                                ColorOutputLine( fgYellow, DateTimeL( DateTimeL::Second(tMinTime) ).toString() );
-                                SetFileTime( dir.getFullPath(), tMinTime, tMinTime, 0 );
-                            }
+                            Registry reg{R"(HKEY_CLASSES_ROOT\Directory\Background\shell)"};
+                            Registry reg2{ reg.key(), "TidyFolderTime" };
+                            auto v = reg2.getValue("");
+                            cout << Registry::ValueType(v) << ", " << Registry::Value(v);
+                            cout << "\n";
+                            v = reg2.getValue("exv");
+                            cout << Registry::ValueType(v) << ", " << Registry::Value(v);
+                            cout << "\n";
+                            v = reg2.getValue("dv");
+                            cout << Registry::ValueType(v) << ", " << Registry::Value(v);
+                            cout << "\n";
+                            v = reg2.getValue("qv");
+                            cout << Registry::ValueType(v) << ", " << Registry::Value(v);
+                            cout << "\n";
                         }
+
                     }
                     break;
                 default:

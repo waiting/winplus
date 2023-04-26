@@ -72,8 +72,50 @@ WINPLUS_FUNC_DECL(String) GetSelfModuleVersion( void );
 /** \brief 获得模块版本号 */
 WINPLUS_FUNC_DECL(String) GetModuleVersion( String const & moduleFile );
 
+///////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////
+/** \brief 注册表
+
+    注册表数据类型与Mixed类型映射关系
+    REG_NONE:       MT_NULL
+    REG_SZ:         MT_ANSI or MT_UNICODE
+    REG_EXPAND_SZ:  MT_COLLECTION { 2: "%VALUE%" }
+    REG_BINARY:     MT_BINARY
+    REG_DWORD:      MT_BOOLEAN, MT_BYTE, MT_SHORT, MT_USHORT, MT_INT, MT_UINT, MT_LONG, MT_ULONG
+    REG_MULTI_SZ:   MT_ARRAY
+    REG_QWORD:      MT_INT64 or MT_UINT64
+ */
+class WINPLUS_DLL Registry
+{
+public:
+    // 根据Mixed类型判断RegValue数据类型
+    static DWORD ValueType( Mixed const & v );
+    // 只取值
+    static Mixed const & Value( Mixed const & v );
+
+    Registry( HKEY hkey, String const & subKey, bool isCreateOnNotExists = false );
+
+    Registry( String const & key, bool isCreateOnNotExists = false );
+
+    ~Registry();
+
+    Mixed getValue( String const & name, Mixed const & defval = Mixed() ) const;
+
+    bool setValue( String const & name, Mixed const & v, DWORD dwType = -1 );
+
+    bool enumValues( String * name, Mixed * pv ) const;
+
+    operator bool() const { return _hkey != nullptr; }
+    
+    //! \brief 当前键
+    HKEY key() const { return _hkey; }
+private:
+    HKEY _hkey;
+
+    DISABLE_OBJECT_COPY(Registry)
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////
 
 /** \brief 共享内存(基于FileMapping)
  *

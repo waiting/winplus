@@ -754,4 +754,286 @@ WINPLUS_FUNC_IMPL(String) GetModuleVersion( String const & moduleFile )
     return version;
 }
 
+// class Registry -------------------------------------------------------------------------
+// 预定义HKEY
+static HKEY __hkeyPredefined[] = {
+    HKEY_CLASSES_ROOT,
+    HKEY_CURRENT_USER,
+    HKEY_LOCAL_MACHINE,
+    HKEY_USERS,
+    HKEY_CURRENT_CONFIG,
+};
+
+// RegValue转换为Mixed
+static Mixed __RegValueToMixed( Buffer const & value, DWORD dwType, Mixed const & defval )
+{
+    Mixed v;
+    switch ( dwType )
+    {
+    case REG_SZ: // MT_ANSI or MT_UNICODE
+        {
+            v.createString();
+            size_t size = value.getSize();
+            if ( size > 0 )
+            {
+                if ( value[size - 1] == '\0' ) size--;
+                v._pStr->assign( value.get<char>(), size );
+            }
+            return v;
+        }
+        break;
+    case REG_EXPAND_SZ: // MT_COLLECTION { 2: "%VALUE%" }
+        {
+            v.createCollection();
+            String expandStr;
+            size_t size = value.getSize();
+            if ( size > 0 )
+            {
+                if ( value[size - 1] == '\0' ) size--;
+                expandStr.assign( value.get<char>(), size );
+            }
+            v[REG_EXPAND_SZ] = expandStr;
+            return v;
+        }
+        break;
+    case REG_BINARY: // MT_BINARY
+        break;
+    case REG_DWORD: //  MT_BOOLEAN, MT_BYTE, MT_SHORT, MT_USHORT, MT_INT, MT_UINT, MT_LONG, MT_ULONG
+        {
+            DWORD tmp;
+            if ( value.getSize() == sizeof(tmp) )
+                tmp = *value.get<decltype(tmp)>();
+            else
+                tmp = 0;
+            v.assign(tmp);
+            return v;
+        }
+        break;
+    case REG_MULTI_SZ: // MT_ARRAY
+        break;
+    case REG_QWORD: // MT_INT64 or MT_UINT64
+        {
+            uint64 tmp;
+            if ( value.getSize() == sizeof(tmp) )
+                tmp = *value.get<decltype(tmp)>();
+            else
+                tmp = 0;
+            v.assign(tmp);
+            return v;
+        }
+        break;
+    default: // maybe REG_NONE
+        return v;
+        break;
+    }
+    return defval;
+}
+
+// Mixed转换为RegValue
+static Buffer __RegValueFromMixed( Mixed const & v, DWORD * pdwType )
+{
+    Buffer value;
+    switch ( v.type() )
+    {
+    case Mixed::MT_NULL:
+        *pdwType = REG_NONE;
+
+        break;
+    case Mixed::MT_BOOLEAN:
+    case Mixed::MT_BYTE:
+    case Mixed::MT_SHORT:
+    case Mixed::MT_USHORT:
+    case Mixed::MT_INT:
+    case Mixed::MT_UINT:
+    case Mixed::MT_LONG:
+    case Mixed::MT_ULONG:
+        *pdwType = REG_DWORD;
+        break;
+    case Mixed::MT_INT64:
+    case Mixed::MT_UINT64:
+        *pdwType = REG_QWORD;
+        break;
+    case Mixed::MT_ANSI:
+    case Mixed::MT_UNICODE:
+        *pdwType = REG_SZ;
+        break;
+    case Mixed::MT_ARRAY:
+        *pdwType = REG_MULTI_SZ;
+        break;
+    case Mixed::MT_COLLECTION:
+        {
+            if ( v.getCount() > 0 && v.getPair(0).first.toULong() == REG_EXPAND_SZ )
+                *pdwType = REG_EXPAND_SZ;
+            *pdwType = REG_NONE;
+        }
+        break;
+    case Mixed::MT_BINARY:
+        *pdwType = REG_BINARY;
+        break;
+    default:
+        *pdwType = REG_NONE;
+        break;
+    }
+    return value;
+}
+
+DWORD Registry::ValueType( Mixed const & v )
+{
+    switch ( v.type() )
+    {
+    case Mixed::MT_NULL:
+        return REG_NONE;
+        break;
+    case Mixed::MT_BOOLEAN:
+    case Mixed::MT_BYTE:
+    case Mixed::MT_SHORT:
+    case Mixed::MT_USHORT:
+    case Mixed::MT_INT:
+    case Mixed::MT_UINT:
+    case Mixed::MT_LONG:
+    case Mixed::MT_ULONG:
+        return REG_DWORD;
+        break;
+    case Mixed::MT_INT64:
+    case Mixed::MT_UINT64:
+        return REG_QWORD;
+        break;
+    case Mixed::MT_ANSI:
+    case Mixed::MT_UNICODE:
+        return REG_SZ;
+        break;
+    case Mixed::MT_ARRAY:
+        return REG_MULTI_SZ;
+        break;
+    case Mixed::MT_COLLECTION:
+        {
+            if ( v.getCount() > 0 && v.getPair(0).first.toULong() == REG_EXPAND_SZ )
+                return REG_EXPAND_SZ;
+            return REG_NONE;
+        }
+        break;
+    case Mixed::MT_BINARY:
+        return REG_BINARY;
+        break;
+    default:
+        return REG_NONE;
+        break;
+    }
+}
+
+Mixed const & Registry::Value( Mixed const & v )
+{
+    if ( v.isCollection() )
+    {
+        if ( v.getCount() > 0 )
+        {
+            auto && pr = v.getPair(0);
+            if ( pr.first.toULong() == REG_EXPAND_SZ )
+            {
+                return pr.second;
+            }
+        }
+    }
+    return v;
+}
+
+// Constructors
+Registry::Registry( HKEY hkey, String const & subKey, bool isCreateOnNotExists ) : _hkey(nullptr)
+{
+    if ( isCreateOnNotExists )
+    {
+        RegCreateKey( hkey, subKey.c_str(), &_hkey );
+    }
+    else
+    {
+        RegOpenKey( hkey, subKey.c_str(), &_hkey );
+    }
+}
+
+Registry::Registry( String const & key, bool isCreateOnNotExists ) : _hkey(nullptr)
+{
+    HKEY hkeyPredefined = nullptr;
+    String::const_pointer strKey = key.c_str();
+    String::const_pointer str = strchr( strKey, '\\' );
+    if ( !str ) // 没搜到 '\\'
+    {
+        str = strKey + key.length();
+    }
+
+    if ( !_strnicmp( strKey, "HKEY_CLASSES_ROOT", str - strKey ) || !_strnicmp( strKey, "HKCR", str - strKey ) )
+        hkeyPredefined = HKEY_CLASSES_ROOT;
+    else if ( !_strnicmp( strKey, "HKEY_CURRENT_CONFIG", str - strKey ) || !_strnicmp( strKey, "HKCC", str - strKey ) )
+        hkeyPredefined = HKEY_CURRENT_CONFIG;
+    else if ( !_strnicmp( strKey, "HKEY_CURRENT_USER", str - strKey ) || !_strnicmp( strKey, "HKCU", str - strKey ) )
+        hkeyPredefined = HKEY_CURRENT_USER;
+    else if ( !_strnicmp( strKey, "HKEY_LOCAL_MACHINE", str - strKey ) || !_strnicmp( strKey, "HKLM", str - strKey ) )
+        hkeyPredefined = HKEY_LOCAL_MACHINE;
+    else if ( !_strnicmp( strKey, "HKEY_USERS", str - strKey ) || !_strnicmp( strKey, "HKU", str - strKey ) )
+        hkeyPredefined = HKEY_USERS;
+    else
+    {
+        hkeyPredefined = nullptr;
+    }
+
+    if ( *str == '\\' )
+        str++; // skip '\\'
+
+    if ( hkeyPredefined != nullptr )
+    {
+        if ( isCreateOnNotExists )
+        {
+            RegCreateKey( hkeyPredefined, str, &_hkey );
+        }
+        else
+        {
+            RegOpenKey( hkeyPredefined, str, &_hkey );
+        }
+    }
+}
+
+Registry::~Registry()
+{
+    if ( _hkey != nullptr )
+    {
+        for ( int i = 0; i < countof(__hkeyPredefined); ++i )
+        {
+            if ( __hkeyPredefined[i] == _hkey )
+            {
+                goto RESET_NULL;
+            }
+        }
+        RegCloseKey(_hkey);
+    RESET_NULL:
+        _hkey = nullptr;
+    }
+}
+
+winux::Mixed Registry::getValue( String const & name, Mixed const & defval ) const
+{
+    DWORD dwType = 0, dwSize = 0;
+    Buffer value;
+
+    // 获取数据类型和大小
+    if ( RegQueryValueEx(_hkey, name.c_str(), NULL, &dwType, NULL, &dwSize ) != ERROR_SUCCESS ) goto RETURN;
+
+    // 读取数据
+    value.alloc(dwSize);
+    if ( RegQueryValueEx(_hkey, name.c_str(), NULL, &dwType, value.get<BYTE>(), &dwSize ) != ERROR_SUCCESS ) goto RETURN;
+
+    return __RegValueToMixed( value, dwType, defval );
+
+RETURN:
+    return defval;
+}
+
+bool Registry::setValue( String const & name, Mixed const & v, DWORD dwType )
+{
+    return false;
+}
+
+bool Registry::enumValues( String * name, Mixed * pv ) const
+{
+    return false;
+}
+
 } // namespace winplus
