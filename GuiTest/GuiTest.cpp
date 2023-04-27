@@ -428,20 +428,45 @@ LRESULT CALLBACK ControlsWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM
                     {
                         //while (1)
                         {
-                            Registry reg{R"(HKEY_CLASSES_ROOT\Directory\Background\shell)"};
-                            Registry reg2{ reg.key(), "TidyFolderTime" };
-                            auto v = reg2.getValue("");
+                            Registry reg( R"(HKCR\Directory\Background\shell\TidyFolderTime)", true );
+                            auto v = reg.getValue("");
                             cout << Registry::ValueType(v) << ", " << Registry::Value(v);
                             cout << "\n";
-                            v = reg2.getValue("exv");
+                            v = reg.getValue("exv");
                             cout << Registry::ValueType(v) << ", " << Registry::Value(v);
                             cout << "\n";
-                            v = reg2.getValue("dv");
+                            v = reg.getValue("dv");
                             cout << Registry::ValueType(v) << ", " << Registry::Value(v);
                             cout << "\n";
-                            v = reg2.getValue("qv");
+                            v = reg.getValue("qv");
                             cout << Registry::ValueType(v) << ", " << Registry::Value(v);
                             cout << "\n";
+                            v = reg.getValue("mul");
+                            cout << Registry::ValueType(v) << ", " << Registry::Value(v);
+                            cout << "\n";
+
+                            //Registry::ForceDelete( R"(HKCR\Directory\Background\shell\TidyFolderTime\bb)" );
+                            cout << boolalpha << reg.hasValue("") << endl;
+                            cout << boolalpha << reg.hasValue("qv") << endl;
+
+                            String name;
+                            //Mixed v;
+                            while ( reg.enumValues( &name, &v ) )
+                            {
+                                cout << name << " = " << Registry::Value(v) << endl;
+                            }
+
+                            Registry reg2(R"(HKCR\Directory\Background\shell)");
+                            String key;
+                            while ( reg2.enumKeys( &key ) )
+                            {
+                                cout << key << endl;
+                                Registry reg3( reg2.key(), key );
+                                while ( reg3.enumKeys(&key) )
+                                {
+                                    cout << "\t" << key << endl;
+                                }
+                            }
                         }
 
                     }

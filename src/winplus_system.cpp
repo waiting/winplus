@@ -778,8 +778,8 @@ static Mixed __RegValueToMixed( Buffer const & value, DWORD dwType, Mixed const 
             {
                 if ( value[size - 1] == '\0' ) size--;
                 v._pStr->assign( value.get<char>(), size );
+                return v;
             }
-            return v;
         }
         break;
     case REG_EXPAND_SZ: // MT_COLLECTION { 2: "%VALUE%" }
@@ -791,12 +791,16 @@ static Mixed __RegValueToMixed( Buffer const & value, DWORD dwType, Mixed const 
             {
                 if ( value[size - 1] == '\0' ) size--;
                 expandStr.assign( value.get<char>(), size );
+                v[REG_EXPAND_SZ] = expandStr;
+                return v;
             }
-            v[REG_EXPAND_SZ] = expandStr;
-            return v;
         }
         break;
     case REG_BINARY: // MT_BINARY
+        {
+            v.assign(value);
+            return v;
+        }
         break;
     case REG_DWORD: //  MT_BOOLEAN, MT_BYTE, MT_SHORT, MT_USHORT, MT_INT, MT_UINT, MT_LONG, MT_ULONG
         {
@@ -810,6 +814,17 @@ static Mixed __RegValueToMixed( Buffer const & value, DWORD dwType, Mixed const 
         }
         break;
     case REG_MULTI_SZ: // MT_ARRAY
+        {
+            v.createArray();
+            TCHAR const * strlist = value.get<TCHAR>();
+            while ( *strlist )
+            {
+                size_t len = strlen(strlist);
+                v._pArr->push_back( String( strlist, len ) );
+                strlist += len + 1;
+            }
+            return v;
+        }
         break;
     case REG_QWORD: // MT_INT64 or MT_UINT64
         {
@@ -837,7 +852,6 @@ static Buffer __RegValueFromMixed( Mixed const & v, DWORD * pdwType )
     {
     case Mixed::MT_NULL:
         *pdwType = REG_NONE;
-
         break;
     case Mixed::MT_BOOLEAN:
     case Mixed::MT_BYTE:
@@ -847,28 +861,67 @@ static Buffer __RegValueFromMixed( Mixed const & v, DWORD * pdwType )
     case Mixed::MT_UINT:
     case Mixed::MT_LONG:
     case Mixed::MT_ULONG:
-        *pdwType = REG_DWORD;
+        {
+            *pdwType = REG_DWORD;
+            value.alloc( sizeof(DWORD) );
+            *value.get<DWORD>() = v.toULong();
+        }
         break;
     case Mixed::MT_INT64:
     case Mixed::MT_UINT64:
-        *pdwType = REG_QWORD;
+        {
+            *pdwType = REG_QWORD;
+            value.alloc( sizeof(uint64) );
+            *value.get<uint64>() = v.toUInt64();
+        }
         break;
     case Mixed::MT_ANSI:
+        {
+            *pdwType = REG_SZ;
+            value.alloc( ( v._pStr->size() + 1 ) * sizeof(AnsiString::value_type) );
+            memcpy( value.get(), v._pStr->c_str(), value.size() );
+        }
+        break;
     case Mixed::MT_UNICODE:
-        *pdwType = REG_SZ;
+        {
+            *pdwType = REG_SZ;
+            value.alloc( ( v._pWStr->size() + 1 ) * sizeof(UnicodeString::value_type) );
+            memcpy( value.get(), v._pWStr->c_str(), value.size() );
+        }
         break;
     case Mixed::MT_ARRAY:
-        *pdwType = REG_MULTI_SZ;
+        {
+            *pdwType = REG_MULTI_SZ;
+            GrowBuffer multiStrings;
+            for ( auto it = v._pArr->begin(); it != v._pArr->end(); ++it )
+            {
+                String str = it->toAnsi();
+                multiStrings.append( str.c_str(), str.length() + 1 );
+            }
+            multiStrings.append('\0');
+            value = multiStrings;
+        }
         break;
     case Mixed::MT_COLLECTION:
         {
-            if ( v.getCount() > 0 && v.getPair(0).first.toULong() == REG_EXPAND_SZ )
+            auto && pr = v.getPair(0);
+            if ( v.getCount() > 0 && pr.first.toULong() == REG_EXPAND_SZ )
+            {
                 *pdwType = REG_EXPAND_SZ;
+                String str = pr.second;
+                value.alloc( ( str.size() + 1 ) * sizeof(String::value_type) );
+                memcpy( value.get(), str.c_str(), value.size() );
+                break;
+            }
             *pdwType = REG_NONE;
         }
         break;
     case Mixed::MT_BINARY:
-        *pdwType = REG_BINARY;
+        {
+            *pdwType = REG_BINARY;
+            value.alloc( v._pBuf->size() );
+            memcpy( value.get(), v._pBuf->get(), value.size() );
+        }
         break;
     default:
         *pdwType = REG_NONE;
@@ -937,20 +990,76 @@ Mixed const & Registry::Value( Mixed const & v )
     return v;
 }
 
-// Constructors
-Registry::Registry( HKEY hkey, String const & subKey, bool isCreateOnNotExists ) : _hkey(nullptr)
+bool Registry::Exists( String const & key, LPCTSTR lpValueName )
 {
-    if ( isCreateOnNotExists )
+    Registry reg(key);
+    if ( reg )
     {
-        RegCreateKey( hkey, subKey.c_str(), &_hkey );
+        if ( lpValueName == nullptr ) return true;
+        return reg.hasValue(lpValueName);
+    }
+    return false;
+}
+
+bool Registry::Delete( String const & key, LPCTSTR lpValueName )
+{
+    if ( lpValueName )
+    {
+        Registry reg(key);
+        return reg.delValue(lpValueName);
     }
     else
     {
-        RegOpenKey( hkey, subKey.c_str(), &_hkey );
+        auto p = strrchr( key.c_str(), '\\' );
+        if ( p && *( p + 1 ) ) // 不能是根键，eg: "HKLM", "HKLM\"
+        {
+            String parentKey( key.c_str(), p - key.c_str() );
+            p++; // skip '\\'
+
+            Registry reg(parentKey);
+            if ( reg )
+            {
+                if ( RegDeleteKey( reg.key(), p ) == ERROR_SUCCESS )
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool Registry::ForceDelete( String const & key )
+{
+    {
+        String szKey;
+        szKey.resize(256);
+        Registry reg(key);
+        if ( !reg ) return false;
+        DWORD dw;
+        for ( DWORD i = 0; ( dw = RegEnumKey( reg.key(), i, &szKey[0], (DWORD)szKey.size() ) ) != ERROR_NO_MORE_ITEMS; )
+        {
+            bool b = ForceDelete( key + "\\" + szKey.c_str() );
+            if ( !b ) i++;
+        }
+    }
+    return Delete(key);
+}
+
+// Constructors
+Registry::Registry( HKEY hkey, String const & subKey, bool isCreateOnNotExists ) : _hkey(nullptr), _err(ERROR_SUCCESS), _indexEnumValues(0), _indexEnumKeys(0)
+{
+    if ( isCreateOnNotExists )
+    {
+        _err = RegCreateKey( hkey, subKey.c_str(), &_hkey );
+    }
+    else
+    {
+        _err = RegOpenKey( hkey, subKey.c_str(), &_hkey );
     }
 }
 
-Registry::Registry( String const & key, bool isCreateOnNotExists ) : _hkey(nullptr)
+Registry::Registry( String const & key, bool isCreateOnNotExists ) : _hkey(nullptr), _err(ERROR_SUCCESS), _indexEnumValues(0), _indexEnumKeys(0)
 {
     HKEY hkeyPredefined = nullptr;
     String::const_pointer strKey = key.c_str();
@@ -975,18 +1084,17 @@ Registry::Registry( String const & key, bool isCreateOnNotExists ) : _hkey(nullp
         hkeyPredefined = nullptr;
     }
 
-    if ( *str == '\\' )
-        str++; // skip '\\'
+    if ( *str == '\\' ) str++; // skip '\\'
 
     if ( hkeyPredefined != nullptr )
     {
         if ( isCreateOnNotExists )
         {
-            RegCreateKey( hkeyPredefined, str, &_hkey );
+            _err = RegCreateKey( hkeyPredefined, str, &_hkey );
         }
         else
         {
-            RegOpenKey( hkeyPredefined, str, &_hkey );
+            _err = RegOpenKey( hkeyPredefined, str, &_hkey );
         }
     }
 }
@@ -1005,6 +1113,7 @@ Registry::~Registry()
         RegCloseKey(_hkey);
     RESET_NULL:
         _hkey = nullptr;
+        _err = ERROR_SUCCESS;
     }
 }
 
@@ -1014,11 +1123,11 @@ winux::Mixed Registry::getValue( String const & name, Mixed const & defval ) con
     Buffer value;
 
     // 获取数据类型和大小
-    if ( RegQueryValueEx(_hkey, name.c_str(), NULL, &dwType, NULL, &dwSize ) != ERROR_SUCCESS ) goto RETURN;
+    if ( ( _err = RegQueryValueEx( _hkey, name.c_str(), NULL, &dwType, NULL, &dwSize ) ) != ERROR_SUCCESS ) goto RETURN;
 
     // 读取数据
     value.alloc(dwSize);
-    if ( RegQueryValueEx(_hkey, name.c_str(), NULL, &dwType, value.get<BYTE>(), &dwSize ) != ERROR_SUCCESS ) goto RETURN;
+    if ( ( _err = RegQueryValueEx( _hkey, name.c_str(), NULL, &dwType, value.get<BYTE>(), &dwSize ) ) != ERROR_SUCCESS ) goto RETURN;
 
     return __RegValueToMixed( value, dwType, defval );
 
@@ -1028,12 +1137,73 @@ RETURN:
 
 bool Registry::setValue( String const & name, Mixed const & v, DWORD dwType )
 {
-    return false;
+    DWORD dw;
+    auto value = __RegValueFromMixed( v, &dw );
+    dwType = ( dwType == -1 ? dw : dwType );
+    _err = RegSetValueEx( _hkey, name.c_str(), 0, dwType, value.get<BYTE>(), (DWORD)value.size() );
+    return _err == ERROR_SUCCESS;
+}
+
+bool Registry::delValue( String const & name )
+{
+    _err = RegDeleteValue( _hkey, name.c_str() );
+    return _err == ERROR_SUCCESS;
 }
 
 bool Registry::enumValues( String * name, Mixed * pv ) const
 {
+    String szName;
+    DWORD cchName = 256;
+    szName.resize(cchName);
+    DWORD dwType = 0, dwSize = 0;
+    _err = RegEnumValue( _hkey, _indexEnumValues, &szName[0], &cchName, nullptr, &dwType, nullptr, &dwSize );
+    _indexEnumValues++;
+    if ( _err != ERROR_NO_MORE_ITEMS )
+    {
+        name->assign( szName.c_str(), cchName );
+        Buffer value;
+        value.alloc(dwSize);
+        _err = RegQueryValueEx( _hkey, name->c_str(), nullptr, &dwType, value.get<BYTE>(), &dwSize );
+        *pv = __RegValueToMixed( value, dwType, Mixed() );
+        return true;
+    }
+    else
+    {
+        _indexEnumValues = 0;
+    }
     return false;
+}
+
+bool Registry::enumKeys( String * subKey ) const
+{
+    String szSubKey;
+    DWORD cch = 256;
+    szSubKey.resize(cch);
+    _err = RegEnumKey( _hkey, _indexEnumKeys, &szSubKey[0], cch );
+    _indexEnumKeys++;
+    if ( _err != ERROR_NO_MORE_ITEMS )
+    {
+        *subKey = szSubKey.c_str();
+        return true;
+    }
+    else
+    {
+        _indexEnumKeys = 0;
+    }
+    return false;
+}
+
+void Registry::enumReset()
+{
+    _indexEnumValues = 0;
+    _indexEnumKeys = 0;
+}
+
+bool Registry::hasValue( String const & name ) const
+{
+    if ( _hkey == nullptr ) return false;
+    _err = RegQueryValueEx( _hkey, name.c_str(), nullptr, nullptr, nullptr, nullptr );
+    return _err == ERROR_SUCCESS;
 }
 
 } // namespace winplus
