@@ -234,10 +234,10 @@ WINPLUS_FUNC_IMPL(bool) Window_IsShow( HWND hWnd )
     return ( GetWindowLong( hWnd, GWL_STYLE ) & WS_VISIBLE ) != 0;
 }
 
-WINPLUS_FUNC_IMPL(void) Window_Show( HWND hWnd, bool show )
+WINPLUS_FUNC_IMPL(void) Window_Show( HWND hWnd, bool wantShow )
 {
     LONG style = GetWindowLong( hWnd, GWL_STYLE );
-    if ( show )
+    if ( wantShow )
     {
         //SetWindowLong( window, GWL_STYLE, style | WS_VISIBLE );
         ShowWindow( hWnd, SW_NORMAL );
@@ -252,7 +252,7 @@ WINPLUS_FUNC_IMPL(void) Window_Show( HWND hWnd, bool show )
 WINPLUS_FUNC_IMPL(bool) Window_IsTopLevel( HWND hWnd )
 {
     LONG exStyle = GetWindowLong( hWnd, GWL_EXSTYLE );
-    return (exStyle & WS_EX_TOPMOST) || (!(exStyle & WS_EX_APPWINDOW) && (GetWindow(hWnd, GW_OWNER) == NULL));
+    return ( exStyle & WS_EX_TOPMOST ) || ( !( exStyle & WS_EX_APPWINDOW ) && ( GetWindow( hWnd, GW_OWNER ) == NULL ) );
 }
 
 // ListCtrl - Report操作---------------------------------------------------

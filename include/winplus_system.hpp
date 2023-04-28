@@ -163,6 +163,8 @@ public:
      *  \param pv Mixed *
      *  \return bool */
     bool enumValues( String * name, Mixed * pv ) const;
+
+    /** \brief 枚举键 */
     bool enumKeys( String * subKey ) const;
 
     /** \brief 枚举重置 */

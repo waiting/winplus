@@ -6,8 +6,6 @@
 //#define _WIN32_WINNT 0x0501
 
 #include "winplus_definitions.hpp"
-#include "winplus_picture.hpp"
-#include "winplus_winctrl.hpp"
 #include "winplus_system.hpp"
 
 #include "strings.hpp"
@@ -249,7 +247,9 @@ WINPLUS_FUNC_IMPL(HWND) GetMainWindowByProcessId( DWORD dwProcessId )
     } param = { NULL, dwProcessId };
 
     EnumWindows( [] ( HWND hwnd, LPARAM lParam ) -> BOOL {
-        if ( Window_IsTopLevel(hwnd) && !GetParent(hwnd) )
+        LONG exStyle = GetWindowLong( hwnd, GWL_EXSTYLE );
+        BOOL bIsTopLevel = ( exStyle & WS_EX_TOPMOST ) || ( !( exStyle & WS_EX_APPWINDOW ) && ( GetWindow( hwnd, GW_OWNER ) == NULL ) );
+        if ( bIsTopLevel && !GetParent(hwnd) )
         {
             MyParam & param = *(MyParam *)lParam;
             DWORD dwProcessId;
@@ -274,7 +274,9 @@ WINPLUS_FUNC_IMPL(HWND) GetMainWindowByThreadId( DWORD dwThreadId )
     } param = { NULL, dwThreadId };
 
     EnumWindows( [] ( HWND hwnd, LPARAM lParam ) -> BOOL {
-        if ( Window_IsTopLevel(hwnd) && !GetParent(hwnd) )
+        LONG exStyle = GetWindowLong( hwnd, GWL_EXSTYLE );
+        BOOL bIsTopLevel = ( exStyle & WS_EX_TOPMOST ) || ( !( exStyle & WS_EX_APPWINDOW ) && ( GetWindow( hwnd, GW_OWNER ) == NULL ) );
+        if ( bIsTopLevel && !GetParent(hwnd) )
         {
             MyParam & param = *(MyParam *)lParam;
             DWORD dwProcessId, dwThreadId;

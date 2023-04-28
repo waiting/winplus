@@ -85,9 +85,31 @@ WINPLUS_FUNC_DECL(void) Window_SetText( HWND hWnd, String const & text );
 /** \brief 获得窗口是否显示 */
 WINPLUS_FUNC_DECL(bool) Window_IsShow( HWND hWnd );
 /** \brief 让窗口可见 */
-WINPLUS_FUNC_DECL(void) Window_Show( HWND hWnd, bool show = true );
+WINPLUS_FUNC_DECL(void) Window_Show( HWND hWnd, bool wantShow = true );
 /** \brief 判断是否是顶层窗口 */
 WINPLUS_FUNC_DECL(bool) Window_IsTopLevel( HWND hWnd );
+
+class WinWrap
+{
+public:
+    WinWrap( HWND hwnd ) : _hwnd(hwnd) { }
+
+    BOOL clientToScreen( LPRECT lpRect ) { return ClientToScreen( _hwnd, lpRect ); }
+    BOOL screenToClient( LPRECT lpRect ) { return ScreenToClient( _hwnd, lpRect ); }
+
+    RECT getClient() { return Window_GetClient(_hwnd); }
+    RECT getRect() { return Window_GetRect(_hwnd); }
+    void setRect( LPCRECT lpRect, bool isRedraw = true, bool isActivate = true ) { return Window_SetRect( _hwnd, lpRect, isRedraw, isActivate ); }
+    void inflate( int dx, int dy ) { return Window_Inflate( _hwnd, dx, dy ); }
+    void center( HWND hwndRelative, bool isInRelative = false, bool isRedraw = true, bool isActivate = true ) { return Window_Center( _hwnd, hwndRelative, isInRelative, isRedraw, isActivate ); }
+    String getText() { return Window_GetText(_hwnd); }
+    void setText( String const & text ) { return Window_SetText( _hwnd, text ); }
+    bool isShow() { return Window_IsShow(_hwnd); }
+    void show( bool wantShow = true ) { return Window_Show( _hwnd, wantShow ); }
+    bool isTopLevel() { return Window_IsTopLevel(_hwnd); }
+private:
+    HWND _hwnd;
+};
 
 // ListCtrl - Report操作 -------------------------------------------------
 WINPLUS_FUNC_DECL(INT) Report_AddStrings( HWND report, StringArray const & cols );
