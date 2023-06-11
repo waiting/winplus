@@ -364,7 +364,7 @@ static ULARGE_INTEGER __Time1970( void )
     return time1970;
 }
 
-WINUX_FUNC_IMPL(bool) SetFileTime( String const & filename, time_t ctime, time_t mtime, time_t atime )
+WINPLUS_FUNC_IMPL(bool) SetFileTime( String const & filename, time_t ctime, time_t mtime, time_t atime )
 {
     FILETIME cft = { 0 }, mft = { 0 }, aft = { 0 };
     ULARGE_INTEGER uli;
@@ -774,12 +774,13 @@ static Mixed __RegValueToMixed( Buffer const & value, DWORD dwType, Mixed const 
     {
     case REG_SZ: // MT_ANSI or MT_UNICODE
         {
-            v.createString();
+            v.createString<tchar>();
             size_t size = value.getSize();
             if ( size > 0 )
             {
                 if ( value[size - 1] == '\0' ) size--;
-                v._pStr->assign( value.get<char>(), size );
+                //v._pStr->assign( value.get<char>(), size );
+                v.refString<tchar>() = value.toString<tchar>();
                 return v;
             }
         }
@@ -792,7 +793,8 @@ static Mixed __RegValueToMixed( Buffer const & value, DWORD dwType, Mixed const 
             if ( size > 0 )
             {
                 if ( value[size - 1] == '\0' ) size--;
-                expandStr.assign( value.get<char>(), size );
+                //expandStr.assign( value.get<char>(), size );
+                expandStr = value.toString<String::value_type>();
                 v[REG_EXPAND_SZ] = expandStr;
                 return v;
             }
