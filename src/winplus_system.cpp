@@ -779,8 +779,8 @@ static Mixed __RegValueToMixed( Buffer const & value, DWORD dwType, Mixed const 
             if ( size > 0 )
             {
                 if ( value[size - 1] == '\0' ) size--;
-                //v._pStr->assign( value.get<char>(), size );
-                v.refString<tchar>() = value.toString<tchar>();
+                v._pStr->assign( value.get<char>(), size );
+                //v.refString<tchar>() = value.toString<tchar>();
                 return v;
             }
         }
@@ -793,8 +793,8 @@ static Mixed __RegValueToMixed( Buffer const & value, DWORD dwType, Mixed const 
             if ( size > 0 )
             {
                 if ( value[size - 1] == '\0' ) size--;
-                //expandStr.assign( value.get<char>(), size );
-                expandStr = value.toString<String::value_type>();
+                expandStr.assign( value.get<char>(), size );
+                //expandStr = value.toString<String::value_type>();
                 v[REG_EXPAND_SZ] = expandStr;
                 return v;
             }
