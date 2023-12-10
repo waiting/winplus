@@ -10,6 +10,7 @@ Debug/
 ipch/
 html/
 cache/
+dist/
 .libs/
 .deps/
 autom4te.cache/

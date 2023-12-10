@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(winplus)
+project(winplus VERSION 1.0)
 
 # Files
 file(
@@ -30,22 +30,58 @@ list(
 
 # Targets
 add_library(winplus SHARED ${winplus_SRCS} ${winplus_HEADERS} ${winux_SRCS} ${winux_HEADERS})
-target_include_directories(winplus PUBLIC include PRIVATE thirdparties/winux/include)
+target_include_directories(winplus PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include> PRIVATE thirdparties/winux/include)
 target_compile_definitions(winplus PUBLIC WINPLUS_DLL_USE PRIVATE WINPLUS_DLL_EXPORTS)
 
 add_library(winplus_a STATIC ${winplus_SRCS} ${winplus_HEADERS} ${winux_SRCS} ${winux_HEADERS})
-target_include_directories(winplus_a PUBLIC include PRIVATE thirdparties/winux/include)
+target_include_directories(winplus_a PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include> PRIVATE thirdparties/winux/include)
 
 set_target_properties(winplus winplus_a PROPERTIES PUBLIC_HEADER "${winplus_HEADERS}")
+
+#export(TARGETS winplus winplus_a NAMESPACE WinPlus:: FILE WinPlusTargets.cmake)
 
 include(GNUInstallDirs)
 # Install
 install(
     TARGETS winplus winplus_a
+    EXPORT WinPlusTargets
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/$<CONFIG>"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/$<CONFIG>"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/$<CONFIG>"
     PUBLIC_HEADER DESTINATION include
+)
+# Generate <PackageName>Targets.cmake for build-tree
+export(EXPORT WinPlusTargets NAMESPACE WinPlus::)
+# Register build-tree-dir of <PackageName> to User Registry(HKCU/Software/Kitware/CMake/Packages)
+export(PACKAGE WinPlus)
+
+# Generate <PackageName>Targets.cmake for install-tree
+install(
+    EXPORT WinPlusTargets NAMESPACE WinPlus::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/WinPlus"
+)
+
+include(CMakePackageConfigHelpers)
+# Generate <PackageName>Config.cmake
+configure_package_config_file(
+    "Config.cmake.in"
+    "WinPlusConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/example"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
+# Generate <PackageName>ConfigVersion.cmake
+include(WriteBasicConfigVersionFile)
+write_basic_package_version_file(
+    "WinPlusConfigVersion.cmake"
+    VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/WinPlusConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/WinPlusConfigVersion.cmake
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/WinPlus"
 )
 
 include(CPack)
