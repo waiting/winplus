@@ -87,8 +87,12 @@
     <ClCompile Include="..\src\winplus_winctrl.cpp" />
     <ClCompile Include="..\src\winplus_wordslib.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\console.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\encoding.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\filesys.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\json.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\md5.cpp" />
+    <ClCompile Include="..\thirdparties\winux\src\sha1.c" />
+    <ClCompile Include="..\thirdparties\winux\src\sha2.c" />
     <ClCompile Include="..\thirdparties\winux\src\smartptr.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\strings.cpp" />
     <ClCompile Include="..\thirdparties\winux\src\system.cpp" />

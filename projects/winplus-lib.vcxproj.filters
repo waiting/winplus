@@ -190,5 +190,17 @@
     <ClCompile Include="..\thirdparties\winux\src\smartptr.cpp">
       <Filter>源文件\winux</Filter>
     </ClCompile>
+    <ClCompile Include="..\thirdparties\winux\src\encoding.cpp">
+      <Filter>源文件\winux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparties\winux\src\md5.cpp">
+      <Filter>源文件\winux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparties\winux\src\sha1.c">
+      <Filter>源文件\winux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparties\winux\src\sha2.c">
+      <Filter>源文件\winux</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

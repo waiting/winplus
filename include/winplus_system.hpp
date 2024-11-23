@@ -94,7 +94,7 @@ public:
      *  \return DWORD */
     static DWORD ValueType( Mixed const & v );
 
-    /** \brief 只取值（由于REG_EXPAND_SZ映射为MT_COLLECTION的原因，导致REG_EXPAND_SZ字符串取用不变，这个静态方法则处理这种情况）
+    /** \brief 只取值（由于REG_EXPAND_SZ映射为MT_COLLECTION的原因，导致REG_EXPAND_SZ字符串取用不便，这个静态方法则处理这种情况）
      *
      *  \param v Mixed const & 由getValue()获取到的值
      *  \return winux::Mixed const & */
@@ -141,7 +141,7 @@ public:
      *  \param name 值名。如果为空串则读取KEY的默认值
      *  \param defval 如果读取失败则使用这个值返回
      *  \return Mixed */
-    Mixed getValue( String const & name, Mixed const & defval = Mixed() ) const;
+    Mixed getValue( String const & name, Mixed const & defval = mxNull ) const;
 
     /** \brief 设置指定名称的值
      *
