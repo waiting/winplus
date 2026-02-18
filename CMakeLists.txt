@@ -26,18 +26,31 @@ list(
     "${winux_SRC_PATH}/filesys.cpp"
     "${winux_SRC_PATH}/console.cpp"
     "${winux_SRC_PATH}/system.cpp"
+    "${winux_SRC_PATH}/encoding.cpp"
+    "${winux_SRC_PATH}/md5.cpp"
+    "${winux_SRC_PATH}/sha1.c"
+    "${winux_SRC_PATH}/sha2.c"
 )
 
 # Targets
 add_library(winplus SHARED ${winplus_SRCS} ${winplus_HEADERS} ${winux_SRCS} ${winux_HEADERS})
-target_include_directories(winplus PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include> PRIVATE thirdparties/winux/include)
+target_include_directories(
+    winplus 
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include> 
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparties/winux/include>$<INSTALL_INTERFACE:include>
+)
 target_compile_definitions(winplus PUBLIC WINPLUS_DLL_USE PRIVATE WINPLUS_DLL_EXPORTS)
 
 add_library(winplus_a STATIC ${winplus_SRCS} ${winplus_HEADERS} ${winux_SRCS} ${winux_HEADERS})
-target_include_directories(winplus_a PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include> PRIVATE thirdparties/winux/include)
+target_include_directories(
+    winplus_a 
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include> 
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparties/winux/include>$<INSTALL_INTERFACE:include>
+)
 
 set_target_properties(winplus winplus_a PROPERTIES PUBLIC_HEADER "${winplus_HEADERS}")
 
+# Export targets for the build tree
 #export(TARGETS winplus winplus_a NAMESPACE WinPlus:: FILE WinPlusTargets.cmake)
 
 include(GNUInstallDirs)
@@ -58,7 +71,7 @@ export(PACKAGE WinPlus)
 # Generate <PackageName>Targets.cmake for install-tree
 install(
     EXPORT WinPlusTargets NAMESPACE WinPlus::
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/WinPlus"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake"
 )
 
 include(CMakePackageConfigHelpers)
@@ -66,7 +79,7 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
     "Config.cmake.in"
     "WinPlusConfig.cmake"
-    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/example"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake"
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
@@ -81,7 +94,7 @@ write_basic_package_version_file(
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/WinPlusConfig.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/WinPlusConfigVersion.cmake
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/WinPlus"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake"
 )
 
 include(CPack)

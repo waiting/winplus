@@ -296,44 +296,37 @@ inline static int __MbsOneChar( char const * & p, char ch[5], bool isUtf8 )
 
     if ( isUtf8 )
     {
-        ch[0] = *p;
+        ch[0] = *p++;
         cch++;
         if ( ( ch[0] & 0xF0 ) == 0b11110000 )
         {
-            p++;
-            ch[1] = *p;
+            ch[1] = *p++;
             cch++;
-            p++;
-            ch[2] = *p;
+            ch[2] = *p++;
             cch++;
-            p++;
-            ch[3] = *p;
+            ch[3] = *p++;
             cch++;
         }
         else if ( ( ch[0] & 0xE0 ) == 0b11100000 )
         {
-            p++;
-            ch[1] = *p;
+            ch[1] = *p++;
             cch++;
-            p++;
-            ch[2] = *p;
+            ch[2] = *p++;
             cch++;
         }
         else if ( ( ch[0] & 0xC0 ) == 0b11000000 )
         {
-            p++;
-            ch[1] = *p;
+            ch[1] = *p++;
             cch++;
         }
     }
     else // Local code
     {
-        ch[0] = *p;
+        ch[0] = *p++;
         cch++;
         if ( ch[0] & 0x80 )
         {
-            p++;
-            ch[1] = *p;
+            ch[1] = *p++;
             cch++;
         }
     }
@@ -365,14 +358,15 @@ int WordsLib::splitWords( AnsiString const & text, AnsiStringArray * arrWords ) 
             last = pos + count - 1;
             haveMatch = pos;
             strMat = str;
-            p++;
+            //p++;
         }
         else // 搜不到
         {
             if ( haveMatch != -1 )
             {
                 // 退回去
-                p -= cch - 1;
+                //p -= cch - 1;
+                p -= cch;
                 if ( this->at(haveMatch) == strMat )
                 {
                     arrWords->push_back(strMat);
@@ -388,9 +382,13 @@ int WordsLib::splitWords( AnsiString const & text, AnsiStringArray * arrWords ) 
                     p++;
                 }
                 if ( ansiStr.empty() )
-                    p++;
+                {
+                    //p++;
+                }
                 else
+                {
                     arrWords->push_back(ansiStr);
+                }
             }
             first = 0;
             last = this->wordscount - 1;
@@ -436,14 +434,15 @@ int WordsLib::splitWords2( AnsiString const & text, AnsiStringArray * arrWords )
             last = pos + count - 1;
             haveMatch = pos;
             strMat = str;
-            p++;
+            //p++;
         }
         else // 搜不到
         {
             if ( haveMatch != -1 )
             {
                 // 退回去
-                p -= cch - 1;
+                //p -= cch - 1;
+                p -= cch;
                 if ( this->at(haveMatch) == strMat )
                 {
                     AnsiString s( q, p - strMat.length() );
@@ -464,7 +463,7 @@ int WordsLib::splitWords2( AnsiString const & text, AnsiStringArray * arrWords )
                 }
                 if ( ansiStr.empty() )
                 {
-                    p++;
+                    //p++;
                 }
                 else
                 {
